@@ -190,4 +190,38 @@ private:
     Cloud *m_Output;
 };
 
+class HillShade : public QObject
+{
+    Q_OBJECT
+public:
+    HillShade();
+    ~HillShade();
+    public slots:
+    void setRadius(float radius);
+    void setNeighbors(int i);
+    void setTerrainCloud(Cloud input);
+    void setOutputName(QString name);
+    void useRadius(bool radius);
+    
+    void execute();
+    void sendData();
+    void hotovo();
+    
+signals:
+    void finished();
+    void percentage(int);
+    void sendingoutput( Cloud *);
+    
+    
+private:
+    float computeSlope(std::vector<float> vec);
+    float computeSlope(std::vector<int> pointsId);
+    std::vector<float> computeSmallestPCA (std::vector<int> pointsId);
+    float computeAspect(std::vector<float> vec);
+    float m_Radius;
+    int m_Neighbors;
+    bool m_useRadius = false;
+    Cloud *m_TerrainCloud;
+    Cloud *m_Output;
+};
 #endif // TERRAIN_H_INCLUDED

@@ -1780,6 +1780,59 @@ void MainWindow::slope()
     }
     delete in;
 }
+void MainWindow::hillShade()
+{
+    InputDialog *in = new InputDialog(this);
+    in->set_title(tr("Compute hillshade of terrain."));
+    in->set_path(Proj->get_Path());
+    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
+    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output cloud of ground:"),"hillShade");
+    in->set_inputInt(tr("Number of surrounding points:"),"5");
+    in->set_inputInt2(tr("radius in cm:"),"10");
+    in->set_inputCheckBox("use radius instead of neighbor");
+    
+    in->set_stretch();
+    int dl = in->exec();
+    
+    if(dl == QDialog::Rejected)
+    { return; }
+    
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        createPBar();
+        // float res = in->get_intValue();
+        std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
+        std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
+        std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+        
+        HillShade *s = new HillShade();
+        s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        s->setOutputName(in->get_outputCloud1());
+        s->setNeighbors(in->get_intValue());
+        s->setRadius(in->get_intValue2()/100.0);
+        s->useRadius(in->get_CheckBox());
+        
+        m_thread = new QThread();
+        
+        connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
+        connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
+        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
+        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+        
+        connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
+        connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
+        connect(s, SIGNAL(finished()), s, SLOT(deleteLater()));
+        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
+        
+        m_thread->start();
+        s->moveToThread(m_thread);
+        
+    }
+    delete in;
+}
 //VEGETATION
 void MainWindow::manualSelect()
 {
@@ -5877,6 +5930,11 @@ void MainWindow::createActions()
     radiusOutlierRemovalAct->setStatusTip(tr("compute slope of terrain"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(slopeAct, SIGNAL(triggered()), this, SLOT(slope()));
+    
+    hillShadeAct = new QAction(tr("Hill shade"), this);
+    hillShadeAct->setStatusTip(tr("compute hillshade of terrain"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(hillShadeAct, SIGNAL(triggered()), this, SLOT(hillShade()));
 
 //VEGETATION
   manualSelAct = new QAction(tr("Manual tree selection"), this);
@@ -6127,6 +6185,7 @@ void MainWindow::createMenus()
   terenMenu->addSeparator();
   terenMenu->addAction(IDWAct);
     terenMenu->addAction(slopeAct);
+    terenMenu->addAction(hillShadeAct);
 
 //VEGETATION
   vegeMenu = menuBar()->addMenu(tr("&Vegetation"));

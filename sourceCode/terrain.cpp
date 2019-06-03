@@ -3,7 +3,7 @@
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/common/centroid.h>
-
+#include <pcl/common/pca.h>
  OctreeTerrain::OctreeTerrain()
 {
   m_baseCloud = new Cloud();
@@ -757,4 +757,238 @@ float Slope::computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b)
 void Slope::useRadius(bool radius)
 {
     m_useRadius = radius;
+}
+
+HillShade::HillShade(){
+    m_TerrainCloud = new Cloud();
+    m_Output = new Cloud();
+    m_Radius = 0.1;
+    m_Neighbors = 8;
+}
+HillShade::~HillShade(){
+    
+}
+void HillShade::setRadius(float radius){
+    m_Radius = radius;
+}
+void HillShade::setNeighbors(int i){
+    m_Neighbors = i;
+}
+void HillShade::setTerrainCloud(Cloud input){
+    m_TerrainCloud->set_Cloud(input.get_Cloud());
+}
+void HillShade::setOutputName(QString name){
+    m_Output->set_name(name);
+}
+void HillShade::execute(){
+    // vem mracno
+    emit percentage(0);
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (m_TerrainCloud->get_Cloud());
+    // m_Output->get_Cloud()->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNewTerrain (new pcl::PointCloud<pcl::PointXYZI>);
+    cloudNewTerrain->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    int procento = m_TerrainCloud->get_Cloud()->points.size()/100.0;
+    std::cout<< "procento: " << procento << "\n";
+    int step_size   = 100;
+    int total_steps = m_TerrainCloud->get_Cloud()->points.size() / step_size + 1;
+    
+    int steps_completed = 0;
+    int sum = 0;
+    
+#pragma omp parallel
+    {
+        int local_count = 0;
+        
+#pragma omp parallel for
+        for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
+        {
+            std::vector<int> pointIDv;
+            std::vector<float> pointSDv;
+            pcl::PointXYZI x = m_TerrainCloud->get_Cloud()->points.at(i);
+            
+            // pro kazdy bod najdi sousedy
+            if(m_useRadius == false)
+            {
+                kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
+            }
+            else
+            {
+                kdtree.radiusSearch(x, m_Radius, pointIDv, pointSDv);
+            }
+            std::vector<float> vec;
+            // take whole pointcloud and compute PCA
+            // define main vectors
+            // smallest should be normal vector of plane
+            vec = computeSmallestPCA(pointIDv);
+            float aspect = computeAspect(vec);
+            // deviation from Z axis means slope - skalar
+            //float sklon = computeSlope(vec);
+            float slope = computeSlope(pointIDv);
+            
+            //HIllSAHDE
+            float zenith =(90 - 45)*M_PI/180.0;
+            float azimuth = 225*M_PI/180.0;// zero is to the right - East - and counter clockwise direction
+            float hillShade = 255 *((std::cos(zenith)*std::cos(slope)) + (std::sin(zenith)*std::sin(slope)*std::cos(azimuth-aspect)));
+            if(hillShade < 0)
+                hillShade = 0;
+            // std::cout<<"angle: " <<aspect<<" sklon: " <<sklon<<" hillshade: " <<hillShade<<"\n";
+            // udelat prumer
+            //float skl = sklon *100/pointSDv.size();
+            //std::cout<<"sklon: " << skl<< "\n";
+            // ulozit do bodu
+            cloudNewTerrain->points.at(i).x = x.x;
+            cloudNewTerrain->points.at(i).y = x.y;
+            cloudNewTerrain->points.at(i).z = x.z;
+            cloudNewTerrain->points.at(i).intensity = hillShade;
+            if (local_count++ % step_size == step_size-1)
+            {
+#pragma omp atomic
+                ++steps_completed;
+                
+                if (steps_completed % 100 == 1)
+                {
+#pragma omp critical
+                    emit percentage(100.0*steps_completed/total_steps);
+                }
+            }
+        }
+    }
+    cloudNewTerrain->width = cloudNewTerrain->points.size ();
+    cloudNewTerrain->height = 1;
+    cloudNewTerrain->is_dense = true;
+    m_Output->set_Cloud(cloudNewTerrain);
+    sendData();
+    
+}
+std::vector<float> HillShade::computeSmallestPCA (std::vector<int> pointsId){
+    // create cloud based on indices stored in pointIds from m_TerrainCloud
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud_->points.resize(pointsId.size());
+    std::vector<float> v {0,0,0};
+    if(pointsId.size() < 3)
+        return v;
+#pragma omp parallel for
+    for(int q=0; q < pointsId.size(); q++)
+        cloud_->points.at(q) = m_TerrainCloud->get_Cloud()->points.at(pointsId.at(q));
+    
+    // use PCA  to estimate  pca vectors
+    //std::cout<<"PCA\n";
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_translated (new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PCA<pcl::PointXYZI> pca;
+    pca.setInputCloud(cloud_);
+    pca.project(*cloud_, *cloud_translated);
+    
+    pcl::PointXYZI proj_min,proj_max, proj_lmin, proj_lmax,lmin, lmax;
+    pcl::getMinMax3D (*cloud_translated, proj_min, proj_max);
+    // swap axes
+    
+    
+    // estimate smallest vector
+    float eX = std::abs(proj_max.x - proj_min.x);
+    float eY = std::abs(proj_max.y - proj_min.y);
+    float eZ = std::abs(proj_max.z - proj_min.z);
+    
+    //estimate two points in the middle of two longer sides
+    if(eX < eZ && eX < eY) // if eX is the smallest
+    {
+        proj_lmin.x =proj_min.x;
+        proj_lmin.y =(proj_max.y + proj_min.y)/2;
+        proj_lmin.z =(proj_max.z + proj_min.z)/2;
+        
+        proj_lmax.x =proj_max.x;
+        proj_lmax.y =(proj_max.y + proj_min.y)/2;
+        proj_lmax.z =(proj_max.z + proj_min.z)/2;
+    }
+    else if (eY<eX && eY< eZ){
+        proj_lmin.x =(proj_max.x + proj_min.x)/2;
+        proj_lmin.y =proj_min.y;
+        proj_lmin.z =(proj_max.z + proj_min.z)/2;
+        
+        proj_lmax.x =(proj_max.x + proj_min.x)/2;
+        proj_lmax.y =proj_max.y;
+        proj_lmax.z =(proj_max.z + proj_min.z)/2;
+    }
+    else{
+        proj_lmin.x =(proj_max.x + proj_min.x)/2;
+        proj_lmin.y =(proj_max.y + proj_min.y)/2;
+        proj_lmin.z =proj_min.z;
+        
+        proj_lmax.x =(proj_max.x + proj_min.x)/2;
+        proj_lmax.y =(proj_max.y + proj_min.y)/2;
+        proj_lmax.z =proj_max.z;
+    }
+    //reconstruct vector into original space
+    pca.reconstruct(proj_lmin, lmin);
+    pca.reconstruct(proj_lmax, lmax);
+    
+    float x,y,z;
+    //return smallest vector;
+    if(lmin.z < lmax.z){
+        x = lmax.x - lmin.x;
+        y = lmax.y - lmin.y;
+        z = lmax.z - lmin.z;
+    }else{
+        x = lmin.x - lmax.x;
+        y = lmin.y - lmax.y;
+        z = lmin.z - lmax.z;
+    }
+    // std::cout<< x <<" " << y << " " << z << "\n";
+    
+    v.at(0)= x;
+    v.at(1) = y;
+    v.at(2) = z;
+    return v;
+}
+void HillShade::sendData(){
+    emit sendingoutput( m_Output);
+}
+void HillShade::hotovo(){
+    emit finished();
+}
+float HillShade::computeSlope(std::vector<float> vec){
+    std::vector<float> axisZ{0,0,1};
+    
+    float del = vec.at(0)*axisZ.at(0) + vec.at(1)*axisZ.at(1) + vec.at(2)*axisZ.at(2);
+    float det1 = std::sqrt(vec.at(0)*vec.at(0) + vec.at(1)*vec.at(1) + vec.at(2)*vec.at(2));
+    float det2 = std::sqrt(axisZ.at(0)*axisZ.at(0) + axisZ.at(1)*axisZ.at(1) + axisZ.at(2)*axisZ.at(2));
+    //std::cout<<"del: " <<del<<" det1: " <<det1<<" det2: " <<det2<<"\n";
+    float det = det1*det2;
+    float slope= M_PI/2 - del/det;
+    if (det ==0)
+        slope=0;
+    return slope;
+}
+void HillShade::useRadius(bool radius){
+    m_useRadius = radius;
+}
+float HillShade::computeAspect(std::vector<float> vec){
+    
+    // its projection into XY plane should give aspect
+    if(vec.at(1)==0 && vec.at(0) ==0)
+        return 0;
+    float angle = std::atan2(vec.at(1), vec.at(0));  //# atan2(y, x) or atan2(sin, cos)
+    float aspect = angle;// * 180/M_PI;
+    return aspect;
+}
+float HillShade::computeSlope(std::vector<int> pointsId){
+    // spocitat skon
+    pcl::PointXYZI a = m_TerrainCloud->get_Cloud()->points.at(pointsId.at(0));
+    float sk=0;
+    for(int q=1; q < pointsId.size(); q++)
+    {
+        pcl::PointXYZI b = m_TerrainCloud->get_Cloud()->points.at(pointsId.at(q));
+        
+        float dist = std::sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) +(a.z-b.z)*(a.z-b.z) );
+        float x=0;
+        if(dist ==0)
+        {x = 0;}
+        else
+        {x = std::abs(a.z-b.z)/dist;}
+        
+        sk += x;
+    }
+    // udelat prumer
+    float skl = sk *100/pointsId.size();
+    return skl*M_PI/180.0;// in radians
 }

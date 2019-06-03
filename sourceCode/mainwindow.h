@@ -124,7 +124,7 @@ private slots:
   void statisticalOutlierRemovalTerrain();
   void radiusOutlierRemovalTerrain();
     void slope();
-
+    void hillShade();
 //VEGETATION
     //! Manual selection of trees from vegetation cloud.
     /*! Choose vegetation cloud for tree selection. Delete points that do not belong to the tree*/
@@ -612,6 +612,7 @@ private:
   QAction *statisticalOutlierRemovalAct;
   QAction *radiusOutlierRemovalAct;
     QAction *slopeAct;
+    QAction *hillShadeAct;
   //VEGETATION
   QAction *segmentAct;             /**< Save tree attributes into file Act */
   QAction *manualSelAct;      /**< Manual selection of trees Act */
