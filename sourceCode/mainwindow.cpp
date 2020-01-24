@@ -1150,8 +1150,8 @@ void MainWindow::openCloudFile(QString file, QString type, QColor col,bool visib
   if(type == "ost")
     Proj->set_OstCloud(*c);
 
-if(visible == true)
-  dispCloud(*c);
+//if(visible == true)
+ // dispCloud(*c);
   addTreeItem(c->get_name(), visible);
   m_vis->resetCamera();
   delete c;
@@ -1780,6 +1780,58 @@ void MainWindow::slope()
     }
     delete in;
 }
+void MainWindow::curvature()
+{
+    InputDialog *in = new InputDialog(this);
+    in->set_title(tr("Compute  terrain curvature."));
+    in->set_path(Proj->get_Path());
+    in->set_description(tr("compute terrain curvature based on number of neighbors or given radius."));
+    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output cloud of ground:"),"curvature");
+    in->set_inputInt(tr("curvature limit:"),"5");
+    in->set_inputInt2(tr("radius in cm:"),"300");
+    in->set_inputCheckBox("use radius instead of neighbor");
+
+    in->set_stretch();
+    int dl = in->exec();
+
+    if(dl == QDialog::Rejected)
+    { return; }
+
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        createPBar();
+       // float res = in->get_intValue();
+        std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
+        std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
+        std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+
+        Curvature *s = new Curvature();
+        s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        s->setOutputName(in->get_outputCloud1());
+        s->setNeighbors(in->get_intValue());
+        s->setRadius(in->get_intValue2()/100.0);
+        s->useRadius(in->get_CheckBox());
+
+        m_thread = new QThread();
+
+        connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
+        connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
+        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
+        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+
+        connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
+        connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
+        connect(s, SIGNAL(finished()), s, SLOT(deleteLater()));
+        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
+
+        m_thread->start();
+        s->moveToThread(m_thread);
+    }
+    delete in;
+}
 void MainWindow::hillShade()
 {
     InputDialog *in = new InputDialog(this);
@@ -1814,6 +1866,92 @@ void MainWindow::hillShade()
         s->setNeighbors(in->get_intValue());
         s->setRadius(in->get_intValue2()/100.0);
         s->useRadius(in->get_CheckBox());
+        
+        m_thread = new QThread();
+        
+        connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
+        connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
+        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
+        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+        
+        connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
+        connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
+        connect(s, SIGNAL(finished()), s, SLOT(deleteLater()));
+        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
+        
+        m_thread->start();
+        s->moveToThread(m_thread);
+        
+    }
+    delete in;
+}
+void MainWindow::terrainDiff()
+{
+    // okno
+    InputDialog *in = new InputDialog(this);
+    in->set_title(tr("Compute hillshade of terrain."));
+    in->set_path(Proj->get_Path());
+    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
+    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output cloud of ground:"),"terrainDiff");
+    in->set_inputInt(tr("Intensity value minimal limit") ,"0");
+    in->set_inputInt7(tr("maximal intenstity value limit:"),"4");
+    in->set_inputInt2(tr("minimal point size of feature:"),"50");
+    in->set_inputInt10(tr("max point size of feature:"),"3000");
+    in->set_inputInt3(tr("minimal axis lenght:"),"5");
+    in->set_inputInt4(tr("maximal axis length:"),"30");
+    in->set_inputInt5(tr("minima area:"),"30");
+    in->set_inputInt6(tr("maximal area of feature:"),"300");
+    in->set_inputInt8(tr("min axis ratio in %:"),"75");
+    in->set_inputInt9(tr("min area ratio in %:"),"75");
+    
+   // in->set_inputCheckBox("use radius instead of neighbor");
+    
+    in->set_stretch();
+    int dl = in->exec();
+    
+    if(dl == QDialog::Rejected)
+    { return; }
+    
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        createPBar();
+        // float res = in->get_intValue();
+        std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - min intensitylimit: " << in->get_intValue() << "\n";
+        std::cout << "parametry - point size: " << in->get_intValue2() << "\n";
+        std::cout << "parametry - min axis: " << in->get_intValue3() << "\n";
+        std::cout << "parametry - max axis: " << in->get_intValue4() << "\n";
+        std::cout << "parametry - min area: " << in->get_intValue5() << "\n";
+        std::cout << "parametry - max area: " << in->get_intValue6() << "\n";
+        std::cout << "parametry - max intensity limit: " << in->get_intValue7() << "\n";
+        std::cout << "parametry - axis ratio: " << in->get_intValue8()/100. << "\n";
+        std::cout << "parametry - area ratio: " << in->get_intValue9()/100. << "\n";
+        
+       // std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+        
+        TerrainFeatures *s = new TerrainFeatures();
+        s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        s->setOutputName(in->get_outputCloud1());
+        
+        s->setMaxBinaryLimit(in->get_intValue7());
+        s->setMinBinaryLimit(in->get_intValue());
+        
+        s->setlowerPointLimit(in->get_intValue2());
+        s->setupperPointLimit(in->get_intValue10());
+        
+        s->setMinAreaLimit(in->get_intValue5());
+        s->setMaxAreaLimit(in->get_intValue6());
+        s->setAreaRatioLimit(in->get_intValue9()/100.);
+        
+        s->setMinLenghtLimit(in->get_intValue3());
+        s->setMaxLenghtLimit(in->get_intValue4());
+        s->setAxisRatioLimit(in->get_intValue8()/100.);
+        
+        s->setNeighbors(10);
+        s->setRadius(300);
+      //  s->useRadius(in->get_CheckBox());
         
         m_thread = new QThread();
         
@@ -5124,7 +5262,58 @@ void MainWindow::labelClouds()
   }
   delete in;
 }
+void MainWindow::removePoints(){
+    // por zatim najit vsechny body v polomeru  41 m od daneho bodu a ulozit je jako tren
+    QStringList types;
+    types << "Tree" << "Base cloud" << "Terrain cloud" << "Vegetation cloud" << "Other";
 
+    InputDialog *in = new InputDialog(this);
+    in->set_title("Remove Points");
+    in->set_path(Proj->get_Path());
+    in->set_description("\tMerge selected clouds into new one. This tool may be used when one object is to be made of more separated clouds. "
+                        "The result is one cloud with given name and of given type.\n"
+                        "\t Please select desired clouds in the list and set a name and type of the new cloud.");
+    //in->set_inputList("cloud selection:",get_allNames());
+    in->set_inputCloud1("cloud:", get_allNames());
+    in->set_outputCloud1("Output cloud name:","cloud");
+    in->set_outputType("Type of the output cloud:", types);
+    in->set_inputCheckBox("keep points with this value?");
+    in->set_inputInt("input value", "5");
+    in->set_stretch();
+    int dl = in->exec();
+
+    if(dl == QDialog::Rejected)
+    { return;}
+
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        QString type;
+           if(in->get_outputType() == "Base cloud")
+             type = "cloud";
+           if(in->get_outputType() == "Terrain cloud")
+             type = "teren";
+           if(in->get_outputType() == "Vegetation cloud")
+             type = "vege";
+           if(in->get_outputType() == "Tree")
+             type = "strom";
+           if(in->get_outputType() == "Other")
+             type = "ost";
+
+
+
+        pcl::PointCloud<pcl::PointXYZI>::Ptr merged_ (new pcl::PointCloud<pcl::PointXYZI>);
+        
+        for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++)
+        {
+            if(in->get_intValue() == Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).intensity)
+            {
+                merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+            }
+        }
+        Cloud *cV = new Cloud(merged_,in->get_outputCloud1());
+        saveCloud(cV, type);
+    }
+}
 void MainWindow::labelCloudsOFF()
 {
   QStringList names;
@@ -5160,6 +5349,8 @@ void MainWindow::radiusOutlierRemoval()
 
     if(dl == QDialog::Accepted && !in->get_inputList().isEmpty())
     {
+        
+        
         QString type;
         if(in->get_outputType() == "Base cloud")
             type = "cloud";
@@ -5927,14 +6118,24 @@ void MainWindow::createActions()
   connect(radiusOutlierRemovalAct, SIGNAL(triggered()), this, SLOT(radiusOutlierRemovalTerrain()));
 
     slopeAct = new QAction(tr("Slope"), this);
-    radiusOutlierRemovalAct->setStatusTip(tr("compute slope of terrain"));
+    slopeAct->setStatusTip(tr("compute slope of terrain"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(slopeAct, SIGNAL(triggered()), this, SLOT(slope()));
+    
+    curvatureAct = new QAction(tr("Curvature"), this);
+    curvatureAct->setStatusTip(tr("compute terrain curvature"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(curvatureAct, SIGNAL(triggered()), this, SLOT(curvature()));
     
     hillShadeAct = new QAction(tr("Hill shade"), this);
     hillShadeAct->setStatusTip(tr("compute hillshade of terrain"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(hillShadeAct, SIGNAL(triggered()), this, SLOT(hillShade()));
+    
+    terrainDiffAct = new QAction(tr("terrain Diff"), this);
+    terrainDiffAct->setStatusTip(tr("compute hillshade of terrain"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(terrainDiffAct, SIGNAL(triggered()), this, SLOT(terrainDiff()));
 
 //VEGETATION
   manualSelAct = new QAction(tr("Manual tree selection"), this);
@@ -6141,6 +6342,9 @@ void MainWindow::createActions()
 
   duplicateAct = new QAction(tr("Remove duplicate points from cloud."), this);
   connect(duplicateAct, SIGNAL(triggered()), this, SLOT(duplicatePoints()));
+    
+    removePointsAct= new QAction(tr("Remove points from cloud."), this);
+    connect(removePointsAct, SIGNAL(triggered()), this, SLOT(removePoints()));
 
 //ABOUT
   aboutAct = new QAction(QPixmap(":/images/icon.png"),tr("&About"), this);
@@ -6185,7 +6389,9 @@ void MainWindow::createMenus()
   terenMenu->addSeparator();
   terenMenu->addAction(IDWAct);
     terenMenu->addAction(slopeAct);
+    terenMenu->addAction(curvatureAct);
     terenMenu->addAction(hillShadeAct);
+    terenMenu->addAction(terrainDiffAct);
 
 //VEGETATION
   vegeMenu = menuBar()->addMenu(tr("&Vegetation"));
@@ -6254,6 +6460,7 @@ void MainWindow::createMenus()
  // miscMenu->addAction(labelOFFAct);
   miscMenu->addAction(spitCloudAct);
   miscMenu->addAction(duplicateAct);
+    miscMenu->addAction(removePointsAct);
 //ABOUT
   helpMenu = menuBar()->addMenu(tr("&About"));
   helpMenu->addAction(aboutAct);

@@ -114,7 +114,7 @@ void LeastSquaredRegression::algebraicCircle()
   float meanY = 0;
   float meanZ = 0;
   float n = (float) m_cloud->points.size();
-  float Mz,Mxy,Mxx,Myy,Mxz,Myz,Mzz,Cov_xy,Var_z= 0;
+    float Mz,Mxy,Mxx,Myy,Mxz,Myz,Mzz = 0.0,Cov_xy,Var_z= 0;
   float A0,A1,A2,A22;
   float Dy,xnew,x,ynew,y;
   float DET,Xcenter,Ycenter;

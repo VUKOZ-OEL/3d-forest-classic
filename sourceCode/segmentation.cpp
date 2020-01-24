@@ -789,9 +789,9 @@ void Segmentation::getData()
     Cloud *c = new Cloud(m_stems.at(i), name);
     emit sendingTree( c);
   }
-   m_restCloud->set_Cloud(m_voxels->get_Cloud());
-   m_restCloud->set_name("voxels");
-    emit sendingCentr( m_restCloud);
+   //m_restCloud->set_Cloud(m_voxels->get_Cloud());
+   //m_restCloud->set_name("voxels");
+    //emit sendingCentr( m_restCloud);
 
   qWarning()<<"stromy odeslany";
 

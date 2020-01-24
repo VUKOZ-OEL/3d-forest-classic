@@ -125,6 +125,8 @@ private slots:
   void radiusOutlierRemovalTerrain();
     void slope();
     void hillShade();
+    void terrainDiff();
+    void curvature();
 //VEGETATION
     //! Manual selection of trees from vegetation cloud.
     /*! Choose vegetation cloud for tree selection. Delete points that do not belong to the tree*/
@@ -333,6 +335,7 @@ private slots:
   void labelClouds();
   void labelCloudsOFF();
   void mergeClouds();
+    void removePoints();
     //! subtract two clouds.
     /*! Choose two input clouds and from the bigger one subtract all point that are common with the second one. Result save into new file.  */
   void minusCloud();
@@ -612,7 +615,9 @@ private:
   QAction *statisticalOutlierRemovalAct;
   QAction *radiusOutlierRemovalAct;
     QAction *slopeAct;
+    QAction *curvatureAct;
     QAction *hillShadeAct;
+    QAction *terrainDiffAct;
   //VEGETATION
   QAction *segmentAct;             /**< Save tree attributes into file Act */
   QAction *manualSelAct;      /**< Manual selection of trees Act */
@@ -665,6 +670,7 @@ private:
   QAction *acuracyAct;         /**< Change background color Act */
   QAction *duplicateAct;         /**< Change background color Act */
     QAction *filterRadiusAct;         /**< Change background color Act */
+    QAction *removePointsAct;         /**< Change background color Act */
 
   //ABOUT ACTIONS
   QAction *aboutAct;          /**< About application Act */

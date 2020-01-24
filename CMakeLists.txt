@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.1.0)
-project(3DForest043)
+project(3DForest06)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -41,6 +41,11 @@ find_package(PCL 1.8.0 REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${PCL_BINARY_DIRS})
 target_link_libraries(3DForest ${PCL_LIBRARIES})
+
+#dependencies - Boost
+find_package(Boost 1.60 COMPONENTS program_options REQUIRED)
+include_directories( ${Boost_INCLUDE_DIR} )
+target_link_libraries(3DForest ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 find_package(OpenMP)
 if (OPENMP_FOUND)

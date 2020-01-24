@@ -46,7 +46,8 @@
 class InputDialog :public QDialog
 {
   Q_OBJECT
-  signals:
+    
+signals:
     void inputCloud_1( QString);
     void inputCloud_2( QString);
     void inputINT(int);
@@ -98,6 +99,12 @@ public:
   void set_inputInt2(QString label, QString example);
   void set_inputInt3(QString label, QString example);
   void set_inputInt4(QString label, QString example);
+    void set_inputInt5(QString label, QString example);
+    void set_inputInt6(QString label, QString example);
+    void set_inputInt7(QString label, QString example);
+    void set_inputInt8(QString label, QString example);
+    void set_inputInt9(QString label, QString example);
+    void set_inputInt10(QString label, QString example);
     //!  Set method description
     /*!  Set method overview, its inputs, example or description.
         \param text label of the method */
@@ -151,6 +158,12 @@ public:
     /*!  \return integer value entered by user */
   int get_intValue3();
   int get_intValue4();
+    int get_intValue5();
+    int get_intValue6();
+    int get_intValue7();
+    int get_intValue8();
+    int get_intValue9();
+    int get_intValue10();
     //!  get type of output cloud.
     /*!  \return true if checkbox is seleted*/
     void setSboxDouble(QString label, float dValue=1.5, float minV=0, float maxV=10);
@@ -204,6 +217,12 @@ private:
   int int_value2;                 /**< input second integer value */
   int int_value3;                 /**< input second integer value */
   int int_value4;                 /**< input second integer value */
+    int int_value5;                 /**< input second integer value */
+    int int_value6;                 /**< input second integer value */
+    int int_value7;                 /**< input second integer value */
+    int int_value8;                 /**< input second integer value */
+    int int_value9;                 /**< input second integer value */
+    int int_value10;                 /**< input second integer value */
   QListWidget * listWidget;
   bool isList;
 
@@ -241,6 +260,24 @@ private:
   QLineEdit *intInput4;            /**< input integer value */
   bool intInputBool4;              /**< bool value if output cloud name is empty */
   bool isII4;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput5;            /**< input integer value */
+    bool intInputBool5;              /**< bool value if output cloud name is empty */
+    bool isII5;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput6;            /**< input integer value */
+    bool intInputBool6;              /**< bool value if output cloud name is empty */
+    bool isII6;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput7;            /**< input integer value */
+    bool intInputBool7;              /**< bool value if output cloud name is empty */
+    bool isII7;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput8;            /**< input integer value */
+    bool intInputBool8;              /**< bool value if output cloud name is empty */
+    bool isII8;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput9;            /**< input integer value */
+    bool intInputBool9;              /**< bool value if output cloud name is empty */
+    bool isII9;                     /**< bool value if output cloud name is in proper format  */
+    QLineEdit *intInput10;            /**< input integer value */
+    bool intInputBool10;              /**< bool value if output cloud name is empty */
+    bool isII10;                     /**< bool value if output cloud name is in proper format  */
   QComboBox * outputType;          /**< List of output cloud types*/
   bool isType;
   bool isICHB;

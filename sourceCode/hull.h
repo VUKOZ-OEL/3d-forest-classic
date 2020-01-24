@@ -91,5 +91,51 @@ private:
     pcl::PointXYZI returnEdgeBreakingPoint(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,pcl::PointXYZI boda, pcl::PointXYZI bodb,float maxEdgeLenght);
 
 };
-
+class ConcaveHull2
+{
+public:
+    ConcaveHull2();
+    ConcaveHull2(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
+    ConcaveHull2(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, float limit);
+    ConcaveHull2(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr convexhull);
+    ~ConcaveHull2();
+    
+    void setSearchLimit(float s);
+    void compute();
+    float getConvexArea();
+    float getConcaveArea();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getConvexHull();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getConcaveHull();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getCloud();
+protected:
+    void setCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
+    void setConvexHull(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
+    void setUsedPoints();
+    float computeAreaConvex();
+    float computeAreaConcave();
+    float computeArea(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
+    float computeDistance(pcl::PointXYZI lineA, pcl::PointXYZI lineB, pcl::PointXYZI point);
+    float computeTwoPointsDist(pcl::PointXYZI lineA, pcl::PointXYZI lineB);
+    float computeConvexHull();
+    void test();
+    int orientation(pcl::PointXYZI& a, pcl::PointXYZI& b, pcl::PointXYZI& c);
+    void removeDuplicateXYpoints(pcl::PointCloud<pcl::PointXYZI>::Ptr c,pcl::PointCloud<pcl::PointXYZI>::Ptr d);
+    
+    float computeAngle(pcl::PointXYZI& a, pcl::PointXYZI& b, pcl::PointXYZI& c);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr computeHull(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, int k);
+    pcl::PointCloud<pcl::PointXYZI>::Ptr findPointZ(pcl::PointCloud<pcl::PointXYZI>::Ptr c, pcl::PointCloud<pcl::PointXYZI>::Ptr z);
+    void setPlaneCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, pcl::PointCloud<pcl::PointXYZI>::Ptr c);
+    bool intersect(pcl::PointXYZI& a, pcl::PointXYZI& b, pcl::PointXYZI& c, pcl::PointXYZI& d);
+    std::vector<bool> m_usedPoint;
+    
+    float m_concaveArea=0;
+    float m_convexArea=0;
+    float m_searchLimit = 0.2;
+    std::vector<int> m_indi;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr m_cloud;
+    Cloud *m_cloudP;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr m_convexhull;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr m_concavehull;
+    
+};
 #endif // HULL_H_INCLUDED

@@ -39,6 +39,12 @@ InputDialog::InputDialog( QWidget *parent)
   isII2 = false;
     isII3 = false;
     isII4 = false;
+    isII5 = false;
+    isII6 = false;
+    isII7 = false;
+    isII8 = false;
+    isII9 = false;
+    isII10 = false;
   isType = false;
   isPath = false;
   isICHB = false;
@@ -76,6 +82,18 @@ void InputDialog::ok()
     int_value3 = intInput3->text().toInt();
   if(isII4 == true)
     int_value4 = intInput4->text().toInt();
+if(isII5 == true)
+    int_value5 = intInput5->text().toInt();
+if(isII6 == true)
+    int_value6 = intInput6->text().toInt();
+if(isII7 == true)
+    int_value7 = intInput7->text().toInt();
+if(isII8 == true)
+    int_value8 = intInput8->text().toInt();
+if(isII9 == true)
+    int_value9 = intInput9->text().toInt();
+if(isII10 == true)
+    int_value10 = intInput10->text().toInt();
   if(isType == true)
     output_type = outputType->currentText();
   if(isICHB == true)
@@ -329,6 +347,116 @@ void InputDialog::set_inputInt3(QString label, QString x)
   connect(intInput4,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
   isII4 = true;
 }
+void InputDialog::set_inputInt5(QString label, QString x)
+{
+  QLabel *labelint5 = new QLabel();
+  labelint5->setText(label);
+  intInput5 = new QLineEdit;
+  intInput5->setText(x);
+  intInputBool5=true;
+  intInput5->setCursorPosition(0);
+  labelint5->setBuddy(intInput5);
+  //resolution
+  InputLayout->addWidget(labelint5);
+  InputLayout->addWidget(intInput5);
+
+//ACTION
+  connect(intInput5,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput5,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII5 = true;
+}
+void InputDialog::set_inputInt6(QString label, QString x)
+{
+  QLabel *labelint6 = new QLabel();
+  labelint6->setText(label);
+  intInput6 = new QLineEdit;
+  intInput6->setText(x);
+  intInputBool6=true;
+  intInput6->setCursorPosition(0);
+  labelint6->setBuddy(intInput6);
+  //resolution
+  InputLayout->addWidget(labelint6);
+  InputLayout->addWidget(intInput6);
+
+//ACTION
+  connect(intInput6,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput6,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII6 = true;
+}
+void InputDialog::set_inputInt7(QString label, QString x)
+{
+  QLabel *labelint7 = new QLabel();
+  labelint7->setText(label);
+  intInput7 = new QLineEdit;
+  intInput7->setText(x);
+  intInputBool7=true;
+  intInput7->setCursorPosition(0);
+  labelint7->setBuddy(intInput7);
+  //resolution
+  InputLayout->addWidget(labelint7);
+  InputLayout->addWidget(intInput7);
+
+//ACTION
+  connect(intInput7,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput7,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII7 = true;
+}
+void InputDialog::set_inputInt8(QString label, QString x)
+{
+  QLabel *labelint8 = new QLabel();
+  labelint8->setText(label);
+  intInput8 = new QLineEdit;
+  intInput8->setText(x);
+  intInputBool8=true;
+  intInput8->setCursorPosition(0);
+  labelint8->setBuddy(intInput8);
+  //resolution
+  InputLayout->addWidget(labelint8);
+  InputLayout->addWidget(intInput8);
+
+//ACTION
+  connect(intInput8,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput8,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII8 = true;
+}
+void InputDialog::set_inputInt9(QString label, QString x)
+{
+  QLabel *labelint9 = new QLabel();
+  labelint9->setText(label);
+  intInput9 = new QLineEdit;
+  intInput9->setText(x);
+  intInputBool9=true;
+  intInput9->setCursorPosition(0);
+  labelint9->setBuddy(intInput9);
+  //resolution
+  InputLayout->addWidget(labelint9);
+  InputLayout->addWidget(intInput9);
+
+//ACTION
+  connect(intInput9,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput9,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII9 = true;
+}
+void InputDialog::set_inputInt10(QString label, QString x)
+{
+  QLabel *labelint10 = new QLabel();
+  labelint10->setText(label);
+  intInput10 = new QLineEdit;
+  intInput10->setText(x);
+  intInputBool10=true;
+  intInput10->setCursorPosition(0);
+  labelint10->setBuddy(intInput10);
+  //resolution
+  InputLayout->addWidget(labelint10);
+  InputLayout->addWidget(intInput10);
+
+//ACTION
+  connect(intInput10,SIGNAL(textChanged(QString)),this,SLOT(validateInt(QString)));
+  connect(intInput10,SIGNAL(textChanged(QString)),this,SLOT(validate(QString)));
+  isII10 = true;
+}
+
+
 void InputDialog::set_outputType(QString label, QStringList li)
 {
   //input cloud
@@ -638,6 +766,31 @@ int InputDialog::get_intValue4()
 {
   return int_value4;
 }
+int InputDialog::get_intValue5()
+{
+  return int_value5;
+}
+int InputDialog::get_intValue6()
+{
+  return int_value6;
+}
+int InputDialog::get_intValue7()
+{
+  return int_value7;
+}
+int InputDialog::get_intValue8()
+{
+  return int_value8;
+}
+int InputDialog::get_intValue9()
+{
+  return int_value9;
+}
+int InputDialog::get_intValue10()
+{
+  return int_value10;
+}
+
 float InputDialog::getSboxValue()
 {
     return sboxvalue;
