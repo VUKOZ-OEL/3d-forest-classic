@@ -1,31 +1,39 @@
-os:
-  - linux
+#install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - vtk
+      - eigen
+      - cmake
+      - flan
+      - Qt
+      - liblas
+  
+# Enable C++ support
 language: cpp
+
+# Compiler selection
 compiler:
   - gcc
-dist: trusty
-before_script:
-  #install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
-  addons:
-    apt:
-      sources:
-        - ubuntu-toolchain-r-test
-      packages:
-        - vtk
-        - eigen
-        - cmake
-        - flann
-        - Qt
-        - liblas
+  
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+  
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    fi
+  
+  # Go to the Root directory  
+  - cd ..
 
-  # create a build folder for the out-of-source build
-  - mkdir build
-  # switch to build directory
-  - cd build
-  # run cmake; here we assume that the project's
-  # top-level CMakeLists.txt is located at '..'
-  - cmake ..
-
+# Build steps
 script:
-  # once CMake has done its job we just build using make as usual
-  - make
+  - mkdir build
+  - cd build
+  - ${DEPS_DIR}/cmake/bin/cmake .. && make
