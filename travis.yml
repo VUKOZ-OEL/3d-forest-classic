@@ -4,6 +4,19 @@ compiler:
   - gcc
 
 before_script:
+  #install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
+  addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - vtk
+      - eigen
+      - cmake
+      - flann
+      - Qt
+      - liblas
+  install: make get-deps
   # create a build folder for the out-of-source build
   - mkdir build
   # switch to build directory
