@@ -1,36 +1,23 @@
 os:
   - linux
-  - osx
-  - windows
 language: cpp
-
 compiler:
   - gcc
-  
 dist: trusty
 before_script:
   #install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
   addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - vtk
-      - eigen
-      - cmake
-      - flann
-      - Qt
-      - liblas
-      
-   homebrew:
-    packages:
-      - vtk
-      - eigen
-      - cmake
-      - flann
-      - Qt
-      - liblas
-      update: true
+    apt:
+      sources:
+        - ubuntu-toolchain-r-test
+      packages:
+        - vtk
+        - eigen
+        - cmake
+        - flann
+        - Qt
+        - liblas
+
   # create a build folder for the out-of-source build
   - mkdir build
   # switch to build directory
