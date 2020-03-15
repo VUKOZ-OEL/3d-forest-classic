@@ -14,6 +14,7 @@ addons:
       - liblas-bin
       - liblas3
       - libboost-all-dev
+      - libpcl1.7
   
 # Enable C++ support
 language: cpp
