@@ -6,16 +6,20 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - libvtk5-dev
-      - eigen
+      - libeigen3-dev
       - cmake
-      - flan
-      - Qt
-      - liblas
+      - libflann-dev
+      - qt5-default
+      - liblas-dev
       - libboost-all-dev
   
 # Enable C++ support
 language: cpp
 
+# Plaform
+os: linux
+#distribution
+dist: xenial
 # Compiler selection
 compiler:
   - gcc
