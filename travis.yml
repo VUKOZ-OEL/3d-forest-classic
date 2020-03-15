@@ -1,8 +1,13 @@
+os:
+  - linux
+  - osx
+  - windows
 language: cpp
 
 compiler:
   - gcc
-
+  
+dist: trusty
 before_script:
   #install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
   addons:
@@ -16,7 +21,16 @@ before_script:
       - flann
       - Qt
       - liblas
-  install: make get-deps
+      
+   homebrew:
+    packages:
+      - vtk
+      - eigen
+      - cmake
+      - flann
+      - Qt
+      - liblas
+      update: true
   # create a build folder for the out-of-source build
   - mkdir build
   # switch to build directory
@@ -28,5 +42,3 @@ before_script:
 script:
   # once CMake has done its job we just build using make as usual
   - make
-  # if the project uses ctest we can run the tests like this
-  - make test
