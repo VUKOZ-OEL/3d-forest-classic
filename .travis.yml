@@ -1,15 +1,17 @@
 #install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
+sudo: required
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - vtk
+      - libvtk5-dev
       - eigen
       - cmake
       - flan
       - Qt
       - liblas
+      - libboost-all-dev
   
 # Enable C++ support
 language: cpp
