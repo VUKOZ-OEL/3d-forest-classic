@@ -5,7 +5,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - libvtk5-dev
+      - libvtk6-dev
       - libeigen3-dev
       - cmake
       - libflann-dev
