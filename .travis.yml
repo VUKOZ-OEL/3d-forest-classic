@@ -11,6 +11,8 @@ addons:
       - libflann-dev
       - qt5-default
       - liblas-dev
+      - liblas-bin
+      - liblas3
       - libboost-all-dev
   
 # Enable C++ support
