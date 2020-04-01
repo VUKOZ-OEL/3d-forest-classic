@@ -36,7 +36,7 @@ install:
   - unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
   - cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
   - cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
-  - make --verbose
+  - make -d
   - make install
   
   
