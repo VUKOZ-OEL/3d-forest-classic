@@ -14,11 +14,6 @@ addons:
       - liblas-bin
       - liblas3
       - libboost-all-dev
-      - tar 
-      - gzip 
-      - zip 
-      - unzip 
-      - bzip2
   
 # Enable C++ support
 language: cpp
@@ -40,15 +35,16 @@ install:
   - wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
   - unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
   - cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
-  - cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pointpicking 
+  - cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
   - make && make install
   
   
   # Go to the Root directory  
+  - cd ..
   - cd ..
 
 # Build steps
 script:
   - mkdir build
   - cd build
-  - ${DEPS_DIR}/cmake/bin/cmake .. && make
+  - cmake && make
