@@ -31,6 +31,7 @@ install:
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
   
   # install pcl from source
+  - travis_wait 30 mvn install
   - mkdir ${TRAVIS_BUILD_DIR}/deps/pcl && mkdir ${TRAVIS_BUILD_DIR}/deps/pcl_build 
   - wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
   - unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
