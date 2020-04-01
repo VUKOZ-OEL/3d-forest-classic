@@ -37,7 +37,7 @@ install:
   
   # install pcl from source
   - mkdir pcl && mkdir pcl_build && wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip && unzip pcl.zip -d pcl
-  - cmake && make && make install
+  - cd pcl_build && cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pointpicking && make && make install
   
   
   # Go to the Root directory  
