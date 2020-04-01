@@ -37,7 +37,8 @@ install:
   - unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
   - cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
   - cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
-  - make && make install
+  - travis_wait 30 make
+  - make install
   
   
   # Go to the Root directory  
