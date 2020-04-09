@@ -1,0 +1,51 @@
+#install dependencies - VTK, PCL, EIGEN, FLANN, Qt, libLAS
+sudo: required
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libvtk6-dev
+      - libeigen3-dev
+      - cmake
+      - libflann-dev
+      - qt5-default
+      - liblas-dev
+      - liblas-bin
+      - liblas3
+      - libboost-all-dev
+  
+# Enable C++ support
+language: cpp
+
+# Plaform
+os: linux
+#distribution
+dist: xenial
+# Compiler selection
+compiler:
+  - gcc
+  
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+  
+  # install pcl from source
+  - mkdir ${TRAVIS_BUILD_DIR}/deps/pcl && mkdir ${TRAVIS_BUILD_DIR}/deps/pcl_build 
+  - wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
+  - unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
+  - cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
+  - cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
+  - make -d
+  - make install
+  
+  
+  # Go to the Root directory  
+  - cd ..
+  - cd ..
+
+# Build steps
+script:
+  - mkdir build
+  - cd build
+  - cmake && make
