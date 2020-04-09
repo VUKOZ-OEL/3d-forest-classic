@@ -37,13 +37,13 @@ target_link_libraries(3DForest ${VTK_LIBRARIES} )
 LINK_DIRECTORIES(${VTK_LIB_DIRS})
 
 #dependencies - PCL
-find_package(PCL 1.8.0 REQUIRED)
+find_package(PCL 1.10 REQUIRED)
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${PCL_BINARY_DIRS})
 target_link_libraries(3DForest ${PCL_LIBRARIES})
 
 #dependencies - Boost
-find_package(Boost 1.60 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.72 COMPONENTS program_options thread system REQUIRED)
 include_directories( ${Boost_INCLUDE_DIR} )
 target_link_libraries(3DForest ${Boost_PROGRAM_OPTIONS_LIBRARY})
 

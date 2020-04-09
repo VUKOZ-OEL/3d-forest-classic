@@ -455,6 +455,7 @@ float ConcaveHull2::computeConvexHull(){
     ConvexHull *c = new ConvexHull(m_cloud);
     m_convexhull = c->getPolygon();
     m_convexArea = c->getPolygonArea();
+    return m_convexArea;
     
 }
 float ConcaveHull2::computeTwoPointsDist(pcl::PointXYZI lineA, pcl::PointXYZI lineB)
