@@ -2,6 +2,7 @@
 #define TERRAIN_H_INCLUDED
 
 #include "cloud.h"
+#include "hull.h"
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
 #include <pcl/common/common_headers.h>
@@ -258,10 +259,58 @@ private:
     Cloud *m_TerrainCloud;
     Cloud *m_Output;
 };
+class Features : public Cloud
+{
+public:
+    Features (pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor col);
+      //! Constructor.
+      /*! Costructor of tree. \param cloud Cloud */
+    Features (Cloud cloud);
+      //! Constructor.
+      /*! Copy Costructor of tree. \param kopie tree copy */
+    Features ();
+    Features operator=(Features &kopie);
+    ~Features();
+    void setConvexArea(float a);
+    void setConcaveArea(float a);
+    void setXlenght(float len);
+    void setYlengtht(float len);
+    void setCentroid(pcl::PointXYZI p);
+    void setMeanCurvature(float curv);
+    void setPointNumber(int n);
+    void setConvexHull();
+    void setconcaveHull();
+    ConvexHull& getConvexHull();
+    ConcaveHull& getConcaveHull();
+    
+    float getConvexArea();
+    float getConcaveArea();
+    float getXlenght();
+    float getYlenght();
+    float getMeanCurvature();
+    int getPointNumber();
+    Cloud* getPointCloud();
+    pcl::PointXYZI getCentroid();
+    ConvexHull *m_convexhull;           /**< cloud of points representing convex hull of tree */
+    ConcaveHull *m_concavehull;         /**< cloud of points representing concave hull of tree */
+    pcl::PolygonMesh *m_triangulatedConcaveHull; /**< */
+    
+    
+private:
+    float m_convexArea;
+    float m_concaveArea;
+    float m_pcaXLength;
+    float m_pcaYLength;
+    int m_pointCount;
+    pcl::PointXYZI m_centroid;
+    float m_meanCurvature;
+    
+};
 class TerrainFeatures : public QObject
 {
     Q_OBJECT
 public:
+    
     TerrainFeatures();
     ~TerrainFeatures();
     public slots:
@@ -288,14 +337,14 @@ public:
 signals:
     void finished();
     void percentage(int);
-    void sendingoutput( Cloud *);
+    void sendingoutput( Features *);
     
     
 private:
     bool computeStatistics(std::vector<float>& vec, float& avg, float& sd, float& range);
     float computeSlope(std::vector<float> vec);
     float computeSlope(std::vector<int> vec);
-    float computeCurvature(Cloud* cloud ,std::vector<int> vec,float& xleng, float& yleng);
+    float computeCurvature(Features vec,float& xleng, float& yleng);
     std::vector<float> computeSmallestPCA (std::vector<int> pointsId);
     float computeAspect(std::vector<float> vec);
     float getAverageZ(std::vector<int> vec);
@@ -312,13 +361,13 @@ private:
     
     bool computeLimits(Cloud *input, Cloud *output);
     bool computeBinary(Cloud *input, Cloud *output);
-    bool findClusters(Cloud *input, std::vector< std::vector<int> >& output);
-    bool filterClustersBySize(std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output);
-    bool filterClustersByPCA(Cloud *inputCloud, std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output);
-    bool filterClustersByHull(Cloud *inputCloud, std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output);
+    bool findClusters(Cloud *input,std::vector<Features>& output);
+    bool filterClustersBySize(std::vector<Features>& input, std::vector<Features>& output);
+    bool filterClustersByPCA(std::vector<Features>& input, std::vector<Features>& output);
+    bool filterClustersByHull(std::vector<Features>& input, std::vector<Features>& output);
     bool computePCA (pcl::PointCloud<pcl::PointXYZI>::Ptr input, float& Xlenght, float& Ylenght);
     bool computeHulls(pcl::PointCloud<pcl::PointXYZI>::Ptr input, float& convexArea, float& concaveArea );
-    bool createCloudsFromClusters(Cloud *inputCloud,std::vector< std::vector<int> >& input);
+    bool createCloudsFromClusters(Cloud *inputCloud,std::vector<Features>& input);
     void printValues();
     
     float m_Radius;
@@ -331,6 +380,7 @@ private:
     pcl::PointXYZI m_p0;
     
     std::vector <pcl::PointCloud<pcl::PointXYZI>::Ptr > m_stems;
+    std::vector <Features > m_features;
     
     float m_upperLimit = 4;
     float m_lowerLimit = -4;

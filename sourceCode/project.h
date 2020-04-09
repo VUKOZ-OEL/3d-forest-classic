@@ -25,6 +25,7 @@
 #include "skeleton.h"
 #include "cloud.h"
 #include "tree.h"
+#include "terrain.h"
 #include "alphaShapes.h"
 
 
@@ -43,6 +44,7 @@ class Project
   std::vector<Cloud> m_vegeCloud;       /**< Vector of vegetation clouds */
   std::vector<Cloud> m_ostCloud;        /**< Vector of ost clouds */
   std::vector<Tree> m_stromy;           /**< Vector of Tree clouds */
+    std::vector<Features> m_features;           /**< Vector of Tree clouds */
   std::vector<PolyhedronIntersections3D> m_intersections3D;           /**< Vector of Tree clouds */
 
 public:
@@ -143,6 +145,17 @@ public:
     //! Get size of base cloud vector.
     /*! \return size of vector containing base clouds */
   int get_sizebaseCV();
+    
+    //TERRAIN FEATURE
+      //! Set new base cloud.
+      /*! \param cloud cloud of new base cloud  */
+    void setFeature(Features feature);
+      //! Get base cloud.
+      /*! \param i get base cloud on ith position in vector \return cloud on given position  */
+    Features getFeature(int i);
+      //! Get size of base cloud vector.
+      /*! \return size of vector containing base clouds */
+    int getFeatureSize();
 
 //TERRAINCLOUD
     //! Set new terrain cloud.

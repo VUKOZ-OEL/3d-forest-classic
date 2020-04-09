@@ -47,6 +47,7 @@
 #include <pcl/visualization/area_picking_event.h>
 #include <pcl/visualization/point_picking_event.h>
 #include <pcl/visualization/point_cloud_color_handlers.h>
+#include <pcl/visualization/pcl_visualizer.h>
 
 //include FILTERS
 #include <pcl/filters/extract_indices.h>
@@ -57,6 +58,7 @@
 //#include <vtkWin32OpenGLRenderWindow.h>
 #include <vtkTIFFWriter.h>
 #include <vtkRenderWindow.h>
+#include <vtkOpenGLRenderWindow.h>
 #include <vtkRendererCollection.h>
 #include <vtkCamera.h>
 #include <vtkSmartPointer.h>
@@ -68,8 +70,11 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkRenderer.h>
 #include <vtkPNGWriter.h>
-#include <QVTKWidget.h>
+#include <QVTKOpenGLNativeWidget.h>
 #include <vtkInteractorStyle.h>
+#include <vtkGenericOpenGLRenderWindow.h>
+#include <vtkRenderer.h>
+
 
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
@@ -96,17 +101,24 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
  MainWindow::MainWindow()
 {
   //Q_INIT_RESOURCE(3dforest);
-  setWindowTitle ( tr("3D Forest - Forest lidar data processing tool") );
-//QVTKwidget - visualizer
-  qvtkwidget = new QVTKWidget();
-  m_vis  = new Visualizer();
-  vtkSmartPointer<vtkRenderWindow> renderWindow = m_vis->getRenderWindow();
+    setWindowTitle ( tr("3D Forest - Forest lidar data processing tool") );
 
-  coordianteAxes();
-  m_vis->setShowFPS(false);
-  qvtkwidget->SetRenderWindow(renderWindow);
-  setCentralWidget(qvtkwidget);
-  qvtkwidget->show();
+//QVTKwidget - visualizer
+    qvtkwidget = new QVTKOpenGLNativeWidget(this);
+
+    auto renderer = vtkSmartPointer<vtkRenderer >::New();
+    auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow >::New();
+
+    renderWindow->AddRenderer(renderer);
+    
+    m_vis = new pcl::visualization::PCLVisualizer(renderer, renderWindow, "data viewer", true);
+    m_vis->setShowFPS(false);
+    qvtkwidget->SetRenderWindow(m_vis->getRenderWindow());
+    coordianteAxes();
+    setCentralWidget(qvtkwidget);
+    qvtkwidget->show();
+    qvtkwidget->update();
+    
 
 // Tree widget
   treeWidget = new MyTree;
@@ -127,6 +139,12 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
   DockITableWidget->setWidget(m_intersectionTable);
   addDockWidget(Qt::BottomDockWidgetArea, DockITableWidget);
   DockITableWidget->hide();
+    //Feature table
+    m_featureTable = new QTableView;
+    DockFTableWidget = new QDockWidget(tr("Feature table"), this);
+    DockFTableWidget->setWidget(m_featureTable);
+    addDockWidget(Qt::BottomDockWidgetArea, DockFTableWidget);
+    DockFTableWidget->hide();
 
 
   resize(QSize(1024, 800));
@@ -144,7 +162,6 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
   point_ev = m_vis->registerPointPickingCallback (&MainWindow::pointEvent, *this );
 
   m_editCloud = false;
-
 }
 
 MainWindow::~MainWindow()
@@ -153,7 +170,6 @@ MainWindow::~MainWindow()
   delete m_cloud;
   delete Proj;
   delete treeWidget;
-  delete m_vis;
   delete qvtkwidget;
 }
 //PROJECT methods
@@ -356,7 +372,6 @@ void MainWindow::createAttTable()
 
 QStandardItemModel* MainWindow::getModel()
 {
-
   QStringList headers;
   headers <<"Name"<<"Points"<<"DBH HT\n[cm]"<<"DBH LSR\n[cm]"<<"DBH QSM\n[cm]"<<"Height\n[m]"<<"Lenght\n[m]"<<"Convex planar\n projection area\n[m^2]"<<"Concave planar\n projection area\n[m^2]"<<"volume QSM\n[cm]" <<" Volume \nsortiment 1\n (m^3)" <<"Lenght\n sortiment 1\n (m)" <<  "Volume\n sortiment 2\n (m^3)" <<"Lenght\n sortiment 2\n (m)" << "Volume\n sortiment 3\n (m^3)"<<"Lenght\n sortiment 3\n (m)" <<"Volume\n sortiment 4\n (m^3)" <<"Lenght\n sortiment 4\n (m)"<<"Volume\n sortiment 5\n (m^3)"<<"Lenght\n sortiment 5\n (m)" <<"Volume\n sortiment 6\n (m^3)"<<"Lenght\n sortiment 6\n (m)" ;
   headers <<"Crown\npoints"<<"Crown bottom\n height\n[m]"<<"Crown\nheight\n[m]"<<"Crown total\n height\n[m]"<<"Crown\n lenght\n[m]"<<"Crown\n width\n[m]"<<"Position\n distance\n[m]"<<"Position\n azimuth\n[deg]";
@@ -545,6 +560,85 @@ void MainWindow::refreshAttTable()
 {
   m_attributeTable->setModel(getModel());
 }
+void MainWindow::createFeatureTable()
+{
+    std::cout<<"createFeatureTable()\n";
+    int rows = Proj->getFeatureSize();
+    m_featureTable->setModel(getFeatureModel());
+    for(int i = 0; i < rows; i++)
+      m_featureTable->setRowHeight(i,20);
+
+    for(int i=1;i<6;i++)
+     m_featureTable->setColumnWidth(i,70);
+
+
+    QString label = QString("%1 - Feature table").arg(Proj->get_ProjName());
+    m_featureTable->setWindowTitle(label);
+    
+}
+void MainWindow::showFeatureTable()
+{
+  createFeatureTable();
+  if(DockFTableWidget->isHidden())
+    DockFTableWidget->show();
+
+  if(visFT == false)
+  {
+    visFT=true;
+    m_featureTable->show();
+  }
+  else
+  {
+    DockFTableWidget->hide();
+    m_featureTable->hide();
+    visFT=false;
+  }
+}
+QStandardItemModel*  MainWindow::getFeatureModel(){
+    //std::cout<<"getFeatureModel()\n";
+    QStringList headers;
+    headers <<"Name"<<"Points"<<"X PCA axis lenght"<<"Y PCA axis lenght"<<"Convex Area"<<"Concave Area"<<"dalsi" ;
+      //std::cout<<"header\n";
+    int rows = Proj->getFeatureSize();
+    //std::cout<<"pocet zaznamu: " << rows << "\n";
+    QStandardItemModel *model = new QStandardItemModel(rows,headers.size(),this);
+    model->setHorizontalHeaderLabels(headers);
+
+    for(int row = 0; row < rows; row++)
+    {
+        //Feature ATTRIBUTES
+        //names
+        QModelIndex index= model->index(row,0,QModelIndex());
+        model->setData(index,Proj->getFeature(row).getPointCloud()->get_name());
+
+          //points
+        index= model->index(row,1,QModelIndex());
+        model->setData(index,Proj->getFeature(row).getPointNumber());
+
+          // X pca
+        index= model->index(row,2,QModelIndex());
+        if(Proj->getFeature(row).getXlenght()>0){
+            model->setData(index,Proj->getFeature(row).getXlenght());}
+
+          //Y pca
+        index= model->index(row,3,QModelIndex());
+        if(Proj->getFeature(row).getYlenght()>0){
+            model->setData(index,Proj->getFeature(row).getYlenght());}
+          //Convex Area
+        index= model->index(row,4,QModelIndex());
+        if(Proj->getFeature(row).getConvexArea() >0){
+            model->setData(index,Proj->getFeature(row).getConvexArea());}
+          // Concave Area
+        index= model->index(row,5,QModelIndex());
+        if(Proj->getFeature(row).getConcaveArea()>0){
+          model->setData(index,Proj->getFeature(row).getConcaveArea());}
+        // centroid
+      }
+    return model;
+}
+void MainWindow::refreshFeatureTable(){
+    m_featureTable->setModel(getFeatureModel());
+}
 //IMPORT methods
 void MainWindow::importTXT(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr output)
 {
@@ -575,13 +669,13 @@ void MainWindow::importTXT(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
     else if(ret == true)
     {
         double r= data.size()/pointsNum;
-        int fields;
-        if(r > 2.5 && r < 3.5)
-            fields =3;
-        else if(r > 3.5 && r < 5)
-            fields =4;
-        else
-            fields =-1;
+        int fields=6;
+//        if(r > 2.5 && r < 3.5)
+//            fields =3;
+//        else if(r > 3.5 && r < 5)
+//            fields =4;
+//        else
+//            fields =-1;
 
         if( fields < 3)
         {
@@ -590,15 +684,16 @@ void MainWindow::importTXT(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
         }
         for(int q=0; q < (data.size()-fields); q+=fields)
         {
-        std::cout<<"data: x " << data.at(q) << " y " << data.at(q+1) <<" z " << data.at(q+2) <<"\n";
+        //std::cout<<"data: x " << data.at(q) << " y " << data.at(q+1) <<" z " << data.at(q+2) <<"\n";
             pcl::PointXYZI data_t;
             data_t.x = data.at(q) + Proj->get_Xtransform();
             data_t.y = data.at(q+1) + Proj->get_Ytransform();
             data_t.z = data.at(q+2) + Proj->get_Ztransform();
-            if(fields == 4)
-                data_t.intensity=data.at(q+3);
-            else
-                data_t.intensity=0;
+            data_t.intensity=data.at(q+3);
+//            if(fields == 4)
+//                data_t.intensity=data.at(q+3);
+//            else
+//                data_t.intensity=0;
             output->points.push_back(data_t);
         }
         output->width = output->points.size();
@@ -1957,8 +2052,8 @@ void MainWindow::terrainDiff()
         
         connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
         connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
-        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
-        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+        connect(s, SIGNAL(sendingoutput(Features *)), this, SLOT(saveFeature(Features *)));
+        connect(this, SIGNAL(savedFeature()), s, SLOT(hotovo()));
         
         connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
         connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
@@ -6350,6 +6445,11 @@ void MainWindow::createActions()
   aboutAct = new QAction(QPixmap(":/images/icon.png"),tr("&About"), this);
   aboutAct->setStatusTip(tr("Show information about 3D Forest application."));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+    
+    featureTableAct = new QAction(QPixmap(":/images/icon.png"),tr("&Feature table"), this);
+     featureTableAct->setStatusTip(tr("Show information about 3D Forest application."));
+     connect(featureTableAct, SIGNAL(triggered()), this, SLOT(showFeatureTable()));
+    
 
 //EVENTS treewidget
   connect(treeWidget, SIGNAL(checkedON(QString)), this, SLOT(removeCloud(QString)));
@@ -6392,6 +6492,7 @@ void MainWindow::createMenus()
     terenMenu->addAction(curvatureAct);
     terenMenu->addAction(hillShadeAct);
     terenMenu->addAction(terrainDiffAct);
+    terenMenu->addAction(featureTableAct);
 
 //VEGETATION
   vegeMenu = menuBar()->addMenu(tr("&Vegetation"));
@@ -6699,22 +6800,16 @@ void MainWindow:: removePbar()
 //QVTKWIDGET
 void MainWindow::AreaEvent(const pcl::visualization::AreaPickingEvent& event, void* )
 {
-  vtkSmartPointer<vtkActorCollection> actors = vtkSmartPointer<vtkActorCollection>::New();
-  if(event.getActors (actors) == false)
+    std::cout<<"area event\n";
+  std::vector<std::string> clouds;
+  if(event.getCloudNames(clouds)<1)
     return;
-
-  pcl::visualization::CloudActorMapPtr cam_ptr;
-  cam_ptr = m_vis->getCloudActorMap();
-  pcl::visualization::CloudActorMap::iterator cam_it;
-  cam_it = cam_ptr->find (m_cloud->get_name().toUtf8().constData());
-
-
-
-  if(cam_it !=cam_ptr->end() )
-  {
-    std::vector<int> indices;
-    event.getActorsIndices(cam_it->second.actor, indices);
-
+    
+  std::vector<int> indices;
+  std::string name =m_cloud->get_name().toUtf8().constData();
+  event.getCloudIndices(name, indices);
+    std::cout<<"velikost indices: "<< indices.size()<< "\n";
+      
     boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud2 (new pcl::PointCloud<pcl::PointXYZI>);
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud1 (new pcl::PointCloud<pcl::PointXYZI>);
@@ -6733,22 +6828,18 @@ void MainWindow::AreaEvent(const pcl::visualization::AreaPickingEvent& event, vo
     cloud1.reset();
     cloud2.reset();
     indicesptr.reset();
-    cam_it->second.actor->Modified();
-  }
 
-  QStringList cl_;
-  for(cam_it = cam_ptr->begin(); cam_it != cam_ptr->end(); cam_it++)
-  {
-    cl_<< QString::fromStdString(cam_it->first);
-  }
   m_vis->removeAllPointClouds();
-  dispCloud(*m_cloud,220,220,0);
-  for(int i=0; i< cl_.size(); i++)
+  
+  for(int i=0; i< clouds.size(); i++)
   {
-    if(m_cloud->get_name() == cl_.at(i))
-      continue;
-
-    dispCloud(Proj->get_Cloud(cl_.at(i)) );
+      std::string nameClouds = clouds.at(i);
+    if(name == nameClouds)
+      dispCloud(*m_cloud,220,220,0);
+    else{
+        QString qstr = QString::fromStdString(nameClouds);
+        dispCloud(Proj->get_Cloud(qstr) );
+    }
   }
   m_vis->getRenderWindow()->SetCurrentCursor( VTK_CURSOR_DEFAULT );
   return;
@@ -6797,27 +6888,11 @@ void MainWindow::pointEvent(const pcl::visualization::PointPickingEvent& event, 
   if (idx == -1)
     return;
 
-  vtkProp3D* prop = event.getProp();
-  vtkSmartPointer<vtkActor> actor = vtkActor::SafeDownCast(prop);
-
-  pcl::visualization::CloudActorMapPtr cam_ptr = m_vis->getCloudActorMap();
-  pcl::visualization::CloudActorMap::iterator cam_it;
-  for(pcl::visualization::CloudActorMap::iterator cam_it = cam_ptr->begin(); cam_it != cam_ptr->end(); cam_it ++)
-  {
-      //std::string camIT;
-     // vtkSmartPointer<vtkActor> actor2 = vtkActor::SafeDownCast(cam_it->second.actor);
-      //camIT = cam_it->second.actor;
-      if( cam_it->second.actor == actor)
-    {
-      cam_it->second.actor->Modified();
-      QString a = QString("Name of selected cloud: %1   points: %2").arg(QString::fromStdString(cam_it->first)).arg(Proj->get_Cloud(QString::fromStdString(cam_it->first)).get_Cloud()->points.size());
-      statusBar()->showMessage(a);
-      m_vis->setPointCloudSelected (true, cam_it->first);
-      //return;
-    }
-    else
-      m_vis->setPointCloudSelected (false, cam_it->first);
-  }
+  std::string name;
+  event.getCloudName (name);
+  QString a = QString("Name of selected cloud: %1   points: %2").arg(QString::fromStdString(name)).arg(Proj->get_Cloud(QString::fromStdString(name)).get_Cloud()->points.size());
+  statusBar()->showMessage(a);
+  m_vis->setPointCloudSelected (true, name);
   return;
 }
 void MainWindow:: coordianteAxes()
@@ -6880,6 +6955,7 @@ void MainWindow::dispCloud(Cloud cloud)
  // m_vis->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_IMMEDIATE_RENDERING, true, cloud.get_name().toUtf8().constData());
   qvtkwidget->update();
 }
+
 void MainWindow::dispCloud(Cloud cloud, int red, int green, int blue)
 {
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZI> color(cloud.get_Cloud(),red,green,blue);
@@ -7222,4 +7298,8 @@ void MainWindow::saveRest(Cloud *c)
 {
   saveCloud(c, "ost");
   emit savedRest();
+}
+void MainWindow::saveFeature(Features *c){
+    Proj->setFeature(*c);
+    emit savedFeature();
 }

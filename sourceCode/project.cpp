@@ -910,7 +910,17 @@ void Project::deleteCloudNoQuestions(QString name) // !!!!!!!!!!!!!!!!!!
   }
   m_stromy.swap(stromy);
 }
+void Project::setFeature(Features feature){
+    m_features.push_back(feature);
+}
 
+Features Project::getFeature(int i)
+{
+    return m_features.at(i);
+}
+int Project::getFeatureSize(){
+    return m_features.size();
+}
 
 ProjFile::ProjFile(QString name)
 {

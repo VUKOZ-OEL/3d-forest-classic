@@ -1,6 +1,8 @@
 #include "terrain.h"
 #include "HoughTransform.h"
 #include "hull.h"
+#include "cloud.h"
+
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/radius_outlier_removal.h>
@@ -1136,6 +1138,62 @@ float HillShade::computeSlope(std::vector<int> pointsId){
 }
 
 
+Features::Features(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor col)
+: Cloud(cloud, name, col)
+{}
+  //! Constructor.
+  /*! Costructor of tree. \param cloud Cloud */
+Features::Features (Cloud cloud)
+: Cloud(cloud)
+{}
+  //! Constructor.
+  /*! Copy Costructor of tree. \param kopie tree copy */
+Features::Features()
+{}
+Features::~Features(){}
+Features Features::operator=(Features &kopie)
+{
+    Features t(kopie);
+    t.m_Cloud = kopie.m_Cloud;
+    t.m_centroid = kopie.m_centroid;
+    t.m_pointCount = kopie.m_pointCount;
+    t.m_convexArea = kopie.m_convexArea;
+    t.m_concaveArea = kopie.m_concaveArea;
+    t.m_convexhull = kopie.m_convexhull;
+    t.m_concavehull = kopie.m_concavehull;
+    t.m_pcaXLength = kopie.m_pcaXLength;
+    t.m_pcaYLength = kopie.m_pcaYLength;
+    t.m_meanCurvature = kopie.m_meanCurvature;
+    t.m_triangulatedConcaveHull = kopie.m_triangulatedConcaveHull;
+}
+void Features::setConvexArea(float a){m_convexArea = m_convexhull->getPolygonArea();}
+void Features::setConcaveArea(float a){m_concaveArea=m_concavehull->getPolygonArea();}
+void Features::setXlenght(float len){m_pcaXLength=len;}
+void Features::setYlengtht(float len){m_pcaYLength=len;}
+void Features::setCentroid(pcl::PointXYZI p){m_centroid=p;}
+void Features::setMeanCurvature(float curv){m_meanCurvature=curv;}
+void Features::setPointNumber(int n){m_pointCount = n;}
+
+float Features::getConvexArea(){return m_convexArea;}
+float Features::getConcaveArea(){return m_concaveArea;}
+float Features::getXlenght(){return m_pcaXLength;}
+float Features::getYlenght(){return m_pcaYLength;}
+float Features::getMeanCurvature(){return m_meanCurvature;}
+int Features::getPointNumber(){return m_pointCount;}
+Cloud* Features::getPointCloud(){return getPointCloud();}
+pcl::PointXYZI Features::getCentroid(){return m_centroid;}
+void Features::setConvexHull(){
+    m_convexhull = new ConvexHull(CloudOperations::getCloudCopy(m_Cloud));
+}
+void Features::setconcaveHull(){
+    m_concavehull = new ConcaveHull(CloudOperations::getCloudCopy(m_Cloud),"concave",1);
+}
+ConvexHull& Features::getConvexHull(){
+    return *m_convexhull;
+}
+ConcaveHull& Features::getConcaveHull(){
+    return *m_concavehull;
+}
 TerrainFeatures::TerrainFeatures(){
     m_TerrainCloud = new Cloud();
     m_OutputAVG = new Cloud();
@@ -1186,13 +1244,13 @@ void TerrainFeatures::execute(){
     computeBinary(m_TerrainCloud, m_OutputAVG);
     emit percentage(20);
     std::cout<< "findClusters: \n";
-    std::vector< std::vector<int> >clusters;
+    std::vector<Features> clusters;
     findClusters(m_OutputAVG, clusters);
     std::cout<< "pocet clusteru: "<< clusters.size() << "\n";
     emit percentage(30);
     
     std::cout<< "filterClustersBySize: \n";
-    std::vector< std::vector<int> >clustersSize;
+    std::vector<Features> clustersSize;
     filterClustersBySize(clusters, clustersSize);
     std::cout<< "pocet Filtered clusteru: "<< clustersSize.size() << "\n";
     emit percentage(40);
@@ -1201,8 +1259,8 @@ void TerrainFeatures::execute(){
    // createCloudsFromClusters(m_OutputAVG, clustersSize);
     
     std::cout<< "filterClustersByPCA: \n";
-    std::vector< std::vector<int> >clustersPCA;
-    filterClustersByPCA(m_OutputAVG, clustersSize, clustersPCA);
+    std::vector<Features> clustersPCA;
+    filterClustersByPCA(clustersSize, clustersPCA);
     std::cout<< "pocet Filtered clusteru: "<< clustersPCA.size() << "\n";
     emit percentage(50);
     
@@ -1210,8 +1268,8 @@ void TerrainFeatures::execute(){
     //createCloudsFromClusters(m_OutputAVG, clustersPCA);
     
     std::cout<< "filterClustersByHull: \n";
-    std::vector< std::vector<int> >clustersHull;
-    filterClustersByHull(m_OutputAVG, clustersPCA, clustersHull);
+    std::vector<Features> clustersHull;
+    filterClustersByHull(clustersPCA, clustersHull);
     std::cout<< "pocet Filtered clusteru: "<< clustersHull.size() << "\n";
     emit percentage(60);
     
@@ -1275,7 +1333,7 @@ bool TerrainFeatures::computeBinary(Cloud *input, Cloud *output)
     output->set_Cloud(cloudNewTerrainRange);
     return true;
 }
-bool TerrainFeatures::findClusters(Cloud *input, std::vector< std::vector<int> >& output)
+bool TerrainFeatures::findClusters(Cloud *input, std::vector<Features> & output)
 {
     std::vector<bool> usedPoint(input->get_Cloud()->points.size(),false);
     //std::vector< std::vector<int> > clusters;
@@ -1310,30 +1368,42 @@ bool TerrainFeatures::findClusters(Cloud *input, std::vector< std::vector<int> >
                 }
             }
         }
-        output.push_back(cluster);
+        if(cluster.size()<4 )
+            continue;
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cl_ (new pcl::PointCloud<pcl::PointXYZI>);
+        Cloud* cl = new Cloud();
+        for(int r=0;r< cluster.size();r++)
+        {
+            cl_->points.push_back(input->get_Cloud()->points.at(cluster.at(r)));
+        }
+        cl->set_Cloud(cl_);
+        Features *f = new Features(*cl);
+        f->setPointNumber(cluster.size());
+        output.push_back(*f);
     }
     std::cout<< "clusters: "<< output.size() <<"\n";
     
     return true;
 }
-bool TerrainFeatures::filterClustersBySize(std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output)
+bool TerrainFeatures::filterClustersBySize(std::vector<Features>& input, std::vector<Features>& output)
 {
     for(int i = 0; i < input.size();i++)
     {
-        //std::cout<<"pocet bodu: " <<input.at(i).size() << "\n";
-        if(input.at(i).size() > m_lowerSizeLimit && input.at(i).size() < m_upperSizeLimit )
+        //std::cout<<"pocet bodu: " <<input.at(i).getPointNumber() << "\n";
+        if(input.at(i).getPointNumber() > m_lowerSizeLimit && input.at(i).getPointNumber() < m_upperSizeLimit )
             output.push_back(input.at(i));
     }
     return true;
 }
-bool TerrainFeatures::filterClustersByPCA(Cloud *inputCloud, std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output)
+bool TerrainFeatures::filterClustersByPCA(std::vector<Features>& input, std::vector<Features>& output)
 {
     for(int i =0; i < input.size(); i++)
     {
         float xlen=0, ylen=0;
-        float ratio =  computeCurvature(inputCloud, input.at(i),xlen, ylen);
-
-        std::cout<<"ratio: " << ratio << " xlen: " << xlen << " ylen: " << ylen << "\n";
+        float ratio =  computeCurvature( input.at(i),xlen, ylen);
+        input.at(i).setXlenght(xlen);
+        input.at(i).setYlengtht(ylen);
+        //std::cout<<"ratio: " << ratio << " xlen: " << input.at(i).getXlenght() << " ylen: " << input.at(i).getYlenght() << "\n";
         
         if(ratio < m_axisRatioLimit)
             continue;
@@ -1345,22 +1415,19 @@ bool TerrainFeatures::filterClustersByPCA(Cloud *inputCloud, std::vector< std::v
     }
     return true;
 }
-bool TerrainFeatures::filterClustersByHull(Cloud *inputCloud, std::vector< std::vector<int> >& input, std::vector< std::vector<int> >& output)
+bool TerrainFeatures::filterClustersByHull( std::vector<Features>& input, std::vector<Features>& output)
 {
     for(int i=0; i< input.size(); i++)
     {
-        // create cloud
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cl (new pcl::PointCloud<pcl::PointXYZI>);
-        for(int q=0; q <input.at(i).size(); q++)
-            cl->points.push_back(inputCloud->get_Cloud()->points.at(input.at(i).at(q)));
-        
-        float convex=0, concave=0;
-        computeHulls(cl, convex, concave);
-        float ratio = concave/convex;
-        std::cout<<"ratio: " << ratio << " convex: " << convex << " concave: " << concave << "\n";
+        input.at(i).setConvexHull();
+        input.at(i).setconcaveHull();
+        input.at(i).setConvexArea(0);
+        input.at(i).setConcaveArea(0);
+        float ratio = input.at(i).getConcaveArea()/input.at(i).getConvexArea();
+        //std::cout<<"ratio: " << ratio << " convex: " << input.at(i).getConvexArea() << " concave: " << input.at(i).getConcaveArea()<< "\n";
         if(ratio < m_areaRatioLimit)
-            continue;
-        if((convex > m_lowerAreaLimit && convex < m_upperAreaLimit) || (concave > m_lowerAreaLimit && concave < m_upperAreaLimit ))
+                    continue;
+        if((input.at(i).getConvexArea() > m_lowerAreaLimit && input.at(i).getConvexArea() < m_upperAreaLimit) || (input.at(i).getConcaveArea() > m_lowerAreaLimit && input.at(i).getConcaveArea() < m_upperAreaLimit ))
             output.push_back(input.at(i));
     }
     return true;
@@ -1375,17 +1442,18 @@ bool TerrainFeatures::computeHulls(pcl::PointCloud<pcl::PointXYZI>::Ptr input, f
     return true;
     //float ratio = rr->getConcaveArea()/ rr->getConvexArea();
 }
-bool TerrainFeatures::createCloudsFromClusters(Cloud *inputCloud, std::vector< std::vector<int> >& input)
+bool TerrainFeatures::createCloudsFromClusters(Cloud *inputCloud, std::vector<Features>& input)
 {
     for(int i = 0; i < input.size(); i++)
     {
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cl (new pcl::PointCloud<pcl::PointXYZI>);
-        for(int q=0; q <input.at(i).size(); q++)
-            cl->points.push_back(inputCloud->get_Cloud()->points.at(input.at(i).at(q)));
-        
-         m_stems.push_back(cl);
+//        pcl::PointCloud<pcl::PointXYZI>::Ptr cl (new pcl::PointCloud<pcl::PointXYZI>);
+//        for(int q=0; q <input.at(i).size(); q++)
+//            cl->points.push_back(inputCloud->get_Cloud()->points.at(input.at(i).at(q)));
+//
+        m_stems.push_back(input.at(i).get_Cloud());
+        m_features.push_back(input.at(i));
     }
-    return true;
+   return true;
 }
 
 bool TerrainFeatures::computePCA (pcl::PointCloud<pcl::PointXYZI>::Ptr input, float& Xlenght, float& Ylenght)
@@ -1433,14 +1501,14 @@ bool TerrainFeatures::computePCA (pcl::PointCloud<pcl::PointXYZI>::Ptr input, fl
     
 }
 void TerrainFeatures::sendData(){
-    emit sendingoutput( m_OutputAVG);
-    emit sendingoutput( m_OutputSD);
-    emit sendingoutput( m_OutputRange);
+
     for(int i=0; i < m_stems.size(); i++)
     {
+       // m_stems.at(i).get
     //    QString a = QString(m_prefix);
       QString name = QString("cluster_%1").arg(i);
-      Cloud *c = new Cloud(m_stems.at(i), name);
+        m_features.at(i).set_name(name);
+      Features *c = new Features(m_features.at(i));
       emit sendingoutput( c);
     }
 }
@@ -1589,24 +1657,14 @@ float TerrainFeatures::computeSlope(std::vector<int> vec){
     //skl = smax - smin;
     return skl*M_PI/180.0;// in radians
 }
-float TerrainFeatures::computeCurvature(Cloud* cloud ,std::vector<int> vec,float& xleng, float& yleng)
+float TerrainFeatures::computeCurvature(Features vec,float& xleng, float& yleng)
 {
     
-    // pro vsechny body jistit jejich umisteni k prvnimu bodu a roztridit do 4(8) skupin podle směru
-    // pro kazdy směr spocitat krivost
-    // najit nejvetsi krivist a kolmou  krivost
-    pcl::PointCloud<pcl::PointXYZI>::Ptr input (new pcl::PointCloud<pcl::PointXYZI>);
-    for(int i=0; i <vec.size(); i++)
-        input->points.push_back(cloud->get_Cloud()->points.at(vec.at(i)));
-    
-    // pca bodu a urcit pomer os nejmenší / součet všech
-    if(input->points.size() < 3)
-        return -1;
     
     pcl::PointCloud<pcl::PointXYZI> cloud_ ;
     pcl::PCA<pcl::PointXYZI> pca;
-    pca.setInputCloud(input);
-    pca.project(*input, cloud_);
+    pca.setInputCloud(vec.getPointCloud()->get_Cloud());
+    pca.project(*vec.get_Cloud(), cloud_);
 
     pcl::PointXYZI proj_min,proj_max;
     pcl::getMinMax3D (cloud_, proj_min, proj_max);
@@ -1643,87 +1701,86 @@ float TerrainFeatures::computeCurvature(Cloud* cloud ,std::vector<int> vec,float
     float SFFIy = eI/eL;
 
     return SFFIy;
-    
 }
 void TerrainFeatures::computeClusters(){
     std::cout<<"computeClusters \n";
     
-    // pro kazdy bod
-    // jestli je jednicka zacit prohledávat okoli
-    //prohledávat sousedni body
-    std::vector<bool> usedPoint(m_OutputAVG->get_Cloud()->points.size(),false);
-    std::vector< std::vector<int> > clusters;
-    
-    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
-    kdtree.setInputCloud (m_OutputAVG->get_Cloud());
-    
-    for(int q=0; q < m_OutputAVG->get_Cloud()->points.size(); q++)
-    {
-        if(m_OutputAVG->get_Cloud()->points.at(q).intensity >0 || usedPoint.at(q)==true)
-            continue;
-        
-        std::vector<int> cluster;
-        cluster.push_back(q);
-        usedPoint.at(q)=true;
-        
-        for(int w=0; w< cluster.size();w++)
-        {
-            std::vector<int> pointIDv;
-            std::vector<float> pointSDv;
-            pcl::PointXYZI x = m_OutputAVG->get_Cloud()->points.at(cluster.at(w));
-            
-            kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
-            for(int e=0; e < pointIDv.size();e++)
-            {
-                if(m_OutputAVG->get_Cloud()->points.at(pointIDv.at(e)).intensity ==1 && usedPoint.at(pointIDv.at(e))==false)
-                {
-                    usedPoint.at(pointIDv.at(e))=true;
-                    cluster.push_back(pointIDv.at(e));
-                }
-            }
-        }
-        clusters.push_back(cluster);
-    }
-    std::cout<< "clusters: "<< clusters.size() <<"\n";
-    // pro kazdy cluster poskladat mracno a zjistit jeho rozmery, plochu, pomer stran
-    int pocet=0;
-    #pragma omp parallel for
-    for(int r=0; r < clusters.size(); r++)
-    {
-        if (clusters.at(r).size() >6  )
-        {
-            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);
-            pocet++;
-            std::cout<< pocet <<" velikost clusteru "<< r << " z " << clusters.size() <<" : "<< clusters.at(r).size() <<"\n";
-            for(int t=0; t < clusters.at(r).size();t++)
-            {
-                // mracno
-                pcl::PointXYZI bod = m_TerrainCloud->get_Cloud()->points.at(clusters.at(r).at(t));
-                cloud_->points.push_back(bod);
-            }
-            
-            // pca a urcit pomer stran
-            float xleng,yleng;
-            float pomer = computeCurvature(m_TerrainCloud, clusters.at(r),xleng,yleng);
-            std::cout<<"pomer: "<< pomer << " x: "<<xleng<< " y: "<<yleng<<"\n";
-            
-            // zjistit pměr stran
-            if(pomer >0.75 && xleng> 6  && xleng < 18 )
-            {
-                ConcaveHull2 * rr = new ConcaveHull2(m_TerrainCloud->get_Cloud());
-                rr->compute();
-                float ratio = rr->getConcaveArea()/ rr->getConvexArea();
-                
-                if(ratio > 0.9)
-                {
-                    #pragma omp critical
-                    m_stems.push_back(cloud_);
-                    std::cout<<"ratio: "<< ratio << " x: "<<xleng<< " y: "<<yleng <<"\n";
-                }
-            }
-        }
-    }
-    std::cout<< "pocet stemu: "<< m_stems.size() <<"\n";
+//    // pro kazdy bod
+//    // jestli je jednicka zacit prohledávat okoli
+//    //prohledávat sousedni body
+//    std::vector<bool> usedPoint(m_OutputAVG->get_Cloud()->points.size(),false);
+//    std::vector< std::vector<int> > clusters;
+//
+//    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+//    kdtree.setInputCloud (m_OutputAVG->get_Cloud());
+//
+//    for(int q=0; q < m_OutputAVG->get_Cloud()->points.size(); q++)
+//    {
+//        if(m_OutputAVG->get_Cloud()->points.at(q).intensity >0 || usedPoint.at(q)==true)
+//            continue;
+//
+//        std::vector<int> cluster;
+//        cluster.push_back(q);
+//        usedPoint.at(q)=true;
+//
+//        for(int w=0; w< cluster.size();w++)
+//        {
+//            std::vector<int> pointIDv;
+//            std::vector<float> pointSDv;
+//            pcl::PointXYZI x = m_OutputAVG->get_Cloud()->points.at(cluster.at(w));
+//
+//            kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
+//            for(int e=0; e < pointIDv.size();e++)
+//            {
+//                if(m_OutputAVG->get_Cloud()->points.at(pointIDv.at(e)).intensity ==1 && usedPoint.at(pointIDv.at(e))==false)
+//                {
+//                    usedPoint.at(pointIDv.at(e))=true;
+//                    cluster.push_back(pointIDv.at(e));
+//                }
+//            }
+//        }
+//        clusters.push_back(cluster);
+//    }
+//    std::cout<< "clusters: "<< clusters.size() <<"\n";
+//    // pro kazdy cluster poskladat mracno a zjistit jeho rozmery, plochu, pomer stran
+//    int pocet=0;
+//    #pragma omp parallel for
+//    for(int r=0; r < clusters.size(); r++)
+//    {
+//        if (clusters.at(r).size() >6  )
+//        {
+//            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);
+//            pocet++;
+//            std::cout<< pocet <<" velikost clusteru "<< r << " z " << clusters.size() <<" : "<< clusters.at(r).size() <<"\n";
+//            for(int t=0; t < clusters.at(r).size();t++)
+//            {
+//                // mracno
+//                pcl::PointXYZI bod = m_TerrainCloud->get_Cloud()->points.at(clusters.at(r).at(t));
+//                cloud_->points.push_back(bod);
+//            }
+//
+//            // pca a urcit pomer stran
+//            float xleng,yleng;
+//            float pomer = computeCurvature(m_TerrainCloud, clusters.at(r),xleng,yleng);
+//            std::cout<<"pomer: "<< pomer << " x: "<<xleng<< " y: "<<yleng<<"\n";
+//
+//            // zjistit pměr stran
+//            if(pomer >0.75 && xleng> 6  && xleng < 18 )
+//            {
+//                ConcaveHull2 * rr = new ConcaveHull2(m_TerrainCloud->get_Cloud());
+//                rr->compute();
+//                float ratio = rr->getConcaveArea()/ rr->getConvexArea();
+//
+//                if(ratio > 0.9)
+//                {
+//                    #pragma omp critical
+//                    m_stems.push_back(cloud_);
+//                    std::cout<<"ratio: "<< ratio << " x: "<<xleng<< " y: "<<yleng <<"\n";
+//                }
+//            }
+//        }
+//    }
+//    std::cout<< "pocet stemu: "<< m_stems.size() <<"\n";
 }
 float TerrainFeatures::getConvexHullArea(std::vector<int> pId){
     float area =0;

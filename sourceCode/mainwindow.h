@@ -16,17 +16,20 @@
 #ifndef MAINWINDOW_H_INCLUDED
 #define MAINWINDOW_H_INCLUDED
 
+#include <QVTKOpenGLNativeWidget.h>
 #include <QVTKWidget.h>
 #include <QtWidgets/QMainWindow>
 #include "gui.h"
 #include "project.h"
 #include "hull.h"
+#include "terrain.h"
 #include "segmentation.h"
 #include "reconstruction.h"
 #include "terrain.h"
 #include <QtWidgets/QProgressBar>
 #include <QtWidgets/QTableView>
 #include <random>
+#include <pcl/visualization/pcl_visualizer.h>
 
 //!  Main application window.
 /*!
@@ -42,6 +45,7 @@ signals:
   void savedTerrain();
   void savedTree();
   void savedRest();
+  void savedFeature();
 
 public:
     //! Constructor.
@@ -381,6 +385,7 @@ private slots:
     /*! Display cloud in m_vis.
     \param name name of cloud */
   void dispCloud(QString name);
+
     //! Remove displayed cloud
     /*! Remove displayed cloud from m_vis.
         \param name name of cloud */
@@ -411,6 +416,7 @@ private slots:
     void saveTerrain (Cloud *);
     void saveTree(Cloud *);
     void saveRest(Cloud *c);
+    void saveFeature(Features *c);
 
   // PROGRESSBAR
 
@@ -427,6 +433,10 @@ private slots:
     void slice();
     void sliceStop();
     void refreshAttTable();
+    
+    void showFeatureTable();
+    void createFeatureTable();
+    void refreshFeatureTable();
     
     
     
@@ -478,8 +488,11 @@ private:
   void openCloudFile(QString file, QString type, QColor col, bool visible =true);
 
 //QVTKWIDGET - display and hide clouds
-  QVTKWidget *qvtkwidget;               /**< Define QVTKWidget */
-  Visualizer *m_vis;                    /**< Visualizer */
+  //QVTKWidget *qvtkwidget;
+    QVTKOpenGLNativeWidget *qvtkwidget;
+    /**< Define QVTKWidget */
+  //Visualizer *m_vis;
+    pcl::visualization::PCLVisualizer *m_vis; /**< Visualizer */
   boost::signals2::connection area;     /**< Boost signal for connecting area picking events */
   boost::signals2::connection point_ev; /**< Boost signal for connecting point picking events */
     //! Display cloud
@@ -512,6 +525,10 @@ private:
   QStandardItemModel* getModel();
   void createITable();
   QStandardItemModel*  getIntersectionModel();
+    
+    
+    QStandardItemModel*  getFeatureModel();
+    
 
 //TREEWIDGET
   MyTree *treeWidget; /**< Define MyTree Widget */
@@ -723,6 +740,8 @@ private:
   QAction *undoAct;
   QAction *stopE;
   QAction *sliceEC;
+    
+    QAction *featureTableAct;
 
   QThread *m_thread;
   bool m_axes=false;
@@ -736,6 +755,11 @@ private:
   QTableView *m_intersectionTable;
   bool visIT=false;
   QDockWidget *DockITableWidget;
+    ///FEATURETABLE
+    QTableView *m_featureTable;
+    bool visFT=false;
+    QDockWidget *DockFTableWidget;
+    
     std::random_device rd;
  };
 
