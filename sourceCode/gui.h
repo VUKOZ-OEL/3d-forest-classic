@@ -113,6 +113,7 @@ public:
     /*!  set type of cloud to saved as.
         \param label description of line \param li list of cloud names */
   void set_outputType(QString label, QStringList li);
+  void set_outputType2(QString label, QStringList li);
     //!  Set method title
     /*!  Settitle of dialog.
         \param title label of the method */
@@ -147,6 +148,7 @@ public:
     //!  get type of output cloud.
     /*!  \return name QString of cloud type*/
   QString get_outputType();
+  QString get_outputType2();
     //!  get int value .
     /*!  \return integer value entered by user */
   int get_intValue();
@@ -207,6 +209,7 @@ private:
   QString output_cloud1;          /**< Output cloud name */
   QString output_cloud2;          /**< Second output cloud name */
   QString output_type;            /**< Second output cloud name */
+    QString output_type2;            /**< Second output cloud name */
   QString output_path;            /**< output path file */
   QString output_dir;            /**< output path file */
   QList<QListWidgetItem*> inputList;
@@ -280,6 +283,8 @@ private:
     bool isII10;                     /**< bool value if output cloud name is in proper format  */
   QComboBox * outputType;          /**< List of output cloud types*/
   bool isType;
+    QComboBox * outputType2;          /**< List of output cloud types*/
+    bool isType2;
   bool isICHB;
   bool CHB;
   QCheckBox * CHBox;
@@ -975,6 +980,87 @@ private:
     bool m_profile=false;           // true if file with segment profiles should be created
     bool m_trees=false;             // if file with tree volume
     bool m_branches=false;          // if file with stem and branches
+};
+
+class ExportFeaturesDialog : public QDialog
+{
+    Q_OBJECT
+    
+public:
+    
+    ExportFeaturesDialog(QWidget *parent = 0 );
+    ExportFeaturesDialog( QStringList nameList, QWidget *parent = 0 );
+    ~ExportFeaturesDialog();
+    
+public slots:
+    
+    //sets
+    void setDescription(QString text);
+    void setList(QStringList li);
+    void setExistingDirectory();
+    void setPrefix(QString label, QString example);
+    //gets
+    QList<QString> getInputList();
+    QString getSeparator();
+    bool getFeatureFile();
+    bool getConcavePolygonFile();
+    bool getConvexPolygonFile();
+    QString getPath();
+    QString getPrefix();
+
+    void ok();
+    
+    void otherSeparator(bool checked);
+    void allFiles(int checked);
+    void allAttr(int checked);
+    void allAttributes(int checked);
+    
+    
+private slots:
+    
+    void DialogSize(int w, int h );
+    void DialogLayout();
+    void validate(QString);
+    QGroupBox *attributesGroup();
+    QGroupBox *separatorGroup();
+    
+private:
+    
+    QListWidget * listWidget;
+    QList<QListWidgetItem*> inputList;
+    QLabel *treeLabel;              /**< Description of tree selection combobox*/
+    QComboBox * inputTrees;         /**< List of input tree names */
+    QLineEdit *prefixLine;
+    
+    QLabel *fileLabel;              /**< Desription of QlineEdit for output file */
+    QLineEdit *outputFile;          /**< Output file name */
+    QPushButton *directoryButton;   /**< Button for selecting directory for project */
+    QDialogButtonBox *buttonBox;    /**< Default buttons */
+    QHBoxLayout *buttontLayout;     /**< horizontal layout */
+    QVBoxLayout *InputLayout;       /**< Default layout of input lines */
+    QHBoxLayout *inputareaLayout;   /**< Default layout of input area */
+    QVBoxLayout *mainLayout;        /**< Default layout */
+    QVBoxLayout *treeLayout;        /**< Default layout */
+    QGridLayout *fileLayout;        /**< Default layout of check boxesn and attributes*/
+    
+    QRadioButton *radio1;           /**< separator button - semicolon*/
+    QRadioButton *radio2;           /**< separator button - space*/
+    QRadioButton *radio3;           /**< separator button - tabulator*/
+    QRadioButton *radio4;           /**< separator button - other*/
+    QLineEdit *sep;                 /**< optional separator */
+    
+    QString m_separator;            /**< QString containg selected separator*/
+    QString m_prefix;               /**< QString containg selected file prefix*/
+    QString m_path;               /**< QString containg selected file prefix*/
+    
+    QCheckBox *CHB_attributeFile;
+    QCheckBox *CHB_convexPolygon;
+    QCheckBox *CHB_concavePolygon;
+    QCheckBox *CHB_all;
+    
+    bool m_convexPolygonFile=false;        // if file with segment profile should be created
+    bool m_concavePoylgonFile=false;           // true if file with segment profiles should be created
+    bool m_featuresAttributesFile=false;             // if file with tree volume
 };
 
 #endif // GUI_H_INCLUDED

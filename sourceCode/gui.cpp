@@ -46,6 +46,7 @@ InputDialog::InputDialog( QWidget *parent)
     isII9 = false;
     isII10 = false;
   isType = false;
+    isType2 = false;
   isPath = false;
   isICHB = false;
   isList =false;
@@ -96,6 +97,8 @@ if(isII10 == true)
     int_value10 = intInput10->text().toInt();
   if(isType == true)
     output_type = outputType->currentText();
+    if(isType == true)
+    output_type2 = outputType2->currentText();
   if(isICHB == true)
   {
     if(CHBox->isChecked())
@@ -472,6 +475,21 @@ void InputDialog::set_outputType(QString label, QStringList li)
   InputLayout->addWidget(outputType);
   isType = true;
 }
+void InputDialog::set_outputType2(QString label, QStringList li)
+{
+  //input cloud
+  QLabel *labelType2 = new QLabel();
+  labelType2->setText(label);
+
+  outputType2 = new QComboBox();
+  outputType2->insertItems(0,li);
+  labelType2->setBuddy(outputType2);
+  outputType2->setMaximumWidth(150);
+//layout
+  InputLayout->addWidget(labelType2);
+  InputLayout->addWidget(outputType2);
+  isType2 = true;
+}
 void InputDialog::set_outputPath(QString label, QString example,QString type)
 {
   //input cloud
@@ -541,7 +559,7 @@ void InputDialog::validateInt(QString text)
 {
   if(isII1 == true)
   {
-      if (text.contains(QRegExp("^\\d+")))
+      if (text.contains(QRegExp("^-?\\d+")))
       {
           intInputBool= true;
       }
@@ -815,6 +833,10 @@ void InputDialog::setSboxDouble(QString label, float dValue, float minV, float m
 QString InputDialog::get_outputType()
 {
   return output_type;
+}
+QString InputDialog::get_outputType2()
+{
+  return output_type2;
 }
 bool InputDialog::get_CheckBox()
 {
@@ -2437,9 +2459,7 @@ ExportQSMDialog::ExportQSMDialog(QWidget *parent)
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     connect(directoryButton, SIGNAL(clicked()), this, SLOT(setExistingDirectory()));
     
-    
     DialogLayout();
-    
 }
 ExportQSMDialog::ExportQSMDialog( QStringList nameList, QWidget *parent )
 : QDialog(parent)
@@ -2706,6 +2726,280 @@ QString ExportQSMDialog::getPrefix()
 }
 
 
+ExportFeaturesDialog::ExportFeaturesDialog(QWidget *parent)
+: QDialog(parent)
+{
+    DialogSize(500,300);
+    //buttons
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    
+    fileLabel = new QLabel();
+    fileLabel->setText("Enter directory you want to save results:");
+    outputFile = new QLineEdit;
+    outputFile->setText("Browse...");
+    outputFile->setReadOnly(true);
+    directoryButton = new QPushButton(tr("Browse"));
+    
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(ok()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(directoryButton, SIGNAL(clicked()), this, SLOT(setExistingDirectory()));
+    
+    
+    DialogLayout();
+    
+}
+ExportFeaturesDialog::ExportFeaturesDialog( QStringList nameList, QWidget *parent )
+: QDialog(parent)
+{
+    // neměl by se spouštět
+    fileLabel = new QLabel();
+    fileLabel->setText("Enter name of the file you want to save results:");
+    outputFile = new QLineEdit;
+    outputFile->setText("Browse...");
+    outputFile->setReadOnly(true);
+    directoryButton = new QPushButton(tr("Browse"));
+    
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(ok()));
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(directoryButton, SIGNAL(clicked()), this, SLOT(setExistingDirectory()));
+    
+    
+    DialogLayout();
+}
+ExportFeaturesDialog::~ExportFeaturesDialog()
+{
+    
+}
+void ExportFeaturesDialog::DialogSize(int w, int h )
+{
+    resize(w, h);
+}
+void ExportFeaturesDialog::DialogLayout()
+{
+    // buttons
+    buttontLayout = new QHBoxLayout();
+    buttontLayout->setGeometry(QRect(0,0,400,50));
+    buttontLayout->setAlignment(Qt::AlignRight);
+    buttontLayout->setSpacing(10);
+    buttontLayout->addWidget(buttonBox );
+    // prefix
+    QLabel *labelOC1 = new QLabel();
+    labelOC1 ->setText("set prefix of the created files: ");
+    prefixLine = new QLineEdit;
+    labelOC1 ->setBuddy(prefixLine);
+    prefixLine->setText("features_");
+    treeLayout = new QVBoxLayout();
+    treeLayout->addWidget(labelOC1);
+    treeLayout->addWidget(prefixLine);
+    
+    //file selection
+    fileLayout = new QGridLayout();
+    fileLayout->addWidget(fileLabel,1,0,1,2);
+    fileLayout->addWidget(outputFile,2,1);
+    fileLayout->addWidget(directoryButton,2,2);
+    fileLayout->setSpacing(5);
+    
+    //inputlayout of cloudnames and labels
+    InputLayout = new QVBoxLayout();
+    InputLayout->addLayout(treeLayout);
+    InputLayout->addLayout(fileLayout);
+    InputLayout->addWidget(separatorGroup());
+    InputLayout->addWidget(attributesGroup());
+    InputLayout->setSpacing(10);
+    // input of cloud and main label
+    inputareaLayout = new QHBoxLayout();
+    inputareaLayout->addLayout(InputLayout);
+    
+    //mainlayout
+    mainLayout = new QVBoxLayout();
+    mainLayout->addLayout(inputareaLayout);
+    mainLayout->addLayout(buttontLayout);
+    setLayout(mainLayout);
+}
+QString ExportFeaturesDialog::getSeparator()
+{
+    return m_separator;
+}
+QGroupBox *ExportFeaturesDialog::separatorGroup()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Data separator"));
+    groupBox->setFlat(true);
+    
+    radio1 = new QRadioButton(tr("Semicolon"));
+    radio2 = new QRadioButton(tr("Space"));
+    radio2->setChecked(true);
+    radio3 = new QRadioButton(tr("Tabulator"));
+    radio4 = new QRadioButton(tr("Other:"));
+    sep = new QLineEdit(this);
+    sep->setFixedWidth(60);
+    sep->setReadOnly(true);
+    sep->setStyleSheet("QLineEdit{background: lightGrey;}");
+    
+    connect(radio4, SIGNAL(toggled(bool)), this, SLOT(otherSeparator(bool)));
+    QHBoxLayout *hbox = new QHBoxLayout;
+    hbox->addWidget(radio1);
+    hbox->addWidget(radio2);
+    hbox->addWidget(radio3);
+    hbox->addWidget(radio4);
+    hbox->addWidget(sep);
+    hbox->setSpacing(10);
+    hbox->addStretch(1);
+    groupBox->setLayout(hbox);
+    return groupBox;
+}
+QGroupBox *ExportFeaturesDialog::attributesGroup()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Feature attributes"));
+    groupBox->setFlat(true);
+    
+    CHB_attributeFile = new QCheckBox(tr("Atribute file"));
+    connect(CHB_attributeFile, SIGNAL(stateChanged(int)), this, SLOT(allAttr(int)));
+    CHB_convexPolygon = new QCheckBox(tr("Convex polygon file"));
+    connect(CHB_convexPolygon, SIGNAL(stateChanged(int)), this, SLOT(allAttr(int)));
+    CHB_concavePolygon = new QCheckBox(tr("Concave polygon file"));
+    connect(CHB_concavePolygon, SIGNAL(stateChanged(int)), this, SLOT(allAttr(int)));
+    CHB_all = new QCheckBox(tr("All files"));
+    connect(CHB_all, SIGNAL(stateChanged(int)), this, SLOT(allAttributes(int)));
+    
+    QGridLayout *box = new QGridLayout();
+    box->addWidget(CHB_all,1,1);
+    box->addWidget(CHB_attributeFile ,2,1);
+    box->addWidget(CHB_convexPolygon,2,2);
+    box->addWidget(CHB_concavePolygon,2,3);
+
+
+    groupBox->setLayout(box);
+    return groupBox;
+}
+void ExportFeaturesDialog::setDescription(QString text)
+{
+    // text about function
+    QLabel *label = new QLabel();
+    label->setText(text);
+    //label->setMaximumSize(180,300);
+    label->setMinimumWidth(160);
+    label->setWordWrap(true);
+    label->setMargin(10);
+    label->setAlignment(Qt::AlignJustify | Qt::AlignTop);
+    //layout
+    inputareaLayout->addWidget(label);
+    
+}
+void ExportFeaturesDialog::setList(QStringList li)
+{
+    listWidget->insertItems(0,li);
+    listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    listWidget->setSortingEnabled(true);
+}
+
+void ExportFeaturesDialog::setExistingDirectory()
+{
+    QString fileName =QFileDialog::getExistingDirectory(this, tr("Open Directory"), "", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    outputFile->setText(fileName);
+}
+void ExportFeaturesDialog::setPrefix(QString label, QString example)
+{
+    //output cloud
+    
+    //layout
+    
+}
+void ExportFeaturesDialog::ok()
+{
+
+    //separator
+    if(radio1->isChecked())
+        m_separator = (";");
+    if(radio2->isChecked())
+        m_separator = (" ");
+    if(radio3->isChecked())
+        m_separator = ("\t");
+    if(radio4->isChecked())
+        m_separator = sep->text();
+    //attributes
+    if(CHB_concavePolygon->isChecked())
+        m_concavePoylgonFile= true;
+    if(CHB_convexPolygon->isChecked())
+        m_convexPolygonFile= true;
+    if(CHB_attributeFile->isChecked())
+        m_featuresAttributesFile = true;
+    // prefix
+    m_prefix = prefixLine->text();
+    //path
+    m_path = outputFile->text();
+}
+void ExportFeaturesDialog::validate(QString)
+{
+    // validate path
+}
+void ExportFeaturesDialog::otherSeparator(bool checked)
+{
+    if(checked == true)
+    {
+        sep->setReadOnly(false);
+        sep->setStyleSheet("QLineEdit{background: white;}");
+    }
+    
+    else
+    {
+        sep->setReadOnly(true);
+        sep->setStyleSheet("QLineEdit{background: lightGrey;}");
+        sep->setText("");
+    }
+}
+void ExportFeaturesDialog::allFiles(int checked)
+{
+    
+}
+void ExportFeaturesDialog::allAttr(int checked)
+{
+    if(checked == 0)
+    {
+        CHB_all->setChecked(false);
+    }
+}
+void ExportFeaturesDialog::allAttributes(int checked)
+{
+    if(checked == 2)
+    {
+        CHB_attributeFile->setChecked(true);
+        CHB_convexPolygon->setChecked(true);
+        CHB_concavePolygon->setChecked(true);
+    }
+}
+
+bool ExportFeaturesDialog::getFeatureFile()
+{
+    return m_featuresAttributesFile;
+}
+bool ExportFeaturesDialog::getConcavePolygonFile()
+{
+    return m_concavePoylgonFile;
+}
+bool ExportFeaturesDialog::getConvexPolygonFile()
+{
+    return m_convexPolygonFile;
+}
+
+QString ExportFeaturesDialog::getPath()
+{
+    //return outputFile->text();
+    return m_path;
+}
+QList<QString> ExportFeaturesDialog::getInputList()
+{
+    QList<QString> result;
+    for(int i=0; i < inputList.size(); i++)
+        result.push_back( inputList.at(i)->text() );
+    
+    return result;
+}
+QString ExportFeaturesDialog::getPrefix()
+{
+    return m_prefix;
+}
 //// THREAD
 
 

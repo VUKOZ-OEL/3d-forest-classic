@@ -1145,7 +1145,7 @@ Features::Features(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QCo
   /*! Costructor of tree. \param cloud Cloud */
 Features::Features (Cloud cloud)
 : Cloud(cloud)
-{}
+{computeCentroid();}
   //! Constructor.
   /*! Copy Costructor of tree. \param kopie tree copy */
 Features::Features()
@@ -1170,7 +1170,21 @@ void Features::setConvexArea(float a){m_convexArea = m_convexhull->getPolygonAre
 void Features::setConcaveArea(float a){m_concaveArea=m_concavehull->getPolygonArea();}
 void Features::setXlenght(float len){m_pcaXLength=len;}
 void Features::setYlengtht(float len){m_pcaYLength=len;}
-void Features::setCentroid(pcl::PointXYZI p){m_centroid=p;}
+void Features::computeCentroid(){
+    //compute centroid
+    Eigen::Vector4f centroid;
+    pcl::compute3DCentroid(*get_Cloud(), centroid);
+    pcl::PointXYZI bod;
+    bod.x =centroid[0];
+    bod.y =centroid[1];
+    bod.z =centroid[2];
+    bod.intensity = centroid[3];
+    setCentroid(bod);
+}
+void Features::setCentroid(pcl::PointXYZI p){
+    m_centroid=p;
+    //std::cout<< "centroid x: "<< m_centroid.x << " y: " << m_centroid.y << " z: "<< m_centroid.z <<"\n";
+    }
 void Features::setMeanCurvature(float curv){m_meanCurvature=curv;}
 void Features::setPointNumber(int n){m_pointCount = n;}
 
@@ -1194,6 +1208,8 @@ ConvexHull& Features::getConvexHull(){
 ConcaveHull& Features::getConcaveHull(){
     return *m_concavehull;
 }
+
+
 TerrainFeatures::TerrainFeatures(){
     m_TerrainCloud = new Cloud();
     m_OutputAVG = new Cloud();

@@ -275,6 +275,7 @@ public:
     void setConcaveArea(float a);
     void setXlenght(float len);
     void setYlengtht(float len);
+    void computeCentroid();
     void setCentroid(pcl::PointXYZI p);
     void setMeanCurvature(float curv);
     void setPointNumber(int n);

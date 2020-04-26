@@ -1244,6 +1244,8 @@ void MainWindow::openCloudFile(QString file, QString type, QColor col,bool visib
     Proj->set_Tree(*c);
   if(type == "ost")
     Proj->set_OstCloud(*c);
+    if(type == "feature")
+    Proj->setFeature(*c);
 
 //if(visible == true)
  // dispCloud(*c);
@@ -2065,6 +2067,134 @@ void MainWindow::terrainDiff()
         
     }
     delete in;
+}
+void MainWindow::exportFeaturesAtt()
+{//input dialog
+    // export all features attriubtes into text file
+
+    ExportFeaturesDialog *exdialog = new ExportFeaturesDialog(this);
+    exdialog->setDescription("\tThe tool for exporting tree parameters into formatted text file. "
+                              "You can select tree(s) for which wants to export the parameters, "
+                              " choose the parameters to export and set the separator of fields in the text file. "
+                              "The tool exports currently computed values.");
+    int dl = exdialog->exec();
+    
+    if(dl == QDialog::Accepted)
+    {
+        QString sep =exdialog->getSeparator();
+        QString prefix =exdialog->getPrefix();
+        QString path =exdialog->getPath();
+        int pocetFeatures = Proj->getFeatureSize();
+        //std::cout<<"pocet features: "<< pocetFeatures << " sep: "<< sep.toStdString() << " prefix: "<< prefix.toStdString() << " path: " << path.toStdString() << "\n";
+        
+        if(pocetFeatures ==0)
+            return;
+        // open file and push header
+        // insert values
+        // name, centroid X, centroid Y, centroid Z, axis length X, axis length Y, ratio, Convex area, concave area, points size,
+        if(exdialog->getFeatureFile() == true) // create tree file
+        {
+            //open file
+            QString filename =QString("%1%2%3featuresAttributes.txt").arg(exdialog->getPath()).arg(QDir::separator()).arg( exdialog->getPrefix());
+            QFile file (filename);
+            file.open(QIODevice::WriteOnly | QIODevice::Text);
+            QTextStream out(&file);
+            out.setRealNumberNotation(QTextStream::FixedNotation);
+            out.setRealNumberPrecision(3);
+            
+            // write header
+            out << "ID" << sep <<"Cloud_name" << sep << "X_centroid"<< sep << "Y_centroid"<<sep << "Z_centroid"<< sep <<"Point_size" << sep << "X_Axis_Length_[m]" << sep << "Y_Axis_Length_[m]" << sep << "Axis_ratio" << sep << "Convex_Area_[m3]"<<sep<< "Concave_Area_[m3]" <<"\n";
+
+            // write data
+            for(int q=0; q < Proj->getFeatureSize();q++)
+            {
+                int id =q+1;
+                QString name =Proj->getFeature(q).getPointCloud()->get_name();
+                int points = Proj->getFeature(q).getPointNumber();
+                float xAxis = Proj->getFeature(q).getXlenght();
+                float yAxis = Proj->getFeature(q).getYlenght();
+                float axisRatio = yAxis/xAxis;
+                float convexArea =Proj->getFeature(q).getConvexArea();
+                float concaveArea =Proj->getFeature(q).getConcaveArea();
+                pcl::PointXYZI bod = Proj->getFeature(q).getCentroid();
+                double x = bod.x - Proj->get_Xtransform();
+                double y = bod.y - Proj->get_Ytransform();
+                double z = bod.z - Proj->get_Ztransform();
+
+                out<< id << sep << name << sep << x << sep << y << sep << z << sep <<  points << sep << xAxis << sep<< yAxis << sep << axisRatio << sep << convexArea<< sep << concaveArea << "\n";
+            }
+            file.close();
+        }
+        if(exdialog->getConvexPolygonFile() == true) // create tree file
+        {
+            //open file
+            QString filename =QString("%1%2%3featuresConvex.txt").arg(exdialog->getPath()).arg(QDir::separator()).arg( exdialog->getPrefix());
+            QFile file (filename);
+            file.open(QIODevice::WriteOnly | QIODevice::Text);
+            QTextStream out(&file);
+            out.setRealNumberNotation(QTextStream::FixedNotation);
+            out.setRealNumberPrecision(3);
+            
+            // write header
+            out << "ID" << sep <<"Xstart" << sep <<"Ystart" << sep <<"Xend" << sep <<"Yend;" << sep <<"Z\n";
+
+            // write data
+            for(int q=0; q < Proj->getFeatureSize();q++)
+            {
+                QString name =Proj->getFeature(q).getPointCloud()->get_name();
+                
+                for(int j = 1; j < Proj->getFeature(q).getConvexHull().getPolygon()->points.size(); j++)
+                {
+                    pcl::PointXYZI bod;
+                    bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(j-1);
+                    double x = bod.x - Proj->get_Xtransform();
+                    double y = bod.y - Proj->get_Ytransform();
+                    out << name << sep << x << sep << y ;
+                    bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(j);
+                    double xend = bod.x - Proj->get_Xtransform();
+                    double yend = bod.y - Proj->get_Ytransform();
+                    double z = bod.z;
+                    out << sep << xend << sep  << yend << sep  << z << endl;
+                 }
+            }
+            file.close();
+        }
+        if(exdialog->getConcavePolygonFile() == true) // create tree file
+        {
+            //open file
+            QString filename =QString("%1%2%3featuresConcave.txt").arg(exdialog->getPath()).arg(QDir::separator()).arg( exdialog->getPrefix());
+            QFile file (filename);
+            file.open(QIODevice::WriteOnly | QIODevice::Text);
+            QTextStream out(&file);
+            out.setRealNumberNotation(QTextStream::FixedNotation);
+            out.setRealNumberPrecision(3);
+            
+            // write header
+            out << "ID" << sep <<"Xstart" << sep <<"Ystart" << sep <<"Xend" << sep <<"Yend;" << sep <<"Z\n";
+
+            // write data
+            for(int q=0; q < Proj->getFeatureSize();q++)
+            {
+                QString name =Proj->getFeature(q).getPointCloud()->get_name();
+                
+                for(int j = 1; j < Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.size(); j++)
+                {
+                    pcl::PointXYZI bod;
+                    bod = Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.at(j-1);
+                    double x = bod.x - Proj->get_Xtransform();
+                    double y = bod.y - Proj->get_Ytransform();
+                    out << name << sep << x << sep << y ;
+                    bod = Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.at(j);
+                    double xend = bod.x - Proj->get_Xtransform();
+                    double yend = bod.y - Proj->get_Ytransform();
+                    double z = bod.z;
+                    out << sep << xend << sep  << yend << sep  << z << endl;
+                 }
+            }
+            file.close();
+        }
+        
+    }
 }
 //VEGETATION
 void MainWindow::manualSelect()
@@ -5361,19 +5491,22 @@ void MainWindow::removePoints(){
     // por zatim najit vsechny body v polomeru  41 m od daneho bodu a ulozit je jako tren
     QStringList types;
     types << "Tree" << "Base cloud" << "Terrain cloud" << "Vegetation cloud" << "Other";
+    QStringList fields;
+    fields << "Intensity" << "X" << "Y" << "Z" ;
 
     InputDialog *in = new InputDialog(this);
     in->set_title("Remove Points");
     in->set_path(Proj->get_Path());
-    in->set_description("\tMerge selected clouds into new one. This tool may be used when one object is to be made of more separated clouds. "
+    in->set_description("\tSelect point from cloud where intensity value i greater than (input value * -1) and smaller than input value"
                         "The result is one cloud with given name and of given type.\n"
                         "\t Please select desired clouds in the list and set a name and type of the new cloud.");
     //in->set_inputList("cloud selection:",get_allNames());
     in->set_inputCloud1("cloud:", get_allNames());
     in->set_outputCloud1("Output cloud name:","cloud");
     in->set_outputType("Type of the output cloud:", types);
-    in->set_inputCheckBox("keep points with this value?");
-    in->set_inputInt("input value", "5");
+    in->set_outputType2("Type of field:", fields);
+    in->set_inputInt("input value for point to be greater than", "0");
+    in->set_inputInt2("input value for point values to be smaller than", "5");
     in->set_stretch();
     int dl = in->exec();
 
@@ -5383,30 +5516,74 @@ void MainWindow::removePoints(){
     if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
     {
         QString type;
-           if(in->get_outputType() == "Base cloud")
-             type = "cloud";
-           if(in->get_outputType() == "Terrain cloud")
-             type = "teren";
-           if(in->get_outputType() == "Vegetation cloud")
-             type = "vege";
-           if(in->get_outputType() == "Tree")
-             type = "strom";
-           if(in->get_outputType() == "Other")
-             type = "ost";
+        if(in->get_outputType() == "Base cloud")
+            type = "cloud";
+        if(in->get_outputType() == "Terrain cloud")
+            type = "teren";
+        if(in->get_outputType() == "Vegetation cloud")
+            type = "vege";
+        if(in->get_outputType() == "Tree")
+            type = "strom";
+        if(in->get_outputType() == "Other")
+            type = "ost";
+        QString field = in->get_outputType2();
+        float value1 =in->get_intValue();
+        float value2 =in->get_intValue2();
+        
+        std::cout<< "Input cloud: "<< in->get_inputCloud1().toStdString()<<"\n";
+        std::cout<< "Output cloud: "<< in->get_outputCloud1().toStdString()<<"\n";
+        std::cout<< "type: "<< in->get_outputType().toStdString()<<"\n";
+        std::cout<< "field: "<< field.toStdString()<<"\n";
+        std::cout<< "value 1: "<< in->get_intValue()<<"\n";
+        std::cout<< "value 2: "<< in->get_intValue2()<<"\n";
 
-
-
+        createPBar();
+        float v= 0;
+        float percent =100/Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size() ;
         pcl::PointCloud<pcl::PointXYZI>::Ptr merged_ (new pcl::PointCloud<pcl::PointXYZI>);
         
-        for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++)
+        if(field =="Z")
         {
-            if(in->get_intValue() == Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).intensity)
-            {
-                merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+            std::cout<< "for Z field \n";
+            for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++){
+                if( Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).z > value1 &&  Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).z < value2 )
+                    merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+                showPBarValue(v+= percent);
             }
         }
+        else if(field =="X")
+        {
+            std::cout<< "for Y field \n";
+            for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++){
+                if( Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).x > value1 &&  Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).x < value2 )
+                    merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+                showPBarValue(v+= percent);
+            }
+        }
+        else if(field =="Y")
+        {
+            std::cout<< "for Y field \n";
+            for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++)
+            {
+                if( Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).y > value1 &&  Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).y < value2 )
+                    merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+                showPBarValue(v+= percent);
+            }
+        }
+        else
+        {
+            std::cout<< "for intensity field \n";
+            for(int i=0; i < Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.size();i++)
+            {
+                if( Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).intensity > value1 &&  Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i).intensity < value2 )
+                    merged_->points.push_back(Proj->get_Cloud(in->get_inputCloud1()).get_Cloud()->points.at(i));
+                showPBarValue(v+= percent);
+            }
+        }
+        std::cout<< "Pocet bodu: "<< merged_->points.size()<<"\n";
         Cloud *cV = new Cloud(merged_,in->get_outputCloud1());
         saveCloud(cV, type);
+        removePbar();
     }
 }
 void MainWindow::labelCloudsOFF()
@@ -6231,6 +6408,11 @@ void MainWindow::createActions()
     terrainDiffAct->setStatusTip(tr("compute hillshade of terrain"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(terrainDiffAct, SIGNAL(triggered()), this, SLOT(terrainDiff()));
+    
+    exportFeaturesAct = new QAction(tr("Export Features"), this);
+    exportFeaturesAct->setStatusTip(tr("Export features into text file with all parameteres and file with convex and concave hulls"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(exportFeaturesAct, SIGNAL(triggered()), this, SLOT(exportFeaturesAtt()));
 
 //VEGETATION
   manualSelAct = new QAction(tr("Manual tree selection"), this);
@@ -6493,6 +6675,7 @@ void MainWindow::createMenus()
     terenMenu->addAction(hillShadeAct);
     terenMenu->addAction(terrainDiffAct);
     terenMenu->addAction(featureTableAct);
+    terenMenu->addAction(exportFeaturesAct);
 
 //VEGETATION
   vegeMenu = menuBar()->addMenu(tr("&Vegetation"));
@@ -6800,16 +6983,13 @@ void MainWindow:: removePbar()
 //QVTKWIDGET
 void MainWindow::AreaEvent(const pcl::visualization::AreaPickingEvent& event, void* )
 {
-    std::cout<<"area event\n";
-  std::vector<std::string> clouds;
-  if(event.getCloudNames(clouds)<1)
-    return;
+    std::vector<std::string> clouds = event.getCloudNames();
+    if(clouds.size()<1)
+        return;
     
-  std::vector<int> indices;
-  std::string name =m_cloud->get_name().toUtf8().constData();
-  event.getCloudIndices(name, indices);
-    std::cout<<"velikost indices: "<< indices.size()<< "\n";
-      
+    auto name = (m_cloud->get_name().toStdString());
+    auto indices = event.getPointsIndices(name);
+
     boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud2 (new pcl::PointCloud<pcl::PointXYZI>);
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud1 (new pcl::PointCloud<pcl::PointXYZI>);
@@ -6888,8 +7068,7 @@ void MainWindow::pointEvent(const pcl::visualization::PointPickingEvent& event, 
   if (idx == -1)
     return;
 
-  std::string name;
-  event.getCloudName (name);
+  std::string name = event.getCloudName ();
   QString a = QString("Name of selected cloud: %1   points: %2").arg(QString::fromStdString(name)).arg(Proj->get_Cloud(QString::fromStdString(name)).get_Cloud()->points.size());
   statusBar()->showMessage(a);
   m_vis->setPointCloudSelected (true, name);
@@ -7014,6 +7193,18 @@ QStringList MainWindow::get_treeNames()
   for(int i = 0; i< Proj->get_sizeTreeCV(); i++)
   {
     names << Proj->get_TreeCloud(i).get_name();
+  }
+
+names.sort();
+return names;
+}
+QStringList MainWindow::get_featureNames()
+{
+  QStringList names;
+    //tree
+  for(int i = 0; i< Proj->getFeatureSize(); i++)
+  {
+      names << Proj->getFeature(i).get_name();
   }
 
 names.sort();
@@ -7300,6 +7491,17 @@ void MainWindow::saveRest(Cloud *c)
   emit savedRest();
 }
 void MainWindow::saveFeature(Features *c){
+    std::mt19937 gen(rd());
+      std::uniform_int_distribution<> dis(0, 255);
+
+      auto r= dis(gen);
+      auto g= dis(gen);
+      auto b= dis(gen);
+
+    QColor col = QColor(r, g, b);
+    c->set_color(col);
     Proj->setFeature(*c);
+    addTreeItem(c->get_name(), true);
+    dispCloud(c->get_name());
     emit savedFeature();
 }

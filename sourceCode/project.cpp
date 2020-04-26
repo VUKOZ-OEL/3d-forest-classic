@@ -429,6 +429,11 @@ Cloud Project::get_Cloud(QString name)
     if (get_TreeCloud(i).get_name() == name)
      return m_stromy.at(i);
   }
+    for(int i = 0; i< m_features.size(); i++)
+    {
+      if (getFeature(i).get_name() == name)
+       return m_features.at(i);
+    }
 }
 void Project::save_newCloud(QString type, QString path)
 {

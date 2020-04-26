@@ -131,6 +131,7 @@ private slots:
     void hillShade();
     void terrainDiff();
     void curvature();
+    void exportFeaturesAtt();
 //VEGETATION
     //! Manual selection of trees from vegetation cloud.
     /*! Choose vegetation cloud for tree selection. Delete points that do not belong to the tree*/
@@ -591,6 +592,7 @@ private:
     /*! Return names of all base clouds in project
         \return QStringList of all base cloud names */
   QStringList get_baseNames();
+    QStringList get_featureNames();
   //! Check if given name eist in project.
     /*!
         \return QString ogiven new name*/
@@ -635,6 +637,7 @@ private:
     QAction *curvatureAct;
     QAction *hillShadeAct;
     QAction *terrainDiffAct;
+    QAction *exportFeaturesAct;
   //VEGETATION
   QAction *segmentAct;             /**< Save tree attributes into file Act */
   QAction *manualSelAct;      /**< Manual selection of trees Act */
