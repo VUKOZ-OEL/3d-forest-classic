@@ -10,7 +10,11 @@ pool:
 steps:
 - script: 
     echo intalation of dependencies
-    sudo apt-get update && sudo apt-get install -y --fix-missing libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
+    sudo apt-get update 
+    
+    sudo apt-get install -y --fix-missing libvtk7-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3
+    
+    sudo apt-get install -y --fix-missing libboost-all-dev
     
     mkdir deps && cd deps
     
