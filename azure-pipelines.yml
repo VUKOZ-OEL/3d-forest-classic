@@ -18,9 +18,18 @@ steps:
     
     mkdir deps && cd deps
     
-    mkdir pcl && mkdir pcl_build
+    mkdir vtk && vtk_build
     
-    echo WGET
+    wget "https://www.vtk.org/files/release/8.2/VTK-8.2.0.zipz" -O vtk.zip
+    
+    unzip vtk.zip -d vtk
+    
+    cd vtk_build
+    
+    cmake -S../vtk/VTK-8.2.0
+    
+    
+    mkdir pcl && mkdir pcl_build
     
     wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip
     
