@@ -30,7 +30,7 @@ steps:
     
     echo CMAKE
     
-    cmake ../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -Dflann_DIR="/usr/include/flann"
+    cmake ../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann"
     
     make 
     
