@@ -12,7 +12,7 @@ steps:
     echo intalation of dependencies
     sudo apt-get update 
     
-    sudo apt-get install -y --fix-missing qt5-default libvtk7-dev libvtk7-qt-dev libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
+    sudo apt-get install -y --fix-missing qt5-default libvtk7-dev vtk7 libvtk7-qt-dev libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
     
     sudo apt-get install -y --fix-missing libboost-all-dev
     
