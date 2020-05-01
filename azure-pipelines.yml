@@ -18,7 +18,7 @@ steps:
     
     mkdir deps && cd deps
     
-    mkdir vtk && vtk_build
+    mkdir vtk && mkdir vtk_build
     
     wget "https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip" -O vtk.zip
     
@@ -26,7 +26,7 @@ steps:
     
     cd vtk_build
     
-    cmake -S../vtk/VTK-8.2.0 -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DCMAKE_BUILD_TYPE=Release
+    cmake -S../vtk/VTK-8.2.0 -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local 
     
     make
     make install
