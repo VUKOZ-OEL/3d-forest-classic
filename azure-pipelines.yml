@@ -12,7 +12,7 @@ steps:
     echo intalation of dependencies
     sudo apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
  
-  # install pcl from source
+     # install pcl from source
     mkdir deps && cd deps
     mkdir pcl && mkdir pcl_build
     wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
