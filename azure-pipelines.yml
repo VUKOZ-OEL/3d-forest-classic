@@ -12,7 +12,7 @@ steps:
     echo intalation of dependencies
     sudo apt-get update 
     
-    sudo apt-get install -y --fix-missing qt5-default libvtk7-dev vtk7 libvtk7-qt-dev libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
+    sudo apt-get install -y --fix-missing qt5-default libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
     
     sudo apt-get install -y --fix-missing libboost-all-dev
     
@@ -20,13 +20,16 @@ steps:
     
     mkdir vtk && vtk_build
     
-    wget "https://www.vtk.org/files/release/8.2/VTK-8.2.0.zipz" -O vtk.zip
+    wget "https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip" -O vtk.zip
     
     unzip vtk.zip -d vtk
     
     cd vtk_build
     
     cmake -S../vtk/VTK-8.2.0
+    
+    make
+    make install
     
     
     mkdir pcl && mkdir pcl_build
