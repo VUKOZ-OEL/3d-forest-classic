@@ -37,7 +37,7 @@ steps:
   displayName: 'Instalation of dependencies'
 - script: |
     mkdir build && cd build
-    cmake -S../
+    cmake -S../ -DQt5Widgets_DIR="usr/local/Cellar/qt/5.14.1./lib/cmake/Qt5Widgets
     make -j$(($(nproc) - 1))
     
     make install
