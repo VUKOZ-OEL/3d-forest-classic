@@ -29,12 +29,10 @@ steps:
     
     make -j$(($(nproc) - 1))
     make install
-  
-  
-  # Go to the Root directory  
     cd ..
     cd ..
-  displayName: 'Inslation of dependencies'
+
+  displayName: 'Instalation of dependencies'
 - script: |
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
