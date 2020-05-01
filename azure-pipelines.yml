@@ -27,7 +27,7 @@ steps:
     
     cmake -S../pcl/pcl-pointpicking -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
     
-    make -j$(($(nproc) - 1))
+    make
     
     make install
     
@@ -37,8 +37,8 @@ steps:
   displayName: 'Instalation of dependencies'
 - script: |
     mkdir build && cd build
-    cmake -S../ -DQt5Widgets_DIR="usr/local/Cellar/qt/5.14.1./lib/cmake/Qt5Widgets
-    make -j$(($(nproc) - 1))
+    cmake -S../ -DQt5Widgets_DIR="usr/local/Cellar/qt/5.14.1./lib/cmake/Qt5Widgets"
+    make
     
     make install
 
