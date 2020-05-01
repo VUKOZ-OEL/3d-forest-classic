@@ -9,6 +9,7 @@ pool:
   vmImage: 'ubuntu-latest'
 steps:
 - script: 
+  displayName: 'install dependencies'
     echo intalation of dependencies
     sudo apt-get update 
     
@@ -30,7 +31,7 @@ steps:
     
     echo CMAKE
     
-    cmake ../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen"
+    cmake ../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -Dflann_DIR="/usr/include/flann
     
     make 
     
