@@ -5,13 +5,11 @@
 
 trigger:
 - master
-
 pool:
   vmImage: 'ubuntu-latest'
-
 steps:
-- script: |
-  echo Hello, world!|
+- script: 
+  echo Hello, world! |
   sudo apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
   
   # install pcl from source
