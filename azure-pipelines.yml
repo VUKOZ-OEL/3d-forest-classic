@@ -30,7 +30,7 @@ steps:
     
     echo CMAKE
     
-    cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so"
+    cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so" -DVTK_DIR="/usr/include/vtk-7.1"
     
     make 
     
