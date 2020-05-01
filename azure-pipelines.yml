@@ -15,7 +15,9 @@ steps:
     mkdir deps && cd deps
     
     mkdir pcl && mkdir pcl_build
+    
     echo WGET
+    
     wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip
     
     unzip pcl.zip -d pcl
@@ -23,6 +25,7 @@ steps:
     cd pcl_build
     
     echo CMAKE
+    
     cmake pcl/pcl-pointpicking
     
     make 
