@@ -28,7 +28,10 @@ steps:
     
     cmake -S../vtk/VTK-8.2.0 -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local 
     
-    make
+    make -j$(($(nproc) - 1))
+    
+    echo make za nami
+    
     make install
     
     
