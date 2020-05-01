@@ -36,7 +36,10 @@ steps:
 
   displayName: 'Instalation of dependencies'
 - script: |
-    cd sourceCode
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'compilation ofd 3D Forest'
+    mkdir build && cd build
+    cmake -S../
+    make -j$(($(nproc) - 1))
+    
+    make install
+
+  displayName: 'compilation of 3D Forest'
