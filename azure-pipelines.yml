@@ -10,18 +10,18 @@ pool:
 steps:
 - script: 
     echo Hello world
-  #sudo apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
+    sudo apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
   
   # install pcl from source
-  #DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-  #mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+    DEPS_DIR="./deps"
+   mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
  # mkdir ${TRAVIS_BUILD_DIR}/deps/pcl && mkdir ${TRAVIS_BUILD_DIR}/deps/pcl_build 
-  #wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
+  wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
   #unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
-  #cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
+  cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
  # cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
-  #make
-  #make install
+  make
+  make install
   
   
   # Go to the Root directory  
