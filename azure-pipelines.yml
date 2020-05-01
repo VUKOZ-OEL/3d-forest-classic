@@ -14,15 +14,16 @@ steps:
     |
     echo pcl
   # install pcl from source
-   # DEPS_DIR="./deps"
-    #mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+    #DEPS_DIR="./deps"
+    mkdir deps && cd deps
+    mkdir pcl && mkdir pcl_build && cd pcl
  # mkdir ${TRAVIS_BUILD_DIR}/deps/pcl && mkdir ${TRAVIS_BUILD_DIR}/deps/pcl_build 
-   # wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
-  #unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
+    wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
+    unzip pcl.zip
    # cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
- # cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
-   # make
-   # make install
+    cmake deps/pcl/pcl-pointpicking 
+    make
+   sudo make install
   
   
   # Go to the Root directory  
