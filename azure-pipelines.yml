@@ -9,9 +9,10 @@ pool:
   vmImage: 'ubuntu-latest'
 steps:
 - script: 
-    echo Hello world
+    echo intalation of dependencies |
     sudo apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
-  
+    |
+    echo pcl
   # install pcl from source
    # DEPS_DIR="./deps"
     #mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
