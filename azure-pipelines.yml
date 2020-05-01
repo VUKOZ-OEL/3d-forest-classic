@@ -30,7 +30,7 @@ steps:
     
     echo CMAKE
     
-    cmake ../pcl/pcl-pointpicking
+    cmake ../pcl/pcl-pointpicking EIGEN_INCLUDE_DIR="/usr/local/include/Eigen"
     
     make 
     
