@@ -27,15 +27,14 @@ steps:
     
     cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so" -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
     
-    make 
-    
-    sudo make install
+    make -j$(($(nproc) - 1))
+    make install
   
   
   # Go to the Root directory  
- # - cd ..
-  #- cd ..
-
+    cd ..
+    cd ..
+  displayName: 'Inslation of dependencies'
 - script: |
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
