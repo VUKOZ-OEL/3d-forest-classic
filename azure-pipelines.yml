@@ -12,7 +12,7 @@ steps:
     echo intalation of dependencies
     sudo apt-get update 
     
-    sudo apt-get install -y --fix-missing libvtk7-dev libeigen3-dev libeigen3-doc cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3
+    sudo apt-get install -y --fix-missing qt5-default libvtk7-dev libvtk7-qt-dev libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
     
     sudo apt-get install -y --fix-missing libboost-all-dev
     
@@ -30,7 +30,7 @@ steps:
     
     echo CMAKE
     
-    cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so" -DVTK_DIR="/usr/lib/cmake/vtk-7.1"
+    cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so" -DVTK_DIR="/usr/lib/cmake/vtk-7.1/"
     
     make 
     
