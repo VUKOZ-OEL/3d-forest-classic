@@ -11,7 +11,7 @@ steps:
 - script: 
     echo instalation of dependencies
     
-    brew install vtk boost eigen flann qt liblas cmake
+    brew install vtk boost eigen flann qt liblas
     
     mkdir deps && cd deps  
     
@@ -25,15 +25,18 @@ steps:
     
     echo CMAKE
     
-    cmake -S../pcl/pcl-pointpicking -DEIGEN_INCLUDE_DIR="/usr/include/eigen3/Eigen" -DFLANN_INCLUDE_DIR="/usr/include/flann" -DFLANN_LIBRARY="/usr/lib/x86_64-linux-gnu/libflann_cpp.so" -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
+    cmake -S../pcl/pcl-pointpicking -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
     
     make -j$(($(nproc) - 1))
+    
     make install
+    
     cd ..
     cd ..
 
   displayName: 'Instalation of dependencies'
 - script: |
+    cd sourceCode
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  displayName: 'compilation ofd 3D Forest'
