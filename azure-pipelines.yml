@@ -6,34 +6,14 @@
 trigger:
 - master
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'macOS-latest'
 steps:
 - script: 
-    echo intalation of dependencies
-    sudo apt-get update 
+    echo instalation of dependencies
+    brew install vtk boost eigen flann qt liblas cmake
     
-    sudo apt-get install -y --fix-missing qt5-default libqt5x11extras5-dev qtbase5-dev qttools5-dev libeigen3-dev libeigen3-doc cmake libflann-dev liblas-dev liblas-bin liblas3
     
-    sudo apt-get install -y --fix-missing libboost-all-dev
-    
-    mkdir deps && cd deps
-    
-    mkdir vtk && mkdir vtk_build
-    
-    wget "https://www.vtk.org/files/release/8.2/VTK-8.2.0.zip" -O vtk.zip
-    
-    unzip vtk.zip -d vtk
-    
-    cd vtk_build
-    
-    cmake -S../vtk/VTK-8.2.0 -DVTK_QT_VERSION=5 -DVTK_Group_Qt=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local 
-    
-    make -j$(($(nproc) - 1))
-    
-    echo make za nami
-    
-    make install
-    
+    mkdir deps && cd deps  
     
     mkdir pcl && mkdir pcl_build
     
