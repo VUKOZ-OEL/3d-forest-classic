@@ -1,17 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
 trigger:
-  - master
+- master
 
-  pool:
-    vmImage: 'Ubuntu-16.04'
+pool:
+  vmImage: 'ubuntu-latest'
 
-  steps:
-  - task: Maven@3
-    inputs:
-      mavenPomFile: 'pom.xml'
-      mavenOptions: '-Xmx3072m'
-      javaHomeOption: 'JDKVersion'
-      jdkVersionOption: '1.8'
-      jdkArchitectureOption: 'x64'
-      publishJUnitResults: false
-      testResultsFiles: '**/surefire-reports/TEST-*.xml'
-      goals: 'package'
+steps:
+- script: echo Hello, world!
+  displayName: 'Install dependencies'
+   apt-get update && apt-get install -y libvtk6-dev libeigen3-dev cmake libflann-dev qt5-default liblas-dev liblas-bin liblas3 libboost-all-dev
+  DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+  
+  # install pcl from source
+  mkdir ${TRAVIS_BUILD_DIR}/deps/pcl && mkdir ${TRAVIS_BUILD_DIR}/deps/pcl_build 
+  wget "https://codeload.github.com/janekT/pcl/zip/pointpicking" -O pcl.zip 
+  unzip pcl.zip -d ${TRAVIS_BUILD_DIR}/deps/pcl
+  cd ${TRAVIS_BUILD_DIR}/deps/pcl_build
+  cmake ${TRAVIS_BUILD_DIR}/deps/pcl/pcl-pointpicking 
+  make
+  make install
+  
+  
+  # Go to the Root directory  
+  - cd ..
+  - cd ..
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
