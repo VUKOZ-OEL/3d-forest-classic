@@ -38,6 +38,7 @@ steps:
 - script: |
     mkdir build && cd build
     cmake -S../ -DQt5Widgets_DIR="/usr/local/opt/qt/lib/cmake/Qt5Widgets"
+    
     make
     
     make install
