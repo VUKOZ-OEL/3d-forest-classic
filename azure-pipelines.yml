@@ -17,7 +17,7 @@ steps:
     
     mkdir pcl && mkdir pcl_build
     
-    wget "https://github.com/janekT/pcl/archive/master.zip" -O pcl.zip
+    wget "https://github.com/janekT/pcl/archive/pointpicking.zip" -O pcl.zip
     
     unzip pcl.zip -d pcl
     
@@ -25,7 +25,7 @@ steps:
     
     echo CMAKE
     
-    cmake -S../pcl/pcl-master -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
+    cmake -S../pcl/pcl-pointpicking -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
     
     make
     
