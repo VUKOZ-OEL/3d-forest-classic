@@ -15,12 +15,12 @@ steps:
     
     mkdir deps && cd deps  
     
-    mkdir pcl && mkdir pcl_build
+    mkdir pcl_build
     
-    cd pcl
     
     git clone https://github.com/PointCloudLibrary/pcl.git
-    ls
+    
+    cd pcl
   
     curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git am
     
