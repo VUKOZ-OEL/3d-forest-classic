@@ -17,14 +17,17 @@ steps:
     
     mkdir pcl_build
     
-    
     git clone https://github.com/PointCloudLibrary/pcl.git
     
+    echo "ls 1"
     ls
+    echo"ls 2"
+    ls ./pcl
+    
+    
   
     curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git am
     
-    cd ..
     cd pcl_build
     
     echo CMAKE
