@@ -17,9 +17,12 @@ steps:
     
     mkdir pcl_build
     
-    git fetch origin pull/3763/head && git cherry-pick FETCH_HEAD
+    git clone https://github.com/PointCloudLibrary/pcl.git
     
-        
+    https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch > patch.patch
+    
+    git apply patch.patch
+       
     echo "ls 1"
     
     ls
