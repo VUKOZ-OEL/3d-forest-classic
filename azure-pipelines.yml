@@ -6,7 +6,7 @@
 trigger:
 - master
 pool:
-  vmImage: 'macOS-10.14'
+  vmImage: 'macOS-latest'
 steps:
 - script: 
     echo instalation of dependencies
@@ -24,8 +24,8 @@ steps:
     cd pcl_build
     
     echo CMAKE
-    
-    cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
+        
+    cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
     
     make
     
