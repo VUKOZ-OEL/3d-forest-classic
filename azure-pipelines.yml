@@ -17,16 +17,17 @@ steps:
     
     mkdir pcl_build
     
-    git clone https://github.com/PointCloudLibrary/pcl.git
+    git fetch origin pull/3763/head && git cherry-pick FETCH_HEAD
     
+        
     echo "ls 1"
+    
     ls
+    
     echo"ls 2"
+    
     ls ./pcl
     
-    
-  
-    curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git am
     
     cd pcl_build
     
