@@ -28,7 +28,7 @@ steps:
     
     echo CMAKE
     
-    cmake -S../pcl/pcl-pointpicking -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
+    cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2"
     
     make
     
