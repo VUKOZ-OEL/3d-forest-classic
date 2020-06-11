@@ -19,13 +19,13 @@ steps:
     
     git clone https://github.com/PointCloudLibrary/pcl.git
     
-    https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git apply
+    curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git apply
     
     echo "ls 1"
     
     ls
     
-    echo"ls 2"
+    echo "ls 2"
     
     ls ./pcl
     
