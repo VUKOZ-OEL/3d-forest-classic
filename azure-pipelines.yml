@@ -17,10 +17,11 @@ steps:
     
     mkdir pcl && mkdir pcl_build
     
-    wget "https://github.com/janekT/pcl/archive/pointpicking.zip" -O pcl.zip
+  
     
-    unzip pcl.zip -d pcl
+    curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git am
     
+     
     cd pcl_build
     
     echo CMAKE
