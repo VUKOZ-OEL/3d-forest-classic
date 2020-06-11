@@ -6,7 +6,7 @@
 trigger:
 - master
 pool:
-  vmImage: 'macOS-latest'
+  vmImage: 'macOS-10.14'
 steps:
 - script: 
     echo instalation of dependencies
@@ -18,6 +18,8 @@ steps:
     mkdir pcl_build
     
     git clone https://github.com/PointCloudLibrary/pcl.git
+    
+    curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch |git apply
     
     cd pcl_build
     
