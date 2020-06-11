@@ -20,7 +20,11 @@ steps:
     
     git clone https://github.com/PointCloudLibrary/pcl.git
     
+    ls
+    
     cd pcl
+    
+    ls
   
     curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch | git am
     
