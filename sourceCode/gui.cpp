@@ -97,7 +97,7 @@ if(isII10 == true)
     int_value10 = intInput10->text().toInt();
   if(isType == true)
     output_type = outputType->currentText();
-    if(isType == true)
+    if(isType2 == true)
     output_type2 = outputType2->currentText();
   if(isICHB == true)
   {

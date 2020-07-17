@@ -577,7 +577,7 @@ emit percentage(100);
 }
 void RadiusOutlierRemoval::sendData()
 {
-  emit sendingoutput( m_output, m_type);
+  emit sendingoutput( m_output);
     hotovo();
 }
 void RadiusOutlierRemoval:: hotovo()
@@ -759,6 +759,205 @@ float Slope::computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b)
     return x;
 }
 void Slope::useRadius(bool radius)
+{
+    m_useRadius = radius;
+}
+
+Aspect::Aspect()
+{
+    m_TerrainCloud = new Cloud();
+    m_Output = new Cloud();
+    m_Radius = 0.1;
+    m_Neighbors = 8;
+}
+Aspect::~Aspect()
+{
+    
+}
+void Aspect::setRadius(float radius)
+{
+    m_Radius = radius;
+}
+void Aspect::setNeighbors(int i)
+{
+    m_Neighbors = i;
+}
+void Aspect::setTerrainCloud(Cloud input)
+{
+    m_TerrainCloud->set_Cloud(input.get_Cloud());
+}
+void Aspect::setOutputName(QString name)
+{
+    m_Output->set_name(name);
+}
+
+void Aspect::execute()
+{
+    // vem mracno
+    emit percentage(0);
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (m_TerrainCloud->get_Cloud());
+   // m_Output->get_Cloud()->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNewTerrain (new pcl::PointCloud<pcl::PointXYZI>);
+    cloudNewTerrain->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    int procento = m_TerrainCloud->get_Cloud()->points.size()/100.0;
+    std::cout<< "procento: " << procento << "\n";
+    int step_size   = 100;
+    int total_steps = m_TerrainCloud->get_Cloud()->points.size() / step_size + 1;
+    
+    int steps_completed = 0;
+    int sum = 0;
+    
+#pragma omp parallel
+    {
+        int local_count = 0;
+    
+#pragma omp parallel for
+        for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
+        {
+            std::vector<int> pointIDv;
+            std::vector<float> pointSDv;
+            pcl::PointXYZI x = m_TerrainCloud->get_Cloud()->points.at(i);
+            float sklon = 0.000000;
+            // pro kazdy bod najdi sousedy
+            if(m_useRadius == false)
+            {
+                kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
+            }
+            else
+            {
+                kdtree.radiusSearch(x, m_Radius, pointIDv, pointSDv);
+            }
+            // spocitat skon
+            std::vector<float> vec;
+            // take whole pointcloud and compute PCA
+            // define main vectors
+            // smallest should be normal vector of plane
+            vec = computeSmallestPCA(pointIDv);
+            float aspect = computeAspect(vec);
+            //std::cout<<"sklon: " << skl<< "\n";
+            // ulozit do bodu
+            cloudNewTerrain->points.at(i).x = x.x;
+            cloudNewTerrain->points.at(i).y = x.y;
+            cloudNewTerrain->points.at(i).z = x.z;
+            cloudNewTerrain->points.at(i).intensity = aspect;
+            if (local_count++ % step_size == step_size-1)
+            {
+                #pragma omp atomic
+                ++steps_completed;
+                
+                if (steps_completed % 100 == 1)
+                {
+                    #pragma omp critical
+                    emit percentage(100.0*steps_completed/total_steps);
+                }
+            }
+        }
+    }
+    cloudNewTerrain->width = cloudNewTerrain->points.size ();
+    cloudNewTerrain->height = 1;
+    cloudNewTerrain->is_dense = true;
+    m_Output->set_Cloud(cloudNewTerrain);
+    sendData();
+
+}
+void Aspect::sendData()
+{
+    emit sendingoutput( m_Output);
+}
+void Aspect::hotovo()
+{
+    emit finished();
+}
+float Aspect::computeAspect(std::vector<float> vec){
+    
+    // its projection into XY plane should give aspect
+    if(vec.at(1)==0 && vec.at(0) ==0)
+        return 0;
+    float angle = std::atan2(vec.at(1), vec.at(0));  //# atan2(y, x) or atan2(sin, cos)
+    float aspect = angle * 180/M_PI;
+    return aspect;
+}
+std::vector<float> Aspect::computeSmallestPCA (std::vector<int> pointsId){
+    // create cloud based on indices stored in pointIds from m_TerrainCloud
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud_->points.resize(pointsId.size());
+    std::vector<float> v {0,0,0};
+    if(pointsId.size() < 3)
+        return v;
+#pragma omp parallel for
+    for(int q=0; q < pointsId.size(); q++)
+        cloud_->points.at(q) = m_TerrainCloud->get_Cloud()->points.at(pointsId.at(q));
+    
+    // use PCA  to estimate  pca vectors
+    //std::cout<<"PCA\n";
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_translated (new pcl::PointCloud<pcl::PointXYZI>);
+    pcl::PCA<pcl::PointXYZI> pca;
+    pca.setInputCloud(cloud_);
+    pca.project(*cloud_, *cloud_translated);
+    
+    pcl::PointXYZI proj_min,proj_max, proj_lmin, proj_lmax,lmin, lmax;
+    pcl::getMinMax3D (*cloud_translated, proj_min, proj_max);
+    // swap axes
+    
+    
+    // estimate smallest vector
+    float eX = std::abs(proj_max.x - proj_min.x);
+    float eY = std::abs(proj_max.y - proj_min.y);
+    float eZ = std::abs(proj_max.z - proj_min.z);
+    
+    //estimate two points in the middle of two longer sides
+    if(eX < eZ && eX < eY) // if eX is the smallest
+    {
+        proj_lmin.x =proj_min.x;
+        proj_lmin.y =(proj_max.y + proj_min.y)/2;
+        proj_lmin.z =(proj_max.z + proj_min.z)/2;
+        
+        proj_lmax.x =proj_max.x;
+        proj_lmax.y =(proj_max.y + proj_min.y)/2;
+        proj_lmax.z =(proj_max.z + proj_min.z)/2;
+    }
+    else if (eY<eX && eY< eZ){
+        proj_lmin.x =(proj_max.x + proj_min.x)/2;
+        proj_lmin.y =proj_min.y;
+        proj_lmin.z =(proj_max.z + proj_min.z)/2;
+        
+        proj_lmax.x =(proj_max.x + proj_min.x)/2;
+        proj_lmax.y =proj_max.y;
+        proj_lmax.z =(proj_max.z + proj_min.z)/2;
+    }
+    else{
+        proj_lmin.x =(proj_max.x + proj_min.x)/2;
+        proj_lmin.y =(proj_max.y + proj_min.y)/2;
+        proj_lmin.z =proj_min.z;
+        
+        proj_lmax.x =(proj_max.x + proj_min.x)/2;
+        proj_lmax.y =(proj_max.y + proj_min.y)/2;
+        proj_lmax.z =proj_max.z;
+    }
+    //reconstruct vector into original space
+    pca.reconstruct(proj_lmin, lmin);
+    pca.reconstruct(proj_lmax, lmax);
+    
+    float x,y,z;
+    //return smallest vector;
+    if(lmin.z < lmax.z){
+        x = lmax.x - lmin.x;
+        y = lmax.y - lmin.y;
+        z = lmax.z - lmin.z;
+    }else{
+        x = lmin.x - lmax.x;
+        y = lmin.y - lmax.y;
+        z = lmin.z - lmax.z;
+    }
+    // std::cout<< x <<" " << y << " " << z << "\n";
+    
+    v.at(0)= x;
+    v.at(1) = y;
+    v.at(2) = z;
+    return v;
+}
+void Aspect::useRadius(bool radius)
 {
     m_useRadius = radius;
 }
@@ -1172,14 +1371,19 @@ void Features::setXlenght(float len){m_pcaXLength=len;}
 void Features::setYlengtht(float len){m_pcaYLength=len;}
 void Features::computeCentroid(){
     //compute centroid
+    setCentroid(get_Cloud());
+    
+}
+void Features::setCentroid(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud){
     Eigen::Vector4f centroid;
-    pcl::compute3DCentroid(*get_Cloud(), centroid);
+    pcl::compute3DCentroid(*cloud, centroid);
     pcl::PointXYZI bod;
     bod.x =centroid[0];
     bod.y =centroid[1];
     bod.z =centroid[2];
     bod.intensity = centroid[3];
     setCentroid(bod);
+    
 }
 void Features::setCentroid(pcl::PointXYZI p){
     m_centroid=p;
@@ -1198,6 +1402,7 @@ Cloud* Features::getPointCloud(){return getPointCloud();}
 pcl::PointXYZI Features::getCentroid(){return m_centroid;}
 void Features::setConvexHull(){
     m_convexhull = new ConvexHull(CloudOperations::getCloudCopy(m_Cloud));
+    setCentroid(m_convexhull->getPolygon());
 }
 void Features::setconcaveHull(){
     m_concavehull = new ConcaveHull(CloudOperations::getCloudCopy(m_Cloud),"concave",1);
@@ -1212,10 +1417,11 @@ ConcaveHull& Features::getConcaveHull(){
 
 TerrainFeatures::TerrainFeatures(){
     m_TerrainCloud = new Cloud();
-    m_OutputAVG = new Cloud();
-    m_OutputSD = new Cloud();
+    m_binaryCloud = new Cloud();
+    m_filteredCloud = new Cloud();
     m_OutputRange = new Cloud();
-    m_Radius = 1.0;
+    m_slopeCloud = new Cloud();
+    m_Radius = 1;
     m_Neighbors = 8;
 }
 TerrainFeatures::~TerrainFeatures(){
@@ -1231,8 +1437,8 @@ void TerrainFeatures::setTerrainCloud(Cloud input){
     m_TerrainCloud->set_Cloud(input.get_Cloud());
 }
 void TerrainFeatures::setOutputName(QString name){
-    m_OutputAVG->set_name(QString("AVG"));
-    m_OutputSD->set_name(QString("Sd"));
+    m_binaryCloud->set_name(QString("binary_cloud"));
+    m_filteredCloud->set_name(QString("filter"));
     m_OutputRange->set_name(QString("Range"));
 }
 void TerrainFeatures::setlowerPointLimit (float limit){ m_lowerSizeLimit = limit;}
@@ -1245,57 +1451,184 @@ void TerrainFeatures::setMaxAreaLimit (float limit){m_upperAreaLimit = limit;}
 void TerrainFeatures::setMinAreaLimit (float limit){m_lowerAreaLimit = limit;}
 void TerrainFeatures::setAxisRatioLimit (float limit){m_axisRatioLimit = limit;}
 void TerrainFeatures::setAreaRatioLimit (float limit){m_areaRatioLimit = limit;}
+void TerrainFeatures::setSlopeCloud(Cloud input){
+    m_slopeCloud->set_Cloud(input.get_Cloud());
+}
 
 
 void TerrainFeatures::execute(){
-   // printValues();
-    // vzit curvature terenu
+    
     std::cout<< "terrainDiff execute: \n";
-    emit percentage(0);
-    // upravit podle limitu
-    std::cout<< "computeLimits: \n";
-    computeLimits(m_TerrainCloud, m_OutputRange);
-    emit percentage(10);
-    std::cout<< "computebinary: \n";
-    computeBinary(m_TerrainCloud, m_OutputAVG);
-    emit percentage(20);
-    std::cout<< "findClusters: \n";
-    std::vector<Features> clusters;
-    findClusters(m_OutputAVG, clusters);
-    std::cout<< "pocet clusteru: "<< clusters.size() << "\n";
-    emit percentage(30);
-    
-    std::cout<< "filterClustersBySize: \n";
-    std::vector<Features> clustersSize;
-    filterClustersBySize(clusters, clustersSize);
-    std::cout<< "pocet Filtered clusteru: "<< clustersSize.size() << "\n";
-    emit percentage(40);
-    
-   // std::cout<< "create clouds from clusters: \n";
-   // createCloudsFromClusters(m_OutputAVG, clustersSize);
-    
-    std::cout<< "filterClustersByPCA: \n";
-    std::vector<Features> clustersPCA;
-    filterClustersByPCA(clustersSize, clustersPCA);
-    std::cout<< "pocet Filtered clusteru: "<< clustersPCA.size() << "\n";
-    emit percentage(50);
-    
-    //std::cout<< "create clouds from clusters: \n";
-    //createCloudsFromClusters(m_OutputAVG, clustersPCA);
-    
-    std::cout<< "filterClustersByHull: \n";
-    std::vector<Features> clustersHull;
-    filterClustersByHull(clustersPCA, clustersHull);
-    std::cout<< "pocet Filtered clusteru: "<< clustersHull.size() << "\n";
-    emit percentage(60);
+    //compute insiders
+    std::cout<< "Insiders: \n";
+    std::vector<Features> insiders;
+    computeInsiders(m_TerrainCloud,insiders);
+    std::cout<< "Boundaries: \n";
+    std::vector<Features> boundary;
+    //computeBundaries(m_TerrainCloud, boundary);
+    std::cout<< "merge: \n";
+    std::vector<Features> milir;
+    //computeFeatures(insiders, boundary, milir);
     
     std::cout<< "create clouds from clusters: \n";
-    createCloudsFromClusters(m_OutputAVG, clustersHull);
-    emit percentage(70);
+    createCloudsFromClusters(m_TerrainCloud,insiders);
     std::cout<< "sendData() \n";
     sendData();
    // return;
   
+}
+void TerrainFeatures::computeInsiders(Cloud *input,std::vector<Features>& output)
+{
+    // select points that fullfill contiionf of minimal curvature, area, ...
+    float radius=3;
+    Cloud* density = new Cloud();
+    std::cout<< "computePointDensity: \n";
+   // computePointDensity(input,radius, m_lowerLimit, m_upperLimit, density);
+    Cloud* binary = new Cloud();
+    binary->set_name("bin_insider");
+    std::cout<< "computeBinary: \n";
+    computeBinary(input,m_lowerLimit, m_upperLimit, binary);
+    std::vector<Features> clusters;
+    
+    std::cout<< "findClusters: \n";
+    findClusters(binary, radius, m_lowerSizeLimit, clusters);
+    
+    std::cout<< "filterClustersBySize: \n";
+       std::vector<Features> clustersSize;
+       filterClustersBySize(clusters, m_lowerSizeLimit, m_upperSizeLimit, clustersSize);
+       std::cout<< "pocet Filtered clusteru: "<< clustersSize.size() << "\n";
+       emit percentage(10);
+       
+      // std::cout<< "create clouds from clusters: \n";
+      // createCloudsFromClusters(m_OutputAVG, clustersSize);
+       
+       std::cout<< "filterClustersByPCA: \n";
+   
+       std::vector<Features> clustersPCA;
+       filterClustersByPCA(clustersSize,m_axisRatioLimit, m_lowerSideLimit, m_upperSideLimit, false, clustersPCA);
+       std::cout<< "pocet Filtered clusteru: "<< clustersPCA.size() << "\n";
+       emit percentage(20);
+       
+       //std::cout<< "create clouds from clusters: \n";
+       //createCloudsFromClusters(m_OutputAVG, clustersPCA);
+       
+       std::cout<< "filterClustersByHull: \n";
+    
+       std::vector<Features> clustersHull;
+       filterClustersByHull(clustersPCA, m_areaRatioLimit, m_lowerAreaLimit, m_upperAreaLimit, false, output);
+       std::cout<< "pocet Filtered clusteru: "<< clustersHull.size() << "\n";
+       emit percentage(40);
+    
+}
+void TerrainFeatures::computeBundaries(Cloud *input,std::vector<Features>& output)
+{
+    // select feature that seems to be boundary - curvature, concave area, ....
+    Cloud* binary = new Cloud();
+    binary->set_name("bin_boundary");
+    float minLimit=10,maxLimit=30;
+    computeBinary(input,minLimit, maxLimit, binary);
+    std::vector<Features> clusters;
+    int minCluseterSize = 5;
+    findClusters(binary, 3, minCluseterSize, clusters);
+    
+    std::cout<< "filterClustersBySize: \n";
+       std::vector<Features> clustersSize;
+       filterClustersBySize(clusters, 5, 10000, clustersSize);
+       std::cout<< "pocet Filtered clusteru: "<< clustersSize.size() << "\n";
+       emit percentage(60);
+       
+      // std::cout<< "create clouds from clusters: \n";
+      // createCloudsFromClusters(m_OutputAVG, clustersSize);
+       
+       std::cout<< "filterClustersByPCA: \n";
+    float ratioAxis = 0.99,lowSide=1, maxSide=100;
+       std::vector<Features> clustersPCA;
+       filterClustersByPCA(clustersSize,ratioAxis, lowSide, maxSide, true, clustersPCA);
+       std::cout<< "pocet Filtered clusteru: "<< clustersPCA.size() << "\n";
+       emit percentage(70);
+       
+       //std::cout<< "create clouds from clusters: \n";
+       //createCloudsFromClusters(m_OutputAVG, clustersPCA);
+       
+       std::cout<< "filterClustersByHull: \n";
+    float areaRatio=0.99,minArea=2,maxArea=550;
+       std::vector<Features> clustersHull;
+       filterClustersByHull(clustersPCA, areaRatio, minArea, maxArea, true, output);
+       std::cout<< "pocet Filtered clusteru: "<< clustersHull.size() << "\n";
+       emit percentage(80);
+}
+void TerrainFeatures::computePointDensity(Cloud *input,float radius, float minValue, float maxValue, Cloud *output )
+{
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNew (new pcl::PointCloud<pcl::PointXYZI>);
+    cloudNew ->points.resize(input->get_Cloud()->points.size());
+    
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (input->get_Cloud());
+    std::vector<int> pointIDv;
+    std::vector<float> pointSDv;
+    
+    #pragma omp parallel for
+        for(int i=0; i < input->get_Cloud()->points.size(); i++)
+        {
+            pcl::PointXYZI x = input->get_Cloud()->points.at(i);
+         
+             cloudNew ->points.at(i).x = x.x;
+             cloudNew ->points.at(i).y = x.y;
+             cloudNew ->points.at(i).z = x.z;
+            
+            kdtree.radiusSearch(x, radius, pointIDv, pointSDv);
+            float a=0;
+            for(int q =0;q< pointIDv.size();q++)
+            {
+                if(input->get_Cloud()->points.at(pointIDv.at(q)).intensity > minValue && input->get_Cloud()->points.at(pointIDv.at(q)).intensity < maxValue)
+                    a++;
+            }
+            cloudNew->points.at(i).intensity = a/pointIDv.size();
+        
+        }//for loop
+        
+        cloudNew->width = cloudNew->points.size ();
+        cloudNew->height = 1;
+        cloudNew->is_dense = true;
+        output->set_Cloud(cloudNew);
+}
+void TerrainFeatures::computeFeatures(std::vector<Features>& insiders,std::vector<Features>& boundary,std::vector<Features>& output)
+{
+    // for each insider find boundary
+    //if if has boundary in radius search merge into one feature output - take pnly concave hulls points
+    float radius =3;
+    for(int i =0; i< insiders.size();i++)
+    {
+        bool hasBoundary =false;
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNew (new pcl::PointCloud<pcl::PointXYZI>);
+        cloudNew = insiders.at(i).get_Cloud();
+        for(int u=0; u < boundary.size();u++)
+        {
+            bool neighbor=false;
+            pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+            kdtree.setInputCloud (boundary.at(u).getConcaveHull().getPolygon().get_Cloud());
+            std::vector<int> pointIDv;
+            std::vector<float> pointSDv;
+            for(int m =0; m < insiders.at(i).getConcaveHull().getPolygon().get_Cloud()->points.size(); m++)
+            {
+                pcl::PointXYZI x = insiders.at(i).getConcaveHull().getPolygon().get_Cloud()->points.at(m);
+                if(kdtree.radiusSearch(x, radius, pointIDv, pointSDv) >1){
+                    neighbor=true;
+                    hasBoundary = true;
+                    break;
+                }
+            }
+            if(neighbor==true){
+                // merge into new feature
+                *cloudNew += *boundary.at(u).get_Cloud();
+            }
+        }
+        if(hasBoundary == true)
+        {
+            insiders.at(i).set_Cloud(cloudNew);
+            output.push_back(insiders.at(i));
+        }
+    }
 }
 bool TerrainFeatures::computeLimits(Cloud *input, Cloud *output)
 {
@@ -1311,10 +1644,10 @@ bool TerrainFeatures::computeLimits(Cloud *input, Cloud *output)
          cloudNewTerrainRange->points.at(i).y = x.y;
          cloudNewTerrainRange->points.at(i).z = x.z;
          
-         if(x.intensity <= m_upperLimit && x.intensity >= m_lowerLimit )
+        if(x.intensity <= m_upperLimit && x.intensity >= m_lowerLimit )
             {cloudNewTerrainRange->points.at(i).intensity = x.intensity;}
          else
-            {cloudNewTerrainRange->points.at(i).intensity = m_upperLimit;}
+            {cloudNewTerrainRange->points.at(i).intensity = m_upperLimit+1;}
     }//for loop
     
     cloudNewTerrainRange->width = cloudNewTerrainRange->points.size ();
@@ -1323,43 +1656,42 @@ bool TerrainFeatures::computeLimits(Cloud *input, Cloud *output)
     output->set_Cloud(cloudNewTerrainRange);
     return true;
 }
-bool TerrainFeatures::computeBinary(Cloud *input, Cloud *output)
+bool TerrainFeatures::computeBinary(Cloud *input, float lowerLimit, float upperLimit, Cloud *output)
 {
     // nastavit hranice
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNewTerrainRange (new pcl::PointCloud<pcl::PointXYZI>);
-    cloudNewTerrainRange->points.resize(input->get_Cloud()->points.size());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud->points.resize(input->get_Cloud()->points.size());
 #pragma omp parallel for
     for(int i=0; i < input->get_Cloud()->points.size(); i++)
     {
         pcl::PointXYZI x = input->get_Cloud()->points.at(i);
      
-         cloudNewTerrainRange->points.at(i).x = x.x;
-         cloudNewTerrainRange->points.at(i).y = x.y;
-         cloudNewTerrainRange->points.at(i).z = x.z;
+         cloud->points.at(i).x = x.x;
+         cloud->points.at(i).y = x.y;
+         cloud->points.at(i).z = x.z;
          
-         if(x.intensity <= m_upperLimit && x.intensity >= m_lowerLimit )
-            {cloudNewTerrainRange->points.at(i).intensity = 0;} // true
+         if(x.intensity <= upperLimit && x.intensity >= lowerLimit )
+            {cloud->points.at(i).intensity = 0;} // true
          else
-            {cloudNewTerrainRange->points.at(i).intensity = 1;}// false
+            {cloud->points.at(i).intensity = 1;}// false
     }//for loop
     
-    cloudNewTerrainRange->width = cloudNewTerrainRange->points.size ();
-    cloudNewTerrainRange->height = 1;
-    cloudNewTerrainRange->is_dense = true;
-    output->set_Cloud(cloudNewTerrainRange);
+    cloud->width = cloud->points.size ();
+    cloud->height = 1;
+    cloud->is_dense = true;
+    output->set_Cloud(cloud);
     return true;
 }
-bool TerrainFeatures::findClusters(Cloud *input, std::vector<Features> & output)
+bool TerrainFeatures::findClusters(Cloud *input,float radius,  int minClusterSize, std::vector<Features> & output)
 {
     std::vector<bool> usedPoint(input->get_Cloud()->points.size(),false);
-    //std::vector< std::vector<int> > clusters;
-    
     pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
     kdtree.setInputCloud (input->get_Cloud());
     
     for(int q=0; q < input->get_Cloud()->points.size(); q++)
     {
-        if(input->get_Cloud()->points.at(q).intensity == 1 || usedPoint.at(q)==true)
+         //std::cout<<"bod " <<q<< " z "<< input->get_Cloud()->points.size() <<"\n";
+        if(input->get_Cloud()->points.at(q).intensity == 1 || usedPoint.at(q)==true  )
             continue;
         
         std::vector<int> cluster;
@@ -1368,13 +1700,14 @@ bool TerrainFeatures::findClusters(Cloud *input, std::vector<Features> & output)
         
         for(int w=0; w< cluster.size();w++)
         {
+            //std::cout<<"cluster.size(): " <<cluster.size()<< " n";
             std::vector<int> pointIDv;
             std::vector<float> pointSDv;
             pcl::PointXYZI x = input->get_Cloud()->points.at(cluster.at(w));
             // search for neighbor points
-            kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
-            // if neighbor point is not used in other cluster
-            // and have true value
+            //kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
+            kdtree.radiusSearch(x, radius, pointIDv, pointSDv);
+
             for(int e=0; e < pointIDv.size();e++)
             {
                 if(input->get_Cloud()->points.at(pointIDv.at(e)).intensity == 0 && usedPoint.at(pointIDv.at(e))==false)
@@ -1384,8 +1717,14 @@ bool TerrainFeatures::findClusters(Cloud *input, std::vector<Features> & output)
                 }
             }
         }
-        if(cluster.size()<4 )
+        if(cluster.size()<minClusterSize ){
+            for(int m=0; m < cluster.size();m++)
+            {
+                usedPoint.at(cluster.at(m))=false;
+            }
             continue;
+        }
+            
         pcl::PointCloud<pcl::PointXYZI>::Ptr cl_ (new pcl::PointCloud<pcl::PointXYZI>);
         Cloud* cl = new Cloud();
         for(int r=0;r< cluster.size();r++)
@@ -1397,41 +1736,47 @@ bool TerrainFeatures::findClusters(Cloud *input, std::vector<Features> & output)
         f->setPointNumber(cluster.size());
         output.push_back(*f);
     }
-    std::cout<< "clusters: "<< output.size() <<"\n";
-    
     return true;
 }
-bool TerrainFeatures::filterClustersBySize(std::vector<Features>& input, std::vector<Features>& output)
+bool TerrainFeatures::filterClustersBySize(std::vector<Features>& input ,float lowerSizeLimit, float upperSizeLimit, std::vector<Features>& output)
 {
     for(int i = 0; i < input.size();i++)
     {
         //std::cout<<"pocet bodu: " <<input.at(i).getPointNumber() << "\n";
-        if(input.at(i).getPointNumber() > m_lowerSizeLimit && input.at(i).getPointNumber() < m_upperSizeLimit )
+        if(input.at(i).getPointNumber() > lowerSizeLimit && input.at(i).getPointNumber() < upperSizeLimit )
             output.push_back(input.at(i));
     }
     return true;
 }
-bool TerrainFeatures::filterClustersByPCA(std::vector<Features>& input, std::vector<Features>& output)
+bool TerrainFeatures::filterClustersByPCA(std::vector<Features>& input, float ratio, float lowerSideLimit, float upperSideLimit, bool ratioLess, std::vector<Features>& output)
 {
     for(int i =0; i < input.size(); i++)
     {
         float xlen=0, ylen=0;
-        float ratio =  computeCurvature( input.at(i),xlen, ylen);
+        float ratioF =  computeCurvature( input.at(i),xlen, ylen);
         input.at(i).setXlenght(xlen);
         input.at(i).setYlengtht(ylen);
         //std::cout<<"ratio: " << ratio << " xlen: " << input.at(i).getXlenght() << " ylen: " << input.at(i).getYlenght() << "\n";
-        
-        if(ratio < m_axisRatioLimit)
-            continue;
-
-        if(xlen > m_lowerSideLimit && xlen < m_upperSideLimit && ylen > m_lowerSideLimit && ylen < m_upperSideLimit)
+        if(ratioLess ==true)
         {
-            output.push_back(input.at(i));
+            if(xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF < ratio)
+            {
+                output.push_back(input.at(i));
+            }
         }
+        else
+        {
+           if(xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF > ratio)
+            {
+                output.push_back(input.at(i));
+            }
+        }
+    
+        
     }
     return true;
 }
-bool TerrainFeatures::filterClustersByHull( std::vector<Features>& input, std::vector<Features>& output)
+bool TerrainFeatures::filterClustersByHull( std::vector<Features>& input,float ratio, float lowerAreaLimit, float upperAreaLimit,bool ratioLess, std::vector<Features>& output)
 {
     for(int i=0; i< input.size(); i++)
     {
@@ -1439,12 +1784,17 @@ bool TerrainFeatures::filterClustersByHull( std::vector<Features>& input, std::v
         input.at(i).setconcaveHull();
         input.at(i).setConvexArea(0);
         input.at(i).setConcaveArea(0);
-        float ratio = input.at(i).getConcaveArea()/input.at(i).getConvexArea();
+        float computedRatio = input.at(i).getConcaveArea()/input.at(i).getConvexArea();
         //std::cout<<"ratio: " << ratio << " convex: " << input.at(i).getConvexArea() << " concave: " << input.at(i).getConcaveArea()<< "\n";
-        if(ratio < m_areaRatioLimit)
-                    continue;
-        if((input.at(i).getConvexArea() > m_lowerAreaLimit && input.at(i).getConvexArea() < m_upperAreaLimit) || (input.at(i).getConcaveArea() > m_lowerAreaLimit && input.at(i).getConcaveArea() < m_upperAreaLimit ))
+        if(ratioLess ==false && computedRatio < ratio)
+            continue;
+        
+        if(ratioLess ==true && computedRatio > ratio)
+            continue;
+             
+        if((input.at(i).getConvexArea() > lowerAreaLimit && input.at(i).getConvexArea() < upperAreaLimit) || (input.at(i).getConcaveArea() > lowerAreaLimit && input.at(i).getConcaveArea() < upperAreaLimit ))
             output.push_back(input.at(i));
+        
     }
     return true;
 }
@@ -1527,6 +1877,9 @@ void TerrainFeatures::sendData(){
       Features *c = new Features(m_features.at(i));
       emit sendingoutput( c);
     }
+    emit sendingoutputCloud(m_binaryCloud);
+    emit sendingoutputCloud(m_filteredCloud);
+    emit sendingoutputCloud(m_OutputRange);
 }
 void TerrainFeatures::hotovo(){
     emit finished();
@@ -1885,4 +2238,300 @@ void TerrainFeatures::printValues(){
     std::cout << "Point size limit: "<< m_lowerSizeLimit << " - " << m_upperSizeLimit <<"\n";
     std::cout << "axis limit: "<< m_lowerSideLimit << " - " << m_upperSideLimit <<" ratio: "<<  m_axisRatioLimit << "\n";
     std::cout << "area limit: "<< m_lowerAreaLimit << " - " << m_upperAreaLimit <<" ratio: "<<  m_areaRatioLimit << "\n";
+}
+void TerrainFeatures::noiseFilter(Cloud *input, Cloud *output){
+    //vzit input a zjistit kde jsou hranice - podle rozdílu hodnot z binary cloudu
+    // nastavit hranice
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud->points.resize(input->get_Cloud()->points.size());
+    
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (input->get_Cloud());
+    
+    float radius=1;
+    int pocetBodu =5;
+    std::cout<<"pocet bodu: "<<input->get_Cloud()->points.size()<<"\n";
+    int procento =input->get_Cloud()->points.size()/100;
+    int proc = 0;
+    #pragma omp parallel for
+    for(int i=0; i < input->get_Cloud()->points.size(); i++)
+    {
+        if( i%procento == 0){
+           
+            std::cout<<"\r"<< proc << " % ";
+             proc++;
+        }
+        pcl::PointXYZI x = input->get_Cloud()->points.at(i);
+        std::vector<int> pointIDv;
+        std::vector<float> pointSDv;
+        float value=x.intensity;
+        int pos=0,neg=0;
+        
+        // search for neighbor points5
+        if(kdtree.radiusSearch(x, radius, pointIDv, pointSDv)>1)
+        //if(kdtree.nearestKSearch(x,pocetBodu, pointIDv, pointSDv)>2)
+        {
+            for(int k =0; k< pointIDv.size();k++)
+            {
+                if(input->get_Cloud()->points.at(pointIDv.at(k)).intensity ==1)
+                    pos++;
+                else
+                    neg++;
+            }
+            if(pos > neg)
+                value=1;
+            else
+                value=0;
+        }
+        x.intensity = value;
+        cloud->points.at(i) = x;
+        
+    }//for loop
+        
+    cloud->width = cloud->points.size ();
+    cloud->height = 1;
+    cloud->is_dense = true;
+    output->set_Cloud(cloud);
+    return;
+}
+void TerrainFeatures::removeNonBoundary(Cloud *input, Cloud *output){
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
+    //cloud->points.resize(input->get_Cloud()->points.size());
+    
+    for(int i=0; i < input->get_Cloud()->points.size(); i++)
+    {
+        if(input->get_Cloud()->points.at(i).intensity == 0){
+            cloud->points.push_back(input->get_Cloud()->points.at(i));
+        }
+    }//for loop
+        
+    cloud->width = cloud->points.size ();
+    cloud->height = 1;
+    cloud->is_dense = true;
+    output->set_Cloud(cloud);
+    return;
+}
+void TerrainFeatures::computeHoughTransform(Cloud *input, Cloud *output)
+{
+    //pro kazdy bod ktery je hranice
+    // najdi body hranice v okoli
+    // udelat HT pro x opakovani
+    // uložit vysledek jako nove body
+    //ulozit centry do noveho cloudu
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
+    //cloud->points.resize(input->get_Cloud()->points.size());
+    std::cout<<"pocet bodu: "<<input->get_Cloud()->points.size()<<"\n";
+    pcl::PointXYZI c_min,c_max;
+    pcl::getMinMax3D (*input->get_Cloud(), c_min, c_max);
+    
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (input->get_Cloud());
+    int procento =input->get_Cloud()->points.size()/100;
+    int proc = 0;
+    
+    float radius=40;
+#pragma omp parallel for
+    for(int i=0; i < input->get_Cloud()->points.size(); i++)
+    {
+        if( i%procento == 0){
+            
+            std::cout<<"\r"<< proc << " % ";
+            proc++;
+        }
+            
+        pcl::PointXYZI x = input->get_Cloud()->points.at(i);
+        std::vector<int> pointIDv;
+        std::vector<float> pointSDv;
+
+    
+        // search for neighbor points5
+        //if(kdtree.nearestKSearch(x,pocetBodu, pointIDv, pointSDv)>2)
+        if(kdtree.radiusSearch(x, radius, pointIDv, pointSDv)>4)
+        {
+            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_tmp (new pcl::PointCloud<pcl::PointXYZI>);
+            for(int k =0; k< pointIDv.size();k++)
+            {
+                cloud_tmp->points.push_back(input->get_Cloud()->points.at(pointIDv.at(k)));
+            }
+            HoughTransform *ht = new HoughTransform(cloud_tmp);
+            ht->set_iterations(50);
+            ht->compute();
+            stred a = ht->get_circle();
+            pcl::PointXYZI bod;
+            bod.x=a.a;
+            bod.y=a.b;
+            bod.z=100;
+            bod.intensity = a.r/100;
+            delete ht;
+            if(bod.intensity< m_lowerSideLimit || bod.intensity > m_upperSideLimit || bod.x < c_min.x|| bod.x > c_max.x|| bod.y < c_min.y|| bod.y < c_min.y)
+                continue;
+#pragma omp critical
+            cloud->points.push_back(bod);
+        }
+    }//for loop
+        
+    cloud->width = cloud->points.size ();
+    cloud->height = 1;
+    cloud->is_dense = true;
+    std::cout<< "voxely\n";
+    // udelat octree a spocitat pocty bodu v jednotlivych voxelech..
+    float res= 3;
+    pcl::octree::OctreePointCloud<pcl::PointXYZI> oc (res);
+    oc.setInputCloud (cloud);
+    oc.addPointsFromInputCloud ();
+    // zjistit vsechny voxely
+    std::vector<pcl::PointXYZI, Eigen::aligned_allocator<pcl::PointXYZI> > voxels;
+    oc.getOccupiedVoxelCenters(voxels);
+    // zjistit rozsah x y osy a podle toho hledat voxely ktere jsou nejníž
+    double x_max,x_min,y_max,y_min,z_min,z_max;
+    oc.getBoundingBox(x_min,y_min,z_min,x_max,y_max,z_max);
+    oc.deleteTree();
+    
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_voxels (new pcl::PointCloud<pcl::PointXYZI>);
+    cloud_voxels->points.resize(voxels.size());
+    #pragma omp parallel for
+    for(int r=0; r < voxels.size(); r++)
+    {
+      cloud_voxels->points.at(r) = voxels.at(r);
+    }
+    cloud_voxels->width = cloud_voxels->points.size ();
+    cloud_voxels->height = 1;
+    cloud_voxels->is_dense = true;
+    
+std::cout<< "OctreePointCloudSearch\n";
+    // spis boxsearch a pro kazdy voxel najit sousedy v danem boxu, pokud nenajde žadny bod niž než je on sam uložit jeho ID..
+    pcl::octree::OctreePointCloudSearch<pcl::PointXYZI> ocs (res);
+
+    ocs.setInputCloud (cloud);
+    ocs.addPointsFromInputCloud ();
+     std::vector< int > low_voxels;
+    for (int q =0; q < voxels.size(); q++)
+    {
+        std::vector< int > ind;
+        int pocet=0;
+        Eigen::Vector3f low(voxels.at(q).x-res/2, voxels.at(q).y-res/2,z_min);
+        Eigen::Vector3f high(voxels.at(q).x+res/2, voxels.at(q).y+res/2,z_max);
+        if(ocs.boxSearch(low,high,ind) >0){
+            pocet = ind.size();
+        }
+        cloud_voxels->points.at(q).intensity=pocet;
+    }
+    
+    output->set_Cloud(cloud_voxels);
+    return;
+}
+
+
+
+PointDensity::PointDensity()
+{
+    m_TerrainCloud = new Cloud();
+    m_Output = new Cloud();
+    m_Radius = 0.1;
+    m_Neighbors = 8;
+}
+PointDensity::~PointDensity()
+{
+    
+}
+void PointDensity::setRadius(float radius)
+{
+    m_Radius = radius;
+}
+void PointDensity::setNeighbors(int i)
+{
+    m_Neighbors = i;
+}
+void PointDensity::setTerrainCloud(Cloud input)
+{
+    m_TerrainCloud->set_Cloud(input.get_Cloud());
+}
+void PointDensity::setOutputName(QString name)
+{
+    m_Output->set_name(name);
+}
+void PointDensity::execute()
+{
+    // vem mracno
+    emit percentage(0);
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    kdtree.setInputCloud (m_TerrainCloud->get_Cloud());
+   // m_Output->get_Cloud()->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNewTerrain (new pcl::PointCloud<pcl::PointXYZI>);
+    cloudNewTerrain->points.resize(m_TerrainCloud->get_Cloud()->points.size());
+    int procento = m_TerrainCloud->get_Cloud()->points.size()/100.0;
+    std::cout<< "procento: " << procento << "\n";
+    int step_size   = 100;
+    int total_steps = m_TerrainCloud->get_Cloud()->points.size() / step_size + 1;
+    
+    int steps_completed = 0;
+    int sum = 0;
+    
+#pragma omp parallel
+    {
+        int local_count = 0;
+    
+#pragma omp parallel for
+        for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
+        {
+            std::vector<int> pointIDv;
+            std::vector<float> pointSDv;
+            pcl::PointXYZI x = m_TerrainCloud->get_Cloud()->points.at(i);
+            float sklon = 0.000000;
+            // pro kazdy bod najdi sousedy
+            if(m_useRadius == false)
+            {
+                kdtree.nearestKSearch(x, m_Neighbors, pointIDv, pointSDv);
+            }
+            else
+            {
+                kdtree.radiusSearch(x, m_Radius, pointIDv, pointSDv);
+            }
+            float ratio =computeDensityValue(0,4, pointIDv);
+            // ulozit do bodu
+            cloudNewTerrain->points.at(i).x = x.x;
+            cloudNewTerrain->points.at(i).y = x.y;
+            cloudNewTerrain->points.at(i).z = x.z;
+            cloudNewTerrain->points.at(i).intensity = ratio;
+            if (local_count++ % step_size == step_size-1)
+            {
+                #pragma omp atomic
+                ++steps_completed;
+                
+                if (steps_completed % 100 == 1)
+                {
+                    #pragma omp critical
+                    emit percentage(100.0*steps_completed/total_steps);
+                }
+            }
+        }
+    }
+    cloudNewTerrain->width = cloudNewTerrain->points.size ();
+    cloudNewTerrain->height = 1;
+    cloudNewTerrain->is_dense = true;
+    m_Output->set_Cloud(cloudNewTerrain);
+    sendData();
+}
+void PointDensity::sendData()
+{
+    emit sendingoutput( m_Output);
+}
+void PointDensity::hotovo()
+{
+    emit finished();
+}
+
+float PointDensity::computeDensityValue(float valuemin, float valuemax, std::vector<int> points)
+{
+    float a=0;
+    for(int i =0;i< points.size();i++)
+    {
+        if(m_TerrainCloud->get_Cloud()->points.at(points.at(i)).intensity > valuemin && m_TerrainCloud->get_Cloud()->points.at(points.at(i)).intensity < valuemax)
+            a++;
+    }
+    return a/points.size();
+}
+void PointDensity::useRadius(bool radius)
+{
+    m_useRadius = radius;
 }

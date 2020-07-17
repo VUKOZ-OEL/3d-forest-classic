@@ -1259,7 +1259,7 @@ void MainWindow::openCloudFile(QString file, QString type, QColor col,bool visib
 void MainWindow::exportCloud()
 {
   QStringList types;
-  types << ".txt" << ".ply" << ".pts" ;
+  types << ".txt" << ".ply" << ".pts"<<".wkt" ;
 
   InputDialog *in = new InputDialog(this);
   in->set_title("Export cloud");
@@ -1295,6 +1295,8 @@ void MainWindow::exportCloud()
       fileName.append((".pts"));
       if(in->get_outputType()== ".ply")
         fileName.append((".ply"));
+        if(in->get_outputType()== ".wkt")
+        fileName.append((".wkt"));
       QFile file(fileName);
 
       if(file.exists())
@@ -1347,6 +1349,26 @@ void MainWindow::exportCloud()
         {
           pcl::io::savePLYFileASCII(fileName.toUtf8().constData(),*Proj->get_Cloud(selected.at(i)).get_Cloud());
         }
+          if(in->get_outputType()== ".wkt")
+          {
+            file.open(QIODevice::WriteOnly | QIODevice::Text);
+            QTextStream out(&file);
+            out.setRealNumberNotation(QTextStream::FixedNotation);
+            out.setRealNumberPrecision(3);
+              out<<"MULTIPOINT(";
+              
+            for(pcl::PointCloud<pcl::PointXYZI>::iterator it = Proj->get_Cloud(selected.at(i)).get_Cloud()->begin(); it != Proj->get_Cloud(selected.at(i)).get_Cloud()->end(); it++)
+            {
+              double x = it->x - Proj->get_Xtransform();
+              double y = it->y - Proj->get_Ytransform();
+              double z = it->z - Proj->get_Ztransform();
+              out <<"("<<  x << " " << y << " " << z << ")";
+                if(it != Proj->get_Cloud(selected.at(i)).get_Cloud()->end()-1)
+                    out<<",";
+            }
+              out<<")";
+            file.close();
+          }
       // save file
 
       }
@@ -1829,7 +1851,7 @@ void MainWindow::slope()
     InputDialog *in = new InputDialog(this);
     in->set_title(tr("Compute slope of terrain."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute slope of terrain based on number of neighbors."));
+    in->set_description(tr("Compute slope of terrain based on neighbors. Neighborhood can be estimaetd by number of surrounding points or by radius."));
     in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
     in->set_outputCloud1(tr("Output cloud of ground:"),"slope");
     in->set_inputInt(tr("Number of surrounding points:"),"5");
@@ -1877,13 +1899,66 @@ void MainWindow::slope()
     }
     delete in;
 }
+void MainWindow::aspect()
+{
+    InputDialog *in = new InputDialog(this);
+    in->set_title(tr("Compute aspect of terrain."));
+    in->set_path(Proj->get_Path());
+    in->set_description(tr("Compute Aspect of terrain based on neighbors. Neighborhood can be defined by number of surrounding points or by radius."));
+    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output cloud of ground:"),"aspect");
+    in->set_inputInt(tr("Number of surrounding points:"),"5");
+    in->set_inputInt2(tr("radius in cm:"),"100");
+    in->set_inputCheckBox("use radius instead of neighbor");
+
+    in->set_stretch();
+    int dl = in->exec();
+
+    if(dl == QDialog::Rejected)
+    { return; }
+
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        createPBar();
+       // float res = in->get_intValue();
+        std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
+        std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
+        std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+
+        Aspect *s = new Aspect();
+        s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        s->setOutputName(in->get_outputCloud1());
+        s->setNeighbors(in->get_intValue());
+        s->setRadius(in->get_intValue2()/100.0);
+        s->useRadius(in->get_CheckBox());
+
+        m_thread = new QThread();
+
+        connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
+        connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
+        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
+        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+
+        connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
+        connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
+        connect(s, SIGNAL(finished()), s, SLOT(deleteLater()));
+        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
+
+        m_thread->start();
+        s->moveToThread(m_thread);
+
+    }
+    delete in;
+}
 void MainWindow::curvature()
 {
     InputDialog *in = new InputDialog(this);
     in->set_title(tr("Compute  terrain curvature."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute terrain curvature based on number of neighbors or given radius."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_description(tr("Compute terrain curvature based on neighbors. Neighbor canbe estimated by number of points or by radius. Curvature is computed as derivate of Intensity value. For terrain curvature input cloud should be slope layer. computed by Slope method. "));
+    in->set_inputCloud1(tr("Input cloud:"), get_terrainNames());
     in->set_outputCloud1(tr("Output cloud of ground:"),"curvature");
     in->set_inputInt(tr("curvature limit:"),"5");
     in->set_inputInt2(tr("radius in cm:"),"300");
@@ -1934,7 +2009,7 @@ void MainWindow::hillShade()
     InputDialog *in = new InputDialog(this);
     in->set_title(tr("Compute hillshade of terrain."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
+    in->set_description(tr("Compute hillshade of terrain based on neighbor points. Neighbor can be estimated by number of point or by radius."));
     in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
     in->set_outputCloud1(tr("Output cloud of ground:"),"hillShade");
     in->set_inputInt(tr("Number of surrounding points:"),"5");
@@ -1982,25 +2057,78 @@ void MainWindow::hillShade()
     }
     delete in;
 }
+void MainWindow::pointDensity()
+{
+    InputDialog *in = new InputDialog(this);
+    in->set_title(tr("Compute point density of cloud."));
+    in->set_path(Proj->get_Path());
+    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
+    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output cloud of ground:"),"density");
+    in->set_inputInt(tr("Number of surrounding points:"),"5");
+    in->set_inputInt2(tr("radius in cm:"),"100");
+    in->set_inputCheckBox("use radius instead of neighbor");
+    
+    in->set_stretch();
+    int dl = in->exec();
+    
+    if(dl == QDialog::Rejected)
+    { return; }
+    
+    if(dl == QDialog::Accepted && !in->get_inputCloud1().isEmpty())
+    {
+        createPBar();
+        // float res = in->get_intValue();
+        std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
+        std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
+        std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+        
+        PointDensity *s = new PointDensity();
+        s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        s->setOutputName(in->get_outputCloud1());
+        s->setNeighbors(in->get_intValue());
+        s->setRadius(in->get_intValue2()/100.0);
+        s->useRadius(in->get_CheckBox());
+        
+        m_thread = new QThread();
+        
+        connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
+        connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
+        connect(s, SIGNAL(sendingoutput(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
+        connect(this, SIGNAL(savedTerrain()), s, SLOT(hotovo()));
+        
+        connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
+        connect(s, SIGNAL(finished()),  m_thread, SLOT(quit()));
+        connect(s, SIGNAL(finished()), s, SLOT(deleteLater()));
+        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
+        
+        m_thread->start();
+        s->moveToThread(m_thread);
+        
+    }
+    delete in;
+}
 void MainWindow::terrainDiff()
 {
     // okno
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute hillshade of terrain."));
+    in->set_title(tr("Compute Terrain features ."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"terrainDiff");
-    in->set_inputInt(tr("Intensity value minimal limit") ,"0");
-    in->set_inputInt7(tr("maximal intenstity value limit:"),"4");
-    in->set_inputInt2(tr("minimal point size of feature:"),"50");
-    in->set_inputInt10(tr("max point size of feature:"),"3000");
-    in->set_inputInt3(tr("minimal axis lenght:"),"5");
-    in->set_inputInt4(tr("maximal axis length:"),"30");
-    in->set_inputInt5(tr("minima area:"),"30");
-    in->set_inputInt6(tr("maximal area of feature:"),"300");
-    in->set_inputInt8(tr("min axis ratio in %:"),"75");
-    in->set_inputInt9(tr("min area ratio in %:"),"75");
+    in->set_description(tr("compute terrain features (similar places) based on its area concave, convex and its ratio, number of points with similar value in intensity, axis length."));
+    in->set_inputCloud1(tr("Input Curvature cloud:"), get_terrainNames());
+    in->set_inputInt(tr("MInimal intensity value limit") ,"-4");
+    in->set_inputInt7(tr("Maximal intenstity value limit:"),"4");
+    in->set_inputInt2(tr("Minimal point size of feature:"),"35");
+    in->set_inputInt10(tr("Maximal point size of feature:"),"350");
+    in->set_inputInt3(tr("Minimal axis lenght:"),"3");
+    in->set_inputInt4(tr("Maximal axis length:"),"15");
+    in->set_inputInt5(tr("Minimal area:"),"14");
+    in->set_inputInt6(tr("Maximal area of feature:"),"100");
+    in->set_inputInt8(tr("Min axis ratio in %:"),"40");
+    in->set_inputInt9(tr("Min area ratio in %:"),"70");
+    
     
    // in->set_inputCheckBox("use radius instead of neighbor");
     
@@ -2015,7 +2143,7 @@ void MainWindow::terrainDiff()
         createPBar();
         // float res = in->get_intValue();
         std::cout << "parametry - vystupni cloud name: " << in->get_outputCloud1().toStdString() << "\n";
-        std::cout << "parametry - input-teren: " << in->get_inputCloud1().toStdString() << "\n";
+        std::cout << "parametry - input-curvature: " << in->get_inputCloud1().toStdString() << "\n";
         std::cout << "parametry - min intensitylimit: " << in->get_intValue() << "\n";
         std::cout << "parametry - point size: " << in->get_intValue2() << "\n";
         std::cout << "parametry - min axis: " << in->get_intValue3() << "\n";
@@ -2030,6 +2158,7 @@ void MainWindow::terrainDiff()
         
         TerrainFeatures *s = new TerrainFeatures();
         s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
+        //s->setSlopeCloud(Proj->get_Cloud(in->get_inputCloud2()));
         s->setOutputName(in->get_outputCloud1());
         
         s->setMaxBinaryLimit(in->get_intValue7());
@@ -2055,6 +2184,7 @@ void MainWindow::terrainDiff()
         connect(m_thread, SIGNAL(started()), s, SLOT(execute()));
         connect(s, SIGNAL(percentage( int )), this, SLOT(showPBarValue( int)));
         connect(s, SIGNAL(sendingoutput(Features *)), this, SLOT(saveFeature(Features *)));
+        connect(s, SIGNAL(sendingoutputCloud(Cloud *)), this, SLOT(saveTerrain(Cloud *)));
         connect(this, SIGNAL(savedFeature()), s, SLOT(hotovo()));
         
         connect(s, SIGNAL(finished()), this , SLOT(removePbar()));
@@ -2073,10 +2203,9 @@ void MainWindow::exportFeaturesAtt()
     // export all features attriubtes into text file
 
     ExportFeaturesDialog *exdialog = new ExportFeaturesDialog(this);
-    exdialog->setDescription("\tThe tool for exporting tree parameters into formatted text file. "
-                              "You can select tree(s) for which wants to export the parameters, "
-                              " choose the parameters to export and set the separator of fields in the text file. "
-                              "The tool exports currently computed values.");
+    exdialog->setDescription("\tThe tool for exporting features parameters into formatted text file. "
+                              "You can select prefix of files which will be created, separator of field and files that shloud be created."
+                              " Polygon files are using WKT geom field that stores polygons - convave and convex.");
     int dl = exdialog->exec();
     
     if(dl == QDialog::Accepted)
@@ -2125,7 +2254,7 @@ void MainWindow::exportFeaturesAtt()
             }
             file.close();
         }
-        if(exdialog->getConvexPolygonFile() == true) // create tree file
+        if(exdialog->getConvexPolygonFile() == true) // create tree file wiht geometry in WKT format and ID
         {
             //open file
             QString filename =QString("%1%2%3featuresConvex.txt").arg(exdialog->getPath()).arg(QDir::separator()).arg( exdialog->getPrefix());
@@ -2136,26 +2265,29 @@ void MainWindow::exportFeaturesAtt()
             out.setRealNumberPrecision(3);
             
             // write header
-            out << "ID" << sep <<"Xstart" << sep <<"Ystart" << sep <<"Xend" << sep <<"Yend;" << sep <<"Z\n";
+            out << "ID" << sep <<"GEOM\n";
+            
 
             // write data
             for(int q=0; q < Proj->getFeatureSize();q++)
             {
                 QString name =Proj->getFeature(q).getPointCloud()->get_name();
+                out << name << sep <<"POLYGON((";
                 
-                for(int j = 1; j < Proj->getFeature(q).getConvexHull().getPolygon()->points.size(); j++)
+                for(int j = 0; j < Proj->getFeature(q).getConvexHull().getPolygon()->points.size(); j++)
                 {
                     pcl::PointXYZI bod;
-                    bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(j-1);
+                    bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(j);
                     double x = bod.x - Proj->get_Xtransform();
                     double y = bod.y - Proj->get_Ytransform();
-                    out << name << sep << x << sep << y ;
-                    bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(j);
-                    double xend = bod.x - Proj->get_Xtransform();
-                    double yend = bod.y - Proj->get_Ytransform();
-                    double z = bod.z;
-                    out << sep << xend << sep  << yend << sep  << z << endl;
+                    out << x << " " << y<<",";
+    
                  }
+                pcl::PointXYZI bod;
+                bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(0);
+                double x = bod.x - Proj->get_Xtransform();
+                double y = bod.y - Proj->get_Ytransform();
+                out << x << " " << y <<"))\n";
             }
             file.close();
         }
@@ -2170,12 +2302,13 @@ void MainWindow::exportFeaturesAtt()
             out.setRealNumberPrecision(3);
             
             // write header
-            out << "ID" << sep <<"Xstart" << sep <<"Ystart" << sep <<"Xend" << sep <<"Yend;" << sep <<"Z\n";
+            out << "ID" << sep <<"GEOM\n";
 
             // write data
             for(int q=0; q < Proj->getFeatureSize();q++)
             {
                 QString name =Proj->getFeature(q).getPointCloud()->get_name();
+                out << name << sep <<"POLYGON((";
                 
                 for(int j = 1; j < Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.size(); j++)
                 {
@@ -2183,13 +2316,14 @@ void MainWindow::exportFeaturesAtt()
                     bod = Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.at(j-1);
                     double x = bod.x - Proj->get_Xtransform();
                     double y = bod.y - Proj->get_Ytransform();
-                    out << name << sep << x << sep << y ;
-                    bod = Proj->getFeature(q).getConcaveHull().getPolygon().get_Cloud()->points.at(j);
-                    double xend = bod.x - Proj->get_Xtransform();
-                    double yend = bod.y - Proj->get_Ytransform();
-                    double z = bod.z;
-                    out << sep << xend << sep  << yend << sep  << z << endl;
+                    out << x << " " << y<<",";
+                  
                  }
+                pcl::PointXYZI bod;
+                bod = Proj->getFeature(q).getConvexHull().getPolygon()->points.at(0);
+                double x = bod.x - Proj->get_Xtransform();
+                double y = bod.y - Proj->get_Ytransform();
+                out << x << " " << y <<"))\n";
             }
             file.close();
         }
@@ -6394,6 +6528,11 @@ void MainWindow::createActions()
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(slopeAct, SIGNAL(triggered()), this, SLOT(slope()));
     
+    aspectAct = new QAction(tr("Aspect"), this);
+    aspectAct->setStatusTip(tr("compute terrain aspect"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(aspectAct, SIGNAL(triggered()), this, SLOT(aspect()));
+    
     curvatureAct = new QAction(tr("Curvature"), this);
     curvatureAct->setStatusTip(tr("compute terrain curvature"));
     //radiusOutlierRemovalAct->setEnabled(false);
@@ -6404,8 +6543,13 @@ void MainWindow::createActions()
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(hillShadeAct, SIGNAL(triggered()), this, SLOT(hillShade()));
     
-    terrainDiffAct = new QAction(tr("terrain Diff"), this);
-    terrainDiffAct->setStatusTip(tr("compute hillshade of terrain"));
+    pointDensityAct = new QAction(tr("Point Density"), this);
+    pointDensityAct->setStatusTip(tr("compute terrain curvature"));
+    //radiusOutlierRemovalAct->setEnabled(false);
+    connect(pointDensityAct, SIGNAL(triggered()), this, SLOT(pointDensity()));
+    
+    terrainDiffAct = new QAction(tr("Terrain Features"), this);
+    terrainDiffAct->setStatusTip(tr("compute features representing similar spots from terrain based on input parameters"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(terrainDiffAct, SIGNAL(triggered()), this, SLOT(terrainDiff()));
     
@@ -6671,8 +6815,10 @@ void MainWindow::createMenus()
   terenMenu->addSeparator();
   terenMenu->addAction(IDWAct);
     terenMenu->addAction(slopeAct);
+    terenMenu->addAction(aspectAct);
     terenMenu->addAction(curvatureAct);
     terenMenu->addAction(hillShadeAct);
+    terenMenu->addAction(pointDensityAct);
     terenMenu->addAction(terrainDiffAct);
     terenMenu->addAction(featureTableAct);
     terenMenu->addAction(exportFeaturesAct);

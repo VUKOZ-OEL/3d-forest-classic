@@ -149,7 +149,7 @@ public slots:
 signals:
   void finished();
   void percentage(int);
-  void sendingoutput( Cloud *, QString);
+  void sendingoutput( Cloud *);
 
 private:
     float m_radius;
@@ -184,6 +184,38 @@ signals:
     
 private:
     float computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b);
+    float m_Radius;
+    int m_Neighbors;
+    bool m_useRadius = false;
+    Cloud *m_TerrainCloud;
+    Cloud *m_Output;
+};
+class Aspect : public QObject
+{
+    Q_OBJECT
+public:
+    Aspect();
+    ~Aspect();
+    public slots:
+    void setRadius(float radius);
+    void setNeighbors(int i);
+    void setTerrainCloud(Cloud input);
+    void setOutputName(QString name);
+    void useRadius(bool radius);
+    
+    void execute();
+    void sendData();
+    void hotovo();
+    
+signals:
+    void finished();
+    void percentage(int);
+    void sendingoutput( Cloud *);
+    
+    
+private:
+    std::vector<float> computeSmallestPCA (std::vector<int> pointsId);
+    float computeAspect(std::vector<float> vec);
     float m_Radius;
     int m_Neighbors;
     bool m_useRadius = false;
@@ -276,6 +308,7 @@ public:
     void setXlenght(float len);
     void setYlengtht(float len);
     void computeCentroid();
+    void setCentroid(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
     void setCentroid(pcl::PointXYZI p);
     void setMeanCurvature(float curv);
     void setPointNumber(int n);
@@ -318,6 +351,7 @@ public:
     void setRadius(float radius);
     void setNeighbors(int i);
     void setTerrainCloud(Cloud input);
+    void setSlopeCloud(Cloud input);
     void setOutputName(QString name);
     void useRadius(bool radius);
     void setlowerPointLimit (float limit);
@@ -339,6 +373,7 @@ signals:
     void finished();
     void percentage(int);
     void sendingoutput( Features *);
+    void sendingoutputCloud( Cloud *);
     
     
 private:
@@ -361,22 +396,30 @@ private:
     float polygonArea(std::vector<pcl::PointXYZI>& p);
     
     bool computeLimits(Cloud *input, Cloud *output);
-    bool computeBinary(Cloud *input, Cloud *output);
-    bool findClusters(Cloud *input,std::vector<Features>& output);
-    bool filterClustersBySize(std::vector<Features>& input, std::vector<Features>& output);
-    bool filterClustersByPCA(std::vector<Features>& input, std::vector<Features>& output);
-    bool filterClustersByHull(std::vector<Features>& input, std::vector<Features>& output);
+    bool computeBinary(Cloud *input, float lowerLimit, float upperLimit, Cloud *output);
+    bool findClusters(Cloud *input,float radius, int minClusterSize, std::vector<Features>& output);
+    bool filterClustersBySize(std::vector<Features>& input, float lowerSizeLimit, float upperSizeLimit, std::vector<Features>& output);
+    bool filterClustersByPCA(std::vector<Features>& input, float ratio, float lowerSideLimit, float upperSideLimit,bool ratioLess, std::vector<Features>& output);
+    bool filterClustersByHull(std::vector<Features>& input, float ratio, float lowerAreaLimit, float upperAreaLimit,bool ratioLess, std::vector<Features>& output);
     bool computePCA (pcl::PointCloud<pcl::PointXYZI>::Ptr input, float& Xlenght, float& Ylenght);
     bool computeHulls(pcl::PointCloud<pcl::PointXYZI>::Ptr input, float& convexArea, float& concaveArea );
     bool createCloudsFromClusters(Cloud *inputCloud,std::vector<Features>& input);
     void printValues();
+    void noiseFilter(Cloud *input, Cloud *output);
+    void computeHoughTransform(Cloud *input, Cloud *output);
+    void removeNonBoundary(Cloud *input, Cloud *output);
+    void computeInsiders(Cloud *input,std::vector<Features>& output);
+    void computeBundaries(Cloud *input,std::vector<Features>& output);
+    void computeFeatures(std::vector<Features>& insiders,std::vector<Features>& boundary,std::vector<Features>& output);
+    void computePointDensity(Cloud *input,float radius, float minValue, float maxValue, Cloud *output );
     
     float m_Radius;
     int m_Neighbors;
     bool m_useRadius = false;
     Cloud *m_TerrainCloud;
-    Cloud *m_OutputAVG;
-    Cloud *m_OutputSD;
+    Cloud *m_slopeCloud;
+    Cloud *m_binaryCloud;
+    Cloud *m_filteredCloud;
     Cloud *m_OutputRange;
     pcl::PointXYZI m_p0;
     
@@ -397,6 +440,37 @@ private:
     float m_upperAreaLimit = 400;
     float m_areaRatioLimit = 0.75;
     
+};
+class PointDensity : public QObject
+{
+    Q_OBJECT
+    public:
+        PointDensity();
+        ~PointDensity();
+        public slots:
+        void setRadius(float radius);
+        void setNeighbors(int i);
+        void setTerrainCloud(Cloud input);
+        void setOutputName(QString name);
+        void useRadius(bool radius);
+        
+        void execute();
+        void sendData();
+        void hotovo();
+        
+    signals:
+        void finished();
+        void percentage(int);
+        void sendingoutput( Cloud *);
+        
+        
+    private:
+        float computeDensityValue(float valuemin, float valuemax, std::vector<int> points);
+        float m_Radius;
+        int m_Neighbors;
+        bool m_useRadius = false;
+        Cloud *m_TerrainCloud;
+        Cloud *m_Output;
 };
 
 #endif // TERRAIN_H_INCLUDED

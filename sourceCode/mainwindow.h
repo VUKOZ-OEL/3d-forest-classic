@@ -128,10 +128,12 @@ private slots:
   void statisticalOutlierRemovalTerrain();
   void radiusOutlierRemovalTerrain();
     void slope();
+    void aspect();
     void hillShade();
     void terrainDiff();
     void curvature();
     void exportFeaturesAtt();
+    void pointDensity();
 //VEGETATION
     //! Manual selection of trees from vegetation cloud.
     /*! Choose vegetation cloud for tree selection. Delete points that do not belong to the tree*/
@@ -634,10 +636,12 @@ private:
   QAction *statisticalOutlierRemovalAct;
   QAction *radiusOutlierRemovalAct;
     QAction *slopeAct;
+    QAction *aspectAct;
     QAction *curvatureAct;
     QAction *hillShadeAct;
     QAction *terrainDiffAct;
     QAction *exportFeaturesAct;
+    QAction *pointDensityAct;
   //VEGETATION
   QAction *segmentAct;             /**< Save tree attributes into file Act */
   QAction *manualSelAct;      /**< Manual selection of trees Act */
