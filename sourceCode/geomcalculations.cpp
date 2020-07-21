@@ -285,8 +285,9 @@ pcl::PolygonMesh GeomCalc::triangulatePolygon(pcl::PointCloud<pcl::PointXYZI>::P
     //volume and surface
     //Convert to pclMesh
     pcl::PolygonMesh triangles;
-    pcl::VTKUtils::vtk2mesh(polydataOut,triangles);
-    return triangles;*/
+    pcl::VTKUtils::vtk2mesh(polydataOut,triangles);*/
+    pcl::PolygonMesh triangles;
+    return triangles;
 }
 //CLOUD OPERATIONS
 void CloudOperations::cloudXYZItoXYZ(pcl::PointCloud<pcl::PointXYZI>::Ptr cloudXYZI, pcl::PointCloud<pcl::PointXYZ>::Ptr cloudXYZ)

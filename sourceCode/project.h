@@ -267,11 +267,11 @@ public:
     //! Set concave planar projection pointCloud fro any pointcloud.
     /*! \param cloud input pointCloud \param edge length of maximal edge length \param name name of the cloud \param color color of the cloud */
     /*! \return Cloud with point of concave planar projection */
-  Cloud set_ConcaveCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,float edge, QString name, QColor color);
+  void set_ConcaveCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,float edge, QString name, QColor color);
     //! Set convex planar projection pointCloud fro any pointcloud.
     /*! \param cloud input pointCloud \param name name of the cloud \param color color of the cloud */
     /*! \return Cloud with point of convex planar projection */
-  Cloud set_ConvexCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor color);
+  void set_ConvexCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor color);
 
 //POLYHEDRON INTERSECTIONS 3D
     int getIntersectionsSize();

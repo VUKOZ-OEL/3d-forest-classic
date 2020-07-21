@@ -170,13 +170,13 @@ void Project::set_treeConvexCloud(QString name)
 }
 int Project::set_treeConcaveCloud(QString name,float edge)
 {
-
+    return 0;
 }
-Cloud Project::set_ConcaveCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,float edge, QString name, QColor color)
+void Project::set_ConcaveCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,float edge, QString name, QColor color)
 {
 
 }
-Cloud Project::set_ConvexCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor color)
+void Project::set_ConvexCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, QString name, QColor color)
 {
 
 }

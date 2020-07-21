@@ -478,7 +478,7 @@ void Tree::set_skeleton(Cloud c)
 }
 Cloud Tree::get_skeleton()
 {
-  //return *m_skeleton;
+  return *m_dbhCloud;
 }
 void Tree::set_positionHT(int iter)
 {

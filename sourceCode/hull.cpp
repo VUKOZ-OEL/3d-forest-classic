@@ -252,7 +252,7 @@ void ConcaveHull::edgesBreaking(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, pcl:
         if (distAB > searchDist)
         {
             bodx = returnEdgeBreakingPoint(cloud,boda,bodb,searchDist);
-            if(bodx.z != 0 and bodx.x != 0)
+            if(bodx.z != 0 && bodx.x != 0)
             {
                 hullCloud->points.insert(hullCloud->points.begin()+j,bodx);
                 CloudOperations::erasePointFromCloudXY(cloud,bodx);
@@ -273,8 +273,8 @@ pcl::PointXYZI ConcaveHull::returnEdgeBreakingPoint(pcl::PointCloud<pcl::PointXY
         pcl::PointXYZI bodc =cloud->points.at(g);
         if(GeomCalc::isXYequal(boda,bodc)!=true || GeomCalc::isXYequal(bodb,bodc)!=true)
         {
-            if ((GeomCalc::computeDistance2Dxy(boda,bodc) < searchDist and GeomCalc::computeDistance2Dxy(bodb,bodc) < distAB) or
-                (GeomCalc::computeDistance2Dxy(bodb,bodc) < searchDist and GeomCalc::computeDistance2Dxy(boda,bodc) < distAB))
+            if ((GeomCalc::computeDistance2Dxy(boda,bodc) < searchDist && GeomCalc::computeDistance2Dxy(bodb,bodc) < distAB) ||
+                (GeomCalc::computeDistance2Dxy(bodb,bodc) < searchDist && GeomCalc::computeDistance2Dxy(boda,bodc) < distAB))
             {
                 float A =GeomCalc::computeClockwiseAngle(boda,bodc,bodb);
                 if (A < Amax)

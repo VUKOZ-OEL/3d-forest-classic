@@ -31,7 +31,7 @@ include_directories(${libLAS_INCLUDE_DIRS})
 target_link_libraries(3DForest ${libLAS_LIBRARIES})
 
 #dependencies - VTK
-find_package(VTK REQUIRED)
+find_package(VTK 8.1 REQUIRED)
 include_directories(${VTK_INCLUDE_DIRS})
 target_link_libraries(3DForest ${VTK_LIBRARIES} )
 LINK_DIRECTORIES(${VTK_LIB_DIRS})
@@ -60,55 +60,4 @@ endif()
 #file(COPY sourceCode/projects.txt DESTINATION ${CMAKE_INSTALL_PREFIX})
 #add_custom_command(TARGET 3DForest POST_BUILD COMMAND ${CMAKE_COMMAND} -E #copy_if_different sourceCode/projects.txt ${CMAKE_INSTALL_PREFIX})
 
-if(WIN32)
-
-##QT copy
-  add_custom_command( TARGET 3DForest POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:Qt5::Widgets>
-    $<TARGET_FILE:Qt5::Core>
-    $<TARGET_FILE:Qt5::Gui>
-    ${CMAKE_INSTALL_PREFIX})
-##boost copy
-add_custom_command( TARGET 3DForest POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${Boost_FILESYSTEM_LIBRARY_RELEASE}
-    ${Boost_IOSTREAMS_LIBRARY_RELEASE}
-    ${Boost_SYSTEM_LIBRARY_RELEASE}
-    ${Boost_THREAD_LIBRARY_RELEASE}
-    ${CMAKE_INSTALL_PREFIX})
-
-##VTK copy
-
-#PCL copy
-add_custom_command( TARGET 3DForest POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${PCL_COMMON_LIBRARY}
-    ${PCL_FEATURES_LIBRARY}
-    ${PCL_IO_LIBRARY}
-    ${PCL_IO_PLY_LIBRARY}
-    ${PCL_FILTERS_LIBRARY}
-    ${PCL_VISUALIZATION_LIBRARY}
-    ${PCL_RECOGNITION_LIBRARY}
-    ${PCL_STEREO_LIBRARY}
-    ${PCL_OUTOFCORE_LIBRARY}
-    ${PCL_OCTREE_LIBRARY}
-    ${PCL_KDTREE_LIBRARY}
-    ${PCL_SEARCH_LIBRARY}
-    ${PCL_SURFACE_LIBRARY}
-    ${PCL_SAMPLE_CONSENSUS_LIBRARY}
-    ${PCL_SEGMENTATION_LIBRARY}
-    ${PCL_ML_LIBRARY}
-
-    ${CMAKE_INSTALL_PREFIX})
-
-#libLAS
-add_custom_command( TARGET 3DForest POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${libLAS_BINARY_DIRS}/libliblas.dll
-    ${CMAKE_INSTALL_PREFIX})
-
-endif(WIN32)
-
-#FOREACH (Lib ${libLAS_LIBRARIES})
-#      INSTALL(PROGRAMS ${Lib} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-#ENDFOREACH (Lib ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_SIGNALS_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
-#install(EXPORT ${PCL_LIBRARIES} DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} EXPORT ${PCL_LIBRARIES} )
 

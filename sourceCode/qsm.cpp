@@ -1148,7 +1148,7 @@ bool CylinderModel::regressionCoeff(Eigen::VectorXf coeff)
     m_coef1.push_back(coeff(0));
     m_coef2.push_back(coeff(1));
     m_coef3.push_back(coeff(2)); // initial value for 'a'
-
+    return true;
 }
 void CylinderModel::medianvalues()
 {

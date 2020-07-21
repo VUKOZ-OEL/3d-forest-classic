@@ -70,7 +70,7 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkRenderer.h>
 #include <vtkPNGWriter.h>
-#include <QVTKOpenGLNativeWidget.h>
+#include <QVTKOpenGLWidget.h>
 #include <vtkInteractorStyle.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
@@ -104,7 +104,7 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
     setWindowTitle ( tr("3D Forest - Forest lidar data processing tool") );
 
 //QVTKwidget - visualizer
-    qvtkwidget = new QVTKOpenGLNativeWidget(this);
+    qvtkwidget = new QVTKOpenGLWidget(this);
 
     auto renderer = vtkSmartPointer<vtkRenderer >::New();
     auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow >::New();
@@ -720,18 +720,18 @@ void MainWindow::importTXTnonStandard(QString file, pcl::PointCloud<pcl::PointXY
     QStringList firstLine;
     QString split;
 
-    if(coordsSpace.size() > coordsTab.size() and coordsSpace.size() > coordsSemicolon.size())
+    if(coordsSpace.size() > coordsTab.size() && coordsSpace.size() > coordsSemicolon.size())
     {
         split = " ";
         firstLine = coordsSpace;
 
     }
-    else if(coordsTab.size() > coordsSpace.size() and coordsTab.size() > coordsSemicolon.size())
+    else if(coordsTab.size() > coordsSpace.size() && coordsTab.size() > coordsSemicolon.size())
     {
         split = "\t";
         firstLine = coordsTab;
     }
-    else if(coordsSemicolon.size() > coordsSpace.size() and coordsSemicolon.size() > coordsTab.size())
+    else if(coordsSemicolon.size() > coordsSpace.size() && coordsSemicolon.size() > coordsTab.size())
     {
         split = ";";
         firstLine = coordsSemicolon;
@@ -2250,7 +2250,7 @@ void MainWindow::exportFeaturesAtt()
                 double y = bod.y - Proj->get_Ytransform();
                 double z = bod.z - Proj->get_Ztransform();
 
-                out<< id << sep << name << sep << x << sep << y << sep << z << sep <<  points << sep << xAxis << sep<< yAxis << sep << axisRatio << sep << convexArea<< sep << concaveArea << "\n";
+                out<< id << sep << name << sep << x << sep << y << sep << z << sep <<  points << sep << xAxis << sep<< yAxis << sep << axisRatio << sep << convexArea<< sep << concaveArea << "\n";
             }
             file.close();
         }
@@ -6435,10 +6435,10 @@ void MainWindow::ortho()
 }
 void MainWindow::about()
 {
-  QMessageBox::about(this, tr("about 3D Forest application"),tr(" 3D Forest application is presented in version 0.42.\n"
-                                                             "Application serve for extraction of tree parameters from TLS data in forest environment."
+  QMessageBox::about(this, tr("about 3D Forest application"),tr(" 3D Forest application is presented in version 0.51.\n"
+                                                             "Application serve for extraction of tree parameters like tree position, dbh,advanced QSM models from TLS data in forest environment."
                                                              "3D Forest is released under terms of GPL v3.\n"
-                                                             "More information can be found on web site www.3dforest.eu  or in User manual attached to application. \n\n"
+                                                             "More information can be found on web site www.3dforest.eu or at wiki on our GitHub https://github.com/janekT/3DForest. \n\n"
                                                              "  AUTHORS:\n "
                                                              "\tJan Trochta j.trochta@gmail.com \n"
                                                              "\tMartin Krucek krucek.martin@gmail.com\n"

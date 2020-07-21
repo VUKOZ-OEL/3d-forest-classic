@@ -24,7 +24,7 @@
 
  int main(int argc, char *argv[])
 {
-    QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
+    QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
   QApplication app(argc, argv);
   //Q_INIT_RESOURCE(3dforest);
   app.setOrganizationName("VUKOZ v.v.i.");

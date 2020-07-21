@@ -1364,6 +1364,7 @@ Features Features::operator=(Features &kopie)
     t.m_pcaYLength = kopie.m_pcaYLength;
     t.m_meanCurvature = kopie.m_meanCurvature;
     t.m_triangulatedConcaveHull = kopie.m_triangulatedConcaveHull;
+    return *this;
 }
 void Features::setConvexArea(float a){m_convexArea = m_convexhull->getPolygonArea();}
 void Features::setConcaveArea(float a){m_concaveArea=m_concavehull->getPolygonArea();}
@@ -1609,7 +1610,7 @@ void TerrainFeatures::computeFeatures(std::vector<Features>& insiders,std::vecto
             kdtree.setInputCloud (boundary.at(u).getConcaveHull().getPolygon().get_Cloud());
             std::vector<int> pointIDv;
             std::vector<float> pointSDv;
-            for(int m =0; m < insiders.at(i).getConcaveHull().getPolygon().get_Cloud()->points.size(); m++)
+            for(int m =0; m < insiders.at(i).getConcaveHull().getPolygon().get_Cloud()->points.size(); m++)
             {
                 pcl::PointXYZI x = insiders.at(i).getConcaveHull().getPolygon().get_Cloud()->points.at(m);
                 if(kdtree.radiusSearch(x, radius, pointIDv, pointSDv) >1){
@@ -1718,7 +1719,7 @@ bool TerrainFeatures::findClusters(Cloud *input,float radius,  int minClusterSiz
             }
         }
         if(cluster.size()<minClusterSize ){
-            for(int m=0; m < cluster.size();m++)
+            for(int m=0; m < cluster.size();m++)
             {
                 usedPoint.at(cluster.at(m))=false;
             }
@@ -1989,13 +1990,13 @@ bool TerrainFeatures::computeStatistics(std::vector<float>& vec, float& avg, flo
 //    //std::cout<< "average: "<< avg << " range : " << range << " sd: " << sd<<"/n";
 }
 float TerrainFeatures::computeSlope(std::vector<float> vec){
-    
+    return 0;
 }
 void TerrainFeatures::useRadius(bool radius){
     m_useRadius = radius;
 }
 float TerrainFeatures::computeAspect(std::vector<float> vec){
-    
+    return 0;
 }
 float TerrainFeatures::computeSlope(std::vector<int> vec){
     // spocitat skon
