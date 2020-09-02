@@ -184,6 +184,7 @@ signals:
     
 private:
     float computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b);
+    float computeSlopeDegrees(pcl::PointXYZI& a, pcl::PointXYZI& b);
     float m_Radius;
     int m_Neighbors;
     bool m_useRadius = false;
