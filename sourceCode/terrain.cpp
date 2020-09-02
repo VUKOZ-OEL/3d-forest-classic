@@ -710,7 +710,7 @@ void Slope::execute()
             // spocitat skon
             for(int q=1; q < pointSDv.size(); q++)
             {
-                float s = computeSlope(x, m_TerrainCloud->get_Cloud()->points.at(pointIDv.at(q)));
+                float s = computeSlopeDegrees(x, m_TerrainCloud->get_Cloud()->points.at(pointIDv.at(q)));
                 sklon += s;
             }
             // udelat prumer
@@ -755,6 +755,15 @@ float Slope::computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b)
     if(dist ==0)
         return 0;
     float x =std::abs(a.z-b.z)/dist;
+    //std::cout<< "computeslope: " << x << "\n";
+    return x;
+}
+float Slope::computeSlopeDegrees(pcl::PointXYZI& a, pcl::PointXYZI& b)
+{
+    float dist = std::sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) +(a.z-b.z)*(a.z-b.z) );
+    if(dist ==0)
+        return 0;
+    float x =std::atan(std::abs(a.z-b.z)/dist)*180/M_PI;
     //std::cout<< "computeslope: " << x << "\n";
     return x;
 }
