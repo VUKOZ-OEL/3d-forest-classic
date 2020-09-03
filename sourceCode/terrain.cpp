@@ -714,7 +714,7 @@ void Slope::execute()
                 sklon += s;
             }
             // udelat prumer
-            float skl = sklon *100/pointSDv.size();
+            float skl = sklon /pointSDv.size();
             //std::cout<<"sklon: " << skl<< "\n";
             // ulozit do bodu
             cloudNewTerrain->points.at(i).x = x.x;
@@ -754,7 +754,7 @@ float Slope::computeSlope(pcl::PointXYZI& a, pcl::PointXYZI& b)
     float dist = std::sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y) +(a.z-b.z)*(a.z-b.z) );
     if(dist ==0)
         return 0;
-    float x =std::abs(a.z-b.z)/dist;
+    float x =std::abs(a.z-b.z)*100/dist;
     //std::cout<< "computeslope: " << x << "\n";
     return x;
 }
