@@ -669,7 +669,9 @@ void Slope::setOutputName(QString name)
 {
     m_Output->set_name(name);
 }
-
+void Slope::setPercent(bool percent){
+    m_percent = percent;
+}
 void Slope::execute()
 {
     // vem mracno
@@ -710,7 +712,12 @@ void Slope::execute()
             // spocitat skon
             for(int q=1; q < pointSDv.size(); q++)
             {
-                float s = computeSlopeDegrees(x, m_TerrainCloud->get_Cloud()->points.at(pointIDv.at(q)));
+                float s=0;
+                if (m_percent ==true)
+                    s= computeSlope(x, m_TerrainCloud->get_Cloud()->points.at(pointIDv.at(q)));
+                else
+                    s= computeSlopeDegrees(x, m_TerrainCloud->get_Cloud()->points.at(pointIDv.at(q)));
+                        
                 sklon += s;
             }
             // udelat prumer
@@ -799,6 +806,9 @@ void Aspect::setOutputName(QString name)
 {
     m_Output->set_name(name);
 }
+void Aspect::setSmer(bool smer){
+    m_smer = smer;
+}
 
 void Aspect::execute()
 {
@@ -844,12 +854,17 @@ void Aspect::execute()
             // smallest should be normal vector of plane
             vec = computeSmallestPCA(pointIDv);
             float aspect = computeAspect(vec);
+            int smer = computeDiretion(aspect);
             //std::cout<<"sklon: " << skl<< "\n";
             // ulozit do bodu
             cloudNewTerrain->points.at(i).x = x.x;
             cloudNewTerrain->points.at(i).y = x.y;
             cloudNewTerrain->points.at(i).z = x.z;
-            cloudNewTerrain->points.at(i).intensity = aspect;
+            if(m_smer==true)
+                cloudNewTerrain->points.at(i).intensity = aspect;
+            else
+                cloudNewTerrain->points.at(i).intensity = smer;
+                
             if (local_count++ % step_size == step_size-1)
             {
                 #pragma omp atomic
@@ -969,6 +984,28 @@ std::vector<float> Aspect::computeSmallestPCA (std::vector<int> pointsId){
 void Aspect::useRadius(bool radius)
 {
     m_useRadius = radius;
+}
+int Aspect::computeDiretion(float angle){
+    if( angle >= 67.5  && angle < 112.5 ) // N
+        return 1;
+    else if(angle >= 22.5  && angle < 67.5 )// NE
+        return 2;
+    else if(angle >= -22.5  && angle < 22.5 )// E
+        return 3;
+    else if(angle >= - 67.5 && angle < -22.5 )// SE
+        return 4;
+    else if(angle >= -112.5  && angle < -67.5 )// S
+        return 5;
+    else if(angle >= -157.5  && angle < -112.5 )// SW
+        return 6;
+    else if((angle >= -180  && angle < -157.5) || (angle >= 157.5  && angle <= 180))// W
+        return 7;
+    else if((angle >= 112.5  && angle < 157.5) )// NW
+        return 8;
+    else // not sure
+    {
+        return 0;
+    }
 }
 
 Curvature::Curvature()

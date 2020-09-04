@@ -170,6 +170,7 @@ public:
     void setNeighbors(int i);
     void setTerrainCloud(Cloud input);
     void setOutputName(QString name);
+    void setPercent(bool percent);
     void useRadius(bool radius);
     
     void execute();
@@ -190,6 +191,7 @@ private:
     bool m_useRadius = false;
     Cloud *m_TerrainCloud;
     Cloud *m_Output;
+    bool m_percent=false;
 };
 class Aspect : public QObject
 {
@@ -203,6 +205,8 @@ public:
     void setTerrainCloud(Cloud input);
     void setOutputName(QString name);
     void useRadius(bool radius);
+    void setSmer(bool smer);
+    int computeDiretion(float angle);
     
     void execute();
     void sendData();
@@ -222,6 +226,7 @@ private:
     bool m_useRadius = false;
     Cloud *m_TerrainCloud;
     Cloud *m_Output;
+    bool m_smer = false;
 };
 
  class Curvature : public QObject

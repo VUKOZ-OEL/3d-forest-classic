@@ -1857,6 +1857,7 @@ void MainWindow::slope()
     in->set_inputInt(tr("Number of surrounding points:"),"5");
     in->set_inputInt2(tr("radius in cm:"),"10");
     in->set_inputCheckBox("use radius instead of neighbor");
+    in->set_inputCheckBox2("use percent instead of degrees?");
 
     in->set_stretch();
     int dl = in->exec();
@@ -1873,6 +1874,7 @@ void MainWindow::slope()
         std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
         std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
         std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+        std::cout << "parametry - Use percent?: " << in->get_CheckBox2() << "\n";
 
         Slope *s = new Slope();
         s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
@@ -1880,6 +1882,7 @@ void MainWindow::slope()
         s->setNeighbors(in->get_intValue());
         s->setRadius(in->get_intValue2()/100.0);
         s->useRadius(in->get_CheckBox());
+        s->setPercent(in->get_CheckBox2());
 
         m_thread = new QThread();
 
@@ -1910,6 +1913,7 @@ void MainWindow::aspect()
     in->set_inputInt(tr("Number of surrounding points:"),"5");
     in->set_inputInt2(tr("radius in cm:"),"100");
     in->set_inputCheckBox("use radius instead of neighbor");
+    in->set_inputCheckBox2("use degrees instead of direction?");
 
     in->set_stretch();
     int dl = in->exec();
@@ -1926,6 +1930,7 @@ void MainWindow::aspect()
         std::cout << "parametry - input-pocet bodu: " << in->get_intValue() << "\n";
         std::cout << "parametry - input-radius: " << in->get_intValue2()/100.0 << "\n";
         std::cout << "parametry - Use radius?: " << in->get_CheckBox() << "\n";
+        std::cout << "parametry - Use percent?: " << in->get_CheckBox2() << "\n";
 
         Aspect *s = new Aspect();
         s->setTerrainCloud(Proj->get_Cloud(in->get_inputCloud1()));
@@ -1933,6 +1938,7 @@ void MainWindow::aspect()
         s->setNeighbors(in->get_intValue());
         s->setRadius(in->get_intValue2()/100.0);
         s->useRadius(in->get_CheckBox());
+        s->setSmer(in->get_CheckBox2());
 
         m_thread = new QThread();
 

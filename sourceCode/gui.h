@@ -79,6 +79,7 @@ public:
     /*!  set output cloud name. On line is example of possible name
         \param label label of edit line \param example possible name of new cloud */
   void set_inputCheckBox(QString label);
+    void set_inputCheckBox2(QString label);
     //!  set output cloud name
     /*!  set output cloud name. On line is example of possible name
         \param label label of edit line \param example possible name of new cloud */
@@ -171,6 +172,7 @@ public:
     void setSboxDouble(QString label, float dValue=1.5, float minV=0, float maxV=10);
     float getSboxValue();
   bool get_CheckBox();
+    bool get_CheckBox2();
    void set_outputDir(QString label, QString example);
   QString get_outputDir();
 
@@ -281,13 +283,17 @@ private:
     QLineEdit *intInput10;            /**< input integer value */
     bool intInputBool10;              /**< bool value if output cloud name is empty */
     bool isII10;                     /**< bool value if output cloud name is in proper format  */
-  QComboBox * outputType;          /**< List of output cloud types*/
-  bool isType;
+    QComboBox * outputType;          /**< List of output cloud types*/
+    bool isType;
     QComboBox * outputType2;          /**< List of output cloud types*/
     bool isType2;
-  bool isICHB;
-  bool CHB;
-  QCheckBox * CHBox;
+    bool isICHB;
+    bool CHB;
+    QCheckBox * CHBox;
+    
+    bool isICHB2;
+    bool CHB2;
+    QCheckBox * CHBox2;
     
     QDoubleSpinBox *sbox;
     bool isSBOX;

@@ -45,10 +45,11 @@ InputDialog::InputDialog( QWidget *parent)
     isII8 = false;
     isII9 = false;
     isII10 = false;
-  isType = false;
+    isType = false;
     isType2 = false;
-  isPath = false;
-  isICHB = false;
+        isPath = false;
+    isICHB = false;
+    isICHB2 = false;
   isList =false;
   isDir = false;
     isSBOX = false;
@@ -106,6 +107,13 @@ if(isII10 == true)
     else
       CHB = false;
   }
+    if(isICHB2 == true)
+    {
+      if(CHBox2->isChecked())
+        CHB2 = true;
+      else
+        CHB2 = false;
+    }
   if(isList ==true)
   {
     inputList =  listWidget->selectedItems();
@@ -215,7 +223,20 @@ void InputDialog::set_inputCheckBox(QString label)
   InputLayout->addWidget(labelbox);
   InputLayout->addWidget(CHBox);
   isICHB =true;
-
+}
+void InputDialog::set_inputCheckBox2(QString label)
+{
+  QLabel *labelbox2 = new QLabel();
+  labelbox2->setText(label);
+  CHBox2 = new QCheckBox();
+  if(CHBox2->checkState() == false)
+    CHBox2->setChecked(true);
+  CHB2 = true;
+  labelbox2->setBuddy(CHBox2);
+//layout
+  InputLayout->addWidget(labelbox2);
+  InputLayout->addWidget(CHBox2);
+  isICHB2 =true;
 }
 void InputDialog::set_description(QString text)
 {
@@ -841,6 +862,10 @@ QString InputDialog::get_outputType2()
 bool InputDialog::get_CheckBox()
 {
   return CHB;
+}
+bool InputDialog::get_CheckBox2()
+{
+  return CHB2;
 }
 QString InputDialog::get_outputDir()
 {
