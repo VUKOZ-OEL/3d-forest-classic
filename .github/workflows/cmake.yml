@@ -26,8 +26,10 @@ jobs:
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
       shell: bash
-      run:  brew install vtk boost eigen flann qt liblas
-            mkdir ${{runner.workspace}}/deps && cd deps  
+      run:  |
+            brew install vtk boost eigen flann qt liblas
+            mkdir ${{runner.workspace}}/deps
+            cd deps  
             mkdir pcl_build
             git clone https://github.com/PointCloudLibrary/pcl.git pcl_build
             curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch |git apply
