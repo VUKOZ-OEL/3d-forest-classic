@@ -29,8 +29,7 @@ jobs:
       run:  |
             brew install vtk boost eigen flann qt liblas
             mkdir ${{runner.workspace}}/deps
-            cd deps  
-            mkdir pcl_build
+            cd ${{runner.workspace}}/deps  
             git clone https://github.com/PointCloudLibrary/pcl.git pcl_build
             curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch |git apply
             cd pcl_build
