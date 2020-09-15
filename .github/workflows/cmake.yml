@@ -28,14 +28,7 @@ jobs:
       shell: bash
       run:  |
             brew install vtk boost eigen flann qt liblas
-            mkdir ${{runner.workspace}}/deps
-            cd ${{runner.workspace}}/deps  
-            git clone https://github.com/janekT/pcl.git pcl
-            mkdir pcl_build
-            cd pcl_build
-            # cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
-            # make
-            # make install
+
             
 
     - name: Configure 3DForest - Cmake
