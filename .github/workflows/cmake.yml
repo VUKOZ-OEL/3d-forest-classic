@@ -33,9 +33,9 @@ jobs:
             git clone https://github.com/janekT/pcl.git pcl
             mkdir pcl_build
             cd pcl_build
-            cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
-            make
-            make install
+            # cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
+            # make
+            # make install
             
 
     - name: Configure 3DForest - Cmake
