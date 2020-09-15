@@ -30,10 +30,15 @@ jobs:
             brew install vtk boost eigen flann qt liblas
             mkdir ${{runner.workspace}}/deps
             cd ${{runner.workspace}}/deps  
-            git clone https://github.com/PointCloudLibrary/pcl.git pcl_build
+            git clone https://github.com/PointCloudLibrary/pcl.git pcl
+            cd pcl
             curl https://patch-diff.githubusercontent.com/raw/PointCloudLibrary/pcl/pull/3763.patch |git apply
-            cd pcl_build
-
+            cd ..
+            mkdir pcl_build
+            cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
+            make
+            make install
+            
 
     - name: Configure CMake
       # Use a bash shell so we can use the same syntax for environment variable
@@ -49,7 +54,7 @@ jobs:
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE
+      run: cmake --build . --config $BUILD_TYPE -DQt5Widgets_DIR="/usr/local/opt/qt/lib/cmake/Qt5Widgets"
 
     - name: Test
       working-directory: ${{runner.workspace}}/build
