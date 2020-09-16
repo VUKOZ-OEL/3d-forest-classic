@@ -37,7 +37,7 @@ jobs:
             make
             make install
             cd ..
-            git clone https://github.com/janekT/pcl.git pcl
+            git clone https://github.com/janekT/pcl/tree/pointpicking.git pcl
             mkdir pcl_build
             cd pcl_build
             cmake -S../pcl -DVTK_DIR="/usr/local/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
