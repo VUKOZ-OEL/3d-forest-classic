@@ -27,7 +27,7 @@ jobs:
       # We'll use this as our working directory for all subsequent commands
       shell: bash
       run:  |
-            brew install vtk boost eigen flann qt liblas
+            brew install vtk boost eigen flann qt
             mkdir ${{runner.workspace}}/deps
             cd ${{runner.workspace}}/deps
             git clone https://github.com/libLAS/libLAS.git liblas
