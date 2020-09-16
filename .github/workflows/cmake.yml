@@ -28,6 +28,7 @@ jobs:
       shell: bash
       run:  |
             brew install vtk boost eigen flann qt libgeotiff
+            export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
             mkdir ${{runner.workspace}}/deps
             cd ${{runner.workspace}}/deps
             git clone https://github.com/libLAS/libLAS.git liblas
