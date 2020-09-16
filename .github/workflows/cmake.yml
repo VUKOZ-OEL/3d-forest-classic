@@ -36,6 +36,7 @@ jobs:
             cmake -S../liblas
             make
             make install
+            cd ..
             git clone https://github.com/janekT/pcl.git pcl
             mkdir pcl_build
             cd pcl_build
