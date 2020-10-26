@@ -101,7 +101,7 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
  MainWindow::MainWindow()
 {
   //Q_INIT_RESOURCE(3dforest);
-    setWindowTitle ( tr("3D Forest - Forest lidar data processing tool") );
+    setWindowTitle ( tr("3D Forest - Forest Lidar Data Processing Tool") );
 
 //QVTKwidget - visualizer
     qvtkwidget = new QVTKOpenGLWidget(this);
@@ -187,7 +187,7 @@ void MainWindow::newProject()
 void MainWindow::openProject()
 {
 //SET 3DF FILE
-  QString fileName = QFileDialog::getOpenFileName(this,tr("Open project file"),"",tr("files (*.3df)"));
+  QString fileName = QFileDialog::getOpenFileName(this,tr("Open Project File"),"",tr("files (*.3df)"));
   if (fileName.isEmpty())
     return;
   closeProject();
@@ -228,8 +228,8 @@ void MainWindow::openProject(QString path)
       if(info.absoluteDir() != Proj->get_Path())
       {
         QMessageBox::StandardButton reply;
-         reply = QMessageBox::question(0,tr("ddd"),("The saved path of the project files and the actual path are different. Maybe you can try to import the projectinstead of opennig."
-                                                        "Do you want to use the new one and look for project files in actual directory?"),QMessageBox::Yes|QMessageBox::No);
+         reply = QMessageBox::question(0,tr("ddd"),("The actual path differs from the path saved in the project."
+                                                        "Do you want to use the actual path and look up the project files in the directory?"),QMessageBox::Yes|QMessageBox::No);
         if(reply == QMessageBox::Yes)
         {
           Proj->set_path(info.absoluteDir().absolutePath());
@@ -334,7 +334,7 @@ void MainWindow::closeProject()
   crownSurfaceBy3DHullT->setEnabled(false);
   crownSurfaceBySectionsT->setEnabled(false);
 
-  setWindowTitle ( tr("3D Forest - Forest lidar data processing tool") );
+  setWindowTitle ( tr("3D Forest - Forest Lidar Data Processing Tool") );
   qvtkwidget->update();
 }
 void MainWindow::importProject()
@@ -679,7 +679,7 @@ void MainWindow::importTXT(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
 
         if( fields < 3)
         {
-            QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Improt failed."));
+            QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Import failed."));
             return;
         }
         for(int q=0; q < (data.size()-fields); q+=fields)
@@ -702,7 +702,7 @@ void MainWindow::importTXT(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
         return;
     }
     else {
-        QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Improt failed."));
+        QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Import failed."));
         return;
     }
 }
@@ -737,7 +737,7 @@ void MainWindow::importTXTnonStandard(QString file, pcl::PointCloud<pcl::PointXY
         firstLine = coordsSemicolon;
     }
     else{
-        QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Improt failed."));
+        QMessageBox::warning(this, tr("Error"),tr("Cannot parse the imported file. Import failed."));
         return;
     }
 
@@ -939,12 +939,12 @@ void MainWindow::importPCD(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
 void MainWindow::importBaseCloud()
 {
   QString selectedFilter;
-  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select file"),Proj->get_Path(),
-                                                 tr("All supported files (*.pcd *.txt *.xyz *.las  *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
+  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select File"),Proj->get_Path(),
+                                                 tr("All Supported Files (*.pcd *.txt *.xyz *.las  *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
                                                  &selectedFilter);
   if (ls.isEmpty())
   {
-    QMessageBox::warning(this,"ERROR","No file selected");
+    QMessageBox::warning(this,"ERROR","No File Selected");
     return;
   }
 //qWarning()<<"vybrano";
@@ -997,12 +997,12 @@ void MainWindow::importBaseCloud()
 void MainWindow::importTerrainFile()
 {
   QString selectedFilter;
-  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select file"),Proj->get_Path(),
-                                                 tr("All supported files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
+  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select File"),Proj->get_Path(),
+                                                 tr("All Supported Files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
                                                  &selectedFilter);
   if (ls.isEmpty())
   {
-    QMessageBox::warning(this,"ERROR","No file selected");
+    QMessageBox::warning(this,"ERROR","No File Selected");
     return;
   }
   for(int i=0;i<ls.size(); i++)
@@ -1057,12 +1057,12 @@ void MainWindow::importTerrainFile()
 void MainWindow::importVegeCloud()
 {
   QString selectedFilter;
-  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select file"),Proj->get_Path(),
-                                                 tr("All supported files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
+  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select File"),Proj->get_Path(),
+                                                 tr("All Supported Files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
                                                  &selectedFilter);
   if (ls.isEmpty())
   {
-    QMessageBox::warning(this,"ERROR","No file selected");
+    QMessageBox::warning(this,"ERROR","No File Selected");
     return;
   }
   for(int i=0;i<ls.size(); i++)
@@ -1109,12 +1109,12 @@ void MainWindow::importVegeCloud()
 void MainWindow::importTreeCloud()
 {
   QString selectedFilter;
-  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select file"),Proj->get_Path(),
-                                                 tr("All supported files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
+  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select File"),Proj->get_Path(),
+                                                 tr("All Supported Files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
                                                  &selectedFilter);
   if (ls.isEmpty())
   {
-    QMessageBox::warning(this,"ERROR","No file selected");
+    QMessageBox::warning(this,"ERROR","No File Selected");
     return;
   }
   for(int i=0;i<ls.size(); i++)
@@ -1163,12 +1163,12 @@ void MainWindow::importTreeCloud()
 void MainWindow::importOstCloud()
 {
   QString selectedFilter;
-  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select file"),Proj->get_Path(),
-                                                 tr("All supported files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
+  QStringList ls = QFileDialog::getOpenFileNames(this,tr("Select File"),Proj->get_Path(),
+                                                 tr("All Supported Files (*.pcd *.txt *.xyz *.las *.pts *.ptx);;PCD files (*.pcd);;TXT files (*.txt);;LAS files (*.las);;PTS files (*.pts);;PTX files (*.ptx)" ),
                                                  &selectedFilter);
   if (ls.isEmpty())
   {
-    QMessageBox::warning(this,"ERROR","No file selected");
+    QMessageBox::warning(this,"ERROR","No File Selected");
     return;
   }
   for(int i=0;i<ls.size(); i++)
@@ -1498,12 +1498,13 @@ void MainWindow::manualAdjust()
 {
   InputDialog *in = new InputDialog(this);
   in->set_path(Proj->get_Path());
-  in->set_title("Manual adjustment of terrain cloud");
-  in->set_description("\tMethod used for inspection and manual editing of terrain pointclouds."
-                      " Noise points (the points not representing ground surface) can be removed.\n"
-                      "\tFor editing please press key 'x' and draw a selection box with left mouse button.");
-  in->set_inputCloud1("Input terrain cloud:",get_terrainNames());
-  in->set_outputCloud1("Output cloud of deleted points:","terrain-rest");
+  in->set_title("Manual Adjustment of Terrain Cloud");
+  in->set_description("\tThis tool serves for examination and manual editing of terrain point clouds."
+                      " Noise points that do not represent the ground surface can be removed. \n"
+                      "\tFor editing please press the \'x\' key and draw a selection box by dragging a mouse."
+                      " Selected points will be deleted from the cloud representing the terrain and saved separately.");
+  in->set_inputCloud1("Input Terrain Cloud:",get_terrainNames());
+  in->set_outputCloud1("Output Cloud of Deleted Points:","terrain-rest");
   in->set_stretch();
   int dl = in->exec();
 
@@ -1526,7 +1527,7 @@ void MainWindow::manualAdjust()
 
     //spustit editacni listu
     addToolBarBreak ();
-    editBar = new QToolBar(tr("edit bar"),this);
+    editBar = new QToolBar(tr("Edit Bar"),this);
     editBar->setIconSize(QSize(24,24));
     this->addToolBar(editBar);
     stopE = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop EDIT");
@@ -1587,16 +1588,16 @@ void MainWindow::IDWslot()
 {
    //inputDialog
   InputDialog *in = new InputDialog(this);
-  in->set_title(tr("Inverse distance weighted algorithm for terrain interpolation."));
+  in->set_title(tr("Inverse distance weighting (IDW) algorithm for terrain interpolation"));
   in->set_path(Proj->get_Path());
-  in->set_description(tr("IDW interpolates a new surface in a given resolution from the input terrain cloud. "
+  in->set_description(tr("IDW interpolates a new surface within a given resolution from the terrain cloud input. "
                          "It serves for filling areas with missing data in the original terrain cloud. "
-                         "User specifies only the resolution of regular grid in [cm] and the number of surrounding points "
-                         "of the original cloud used for interpolation. The output is a new terrain cloud of interpolated points."));
-  in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-  in->set_outputCloud1(tr("Output cloud of ground:"),"idw-");
-  in->set_inputInt(tr("Output resolution in cm:"),"20");
-  in->set_inputInt2(tr("Number of surrounding points:"),"10");
+                         "User specifies the resolution of regular grid in [cm] and the number of surrounding points "
+                         "of the original cloud used for the interpolation. The output is a new terrain cloud that consists of the interpolated points."));
+  in->set_inputCloud1(tr("Input Terrain Cloud:"), get_terrainNames());
+  in->set_outputCloud1(tr("Output Cloud of Ground:"),"idw-");
+  in->set_inputInt(tr("Output Resolution in [cm]:"),"20");
+  in->set_inputInt2(tr("Number of Surrounding Points:"),"10");
 
   in->set_stretch();
   int dl = in->exec();
@@ -1764,7 +1765,7 @@ void MainWindow::slice()
 {
   InputDialog *in = new InputDialog(this);
   in->set_path(Proj->get_Path());
-  in->set_title("Split terrain cloud int strips");
+  in->set_title("Split terrain cloud into strips");
   in->set_description("\tMethod for splitting the cloud into slices with given width for easier adjustment.");
   in->set_inputInt("Width of the slice (m):","5");
   in->set_stretch();
@@ -1849,15 +1850,15 @@ void MainWindow::sliceStop()
 void MainWindow::slope()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute slope of terrain."));
+    in->set_title(tr("Terrain Slope"));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("Compute slope of terrain based on neighbors. Neighborhood can be estimaetd by number of surrounding points or by radius."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"slope");
-    in->set_inputInt(tr("Number of surrounding points:"),"5");
-    in->set_inputInt2(tr("radius in cm:"),"10");
-    in->set_inputCheckBox("use radius instead of neighbor");
-    in->set_inputCheckBox2("use percent instead of degrees?");
+    in->set_description(tr("This tool computes the slope of terrain based on its neighborhood. The neighborhood can be defined by the number of surrounding points or by the radius."));
+    in->set_inputCloud1(tr("Input Terrain Cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output Ground Cloud:"),"Slope");
+    in->set_inputInt(tr("Number of Surrounding Points:"),"5");
+    in->set_inputInt2(tr("Radius in [cm]:"),"10");
+    in->set_inputCheckBox("Use radius.");
+    in->set_inputCheckBox2("Use percentage.");
 
     in->set_stretch();
     int dl = in->exec();
@@ -1905,15 +1906,15 @@ void MainWindow::slope()
 void MainWindow::aspect()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute aspect of terrain."));
+    in->set_title(tr("Aspect of Terrain."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("Compute Aspect of terrain based on neighbors. Neighborhood can be defined by number of surrounding points or by radius."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"aspect");
-    in->set_inputInt(tr("Number of surrounding points:"),"5");
-    in->set_inputInt2(tr("radius in cm:"),"100");
-    in->set_inputCheckBox("use radius instead of neighbor");
-    in->set_inputCheckBox2("use degrees instead of direction?");
+    in->set_description(tr("This tool computes the aspect of terrain based on its neighborhood. The neighborhood can be defined by the number of surrounding points or by the radius."));
+    in->set_inputCloud1(tr("Input Terrain Cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output Ground Cloud:"),"aspect");
+    in->set_inputInt(tr("Number of Surrounding Points:"),"5");
+    in->set_inputInt2(tr("Radius in [cm]:"),"100");
+    in->set_inputCheckBox("Use radius.");
+    in->set_inputCheckBox2("Use degrees.");
 
     in->set_stretch();
     int dl = in->exec();
@@ -1961,14 +1962,14 @@ void MainWindow::aspect()
 void MainWindow::curvature()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute  terrain curvature."));
+    in->set_title(tr("Terrain Curvature."));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("Compute terrain curvature based on neighbors. Neighbor canbe estimated by number of points or by radius. Curvature is computed as derivate of Intensity value. For terrain curvature input cloud should be slope layer. computed by Slope method. "));
-    in->set_inputCloud1(tr("Input cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"curvature");
-    in->set_inputInt(tr("curvature limit:"),"5");
-    in->set_inputInt2(tr("radius in cm:"),"300");
-    in->set_inputCheckBox("use radius instead of neighbor");
+    in->set_description(tr("This tool computes the terrain curvature based on its neighborhood. The neighborhood can be defined by the number of surrounding points or by the radius. The terrain curvature is computed as a derivate of intensity value. The terrain curvature input cloud has to be used the slope output cloud as computed by the slope tool."));
+    in->set_inputCloud1(tr("Input Cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output Ground Cloud:"),"curvature");
+    in->set_inputInt(tr("Curvature Limit:"),"5");
+    in->set_inputInt2(tr("Radius in [cm]:"),"300");
+    in->set_inputCheckBox("Use radius.");
 
     in->set_stretch();
     int dl = in->exec();
@@ -2013,14 +2014,14 @@ void MainWindow::curvature()
 void MainWindow::hillShade()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute hillshade of terrain."));
+    in->set_title(tr("Terrain Hillshade"));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("Compute hillshade of terrain based on neighbor points. Neighbor can be estimated by number of point or by radius."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"hillShade");
-    in->set_inputInt(tr("Number of surrounding points:"),"5");
-    in->set_inputInt2(tr("radius in cm:"),"10");
-    in->set_inputCheckBox("use radius instead of neighbor");
+    in->set_description(tr("This tool computes the hillshade of terrain based on its neighborhood. The neighborhood can be defined by the number of surrounding points or by the radius."));
+    in->set_inputCloud1(tr("Input Terrain Cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output Ground Cloud of ground:"),"hillShade");
+    in->set_inputInt(tr("Number of Surrounding Points:"),"5");
+    in->set_inputInt2(tr("Radius in [cm]:"),"10");
+    in->set_inputCheckBox("Use radius.");
     
     in->set_stretch();
     int dl = in->exec();
@@ -2066,14 +2067,14 @@ void MainWindow::hillShade()
 void MainWindow::pointDensity()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute point density of cloud."));
+    in->set_title(tr("Cloud Point Density"));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute hillshade of terrain based on number of neighbors."));
-    in->set_inputCloud1(tr("Input terrain cloud:"), get_terrainNames());
-    in->set_outputCloud1(tr("Output cloud of ground:"),"density");
-    in->set_inputInt(tr("Number of surrounding points:"),"5");
-    in->set_inputInt2(tr("radius in cm:"),"100");
-    in->set_inputCheckBox("use radius instead of neighbor");
+    in->set_description(tr("This tool computes the cloud point density based on its neighborhood. The neighborhood can be defined by the number of surrounding points or by the radius."));
+    in->set_inputCloud1(tr("Input Terrain Cloud:"), get_terrainNames());
+    in->set_outputCloud1(tr("Output Ground Cloud"),"density");
+    in->set_inputInt(tr("Number of Surrounding Points:"),"5");
+    in->set_inputInt2(tr("Radius in [cm]:"),"100");
+    in->set_inputCheckBox("Use radius.");
     
     in->set_stretch();
     int dl = in->exec();
@@ -2120,20 +2121,20 @@ void MainWindow::terrainDiff()
 {
     // okno
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Compute Terrain features ."));
+    in->set_title(tr("Terrain Features"));
     in->set_path(Proj->get_Path());
-    in->set_description(tr("compute terrain features (similar places) based on its area concave, convex and its ratio, number of points with similar value in intensity, axis length."));
-    in->set_inputCloud1(tr("Input Curvature cloud:"), get_terrainNames());
-    in->set_inputInt(tr("MInimal intensity value limit") ,"-4");
-    in->set_inputInt7(tr("Maximal intenstity value limit:"),"4");
-    in->set_inputInt2(tr("Minimal point size of feature:"),"35");
-    in->set_inputInt10(tr("Maximal point size of feature:"),"350");
-    in->set_inputInt3(tr("Minimal axis lenght:"),"3");
-    in->set_inputInt4(tr("Maximal axis length:"),"15");
-    in->set_inputInt5(tr("Minimal area:"),"14");
-    in->set_inputInt6(tr("Maximal area of feature:"),"100");
-    in->set_inputInt8(tr("Min axis ratio in %:"),"40");
-    in->set_inputInt9(tr("Min area ratio in %:"),"70");
+    in->set_description(tr("This tool computes the terrain features (similar places) based on its area concave or convex characteristic, their ratio, number of points with a similar value of intensity, and axis length."));
+    in->set_inputCloud1(tr("Input Curvature Cloud:"), get_terrainNames());
+    in->set_inputInt(tr("MInimal Intensity Value Limit") ,"-4");
+    in->set_inputInt7(tr("Maximal Intenstity Value Limit:"),"4");
+    in->set_inputInt2(tr("Minimal Point Size of Feature:"),"35");
+    in->set_inputInt10(tr("Maximal Point Size of Feature:"),"350");
+    in->set_inputInt3(tr("Minimal Axis Lenght:"),"3");
+    in->set_inputInt4(tr("Maximal Axis Length:"),"15");
+    in->set_inputInt5(tr("Minimal Area:"),"14");
+    in->set_inputInt6(tr("Maximal Area of Feature:"),"100");
+    in->set_inputInt8(tr("Min Axis Ratio in [%]:"),"40");
+    in->set_inputInt9(tr("Min Area Ratio in [%]:"),"70");
     
     
    // in->set_inputCheckBox("use radius instead of neighbor");
@@ -2209,8 +2210,8 @@ void MainWindow::exportFeaturesAtt()
     // export all features attriubtes into text file
 
     ExportFeaturesDialog *exdialog = new ExportFeaturesDialog(this);
-    exdialog->setDescription("\tThe tool for exporting features parameters into formatted text file. "
-                              "You can select prefix of files which will be created, separator of field and files that shloud be created."
+    exdialog->setDescription("\tThis tool serves for exporting feature parameters into formatted text file. "
+                              "The prefix, and the separator within the exported .txt file have to be specified."
                               " Polygon files are using WKT geom field that stores polygons - convave and convex.");
     int dl = exdialog->exec();
     
@@ -2343,17 +2344,16 @@ void MainWindow::manualSelect()
   names << get_vegetationNames() << get_ostNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Manual tree segmentation");
+  in->set_title("Manual Tree Segmentation");
   in->set_path(Proj->get_Path());
-  in->set_description("\tManual selection tool serving for segmentation of vegetation cloud into single trees. "
-                      "You can manually delete points that do not belong to the target tree.\n"
-                      "\tFor editing please press key 'x' and drag and draw a selection box by a mouse with left mouse button. "
-                      "Selected points will be deleted from the view.\n"
-                      "\tRemaining points representing a target tree will be saved as a separate tree cloud in the dialog box that "
-                      "follows after Stop EDIT. After saving the single tree cloud you can choose if you want to edit a next tree or you want "
-                      "to quit the tree segmentation.");
+  in->set_description("\tThis tool serves for manual segmentation of vegetation cloud and creation of single tree clouds. "
+                      "The points that do not belong to the target tree can be deleted manually.\n"
+                      "\t For editing please press the \'x\' key and draw a selection box by dragging a mouse."
+                      " Selected points will be deleted from the view.\n"
+                      "\tThe points representing a target tree will be saved as a separate tree cloud by “Stop EDIT” icon that ends editing mode. "
+                      "The filename of the new tree cloud has to be set. Once the segmented tree is saved, another segmentation process can be started (all the removed but unsegmented points will reappear) or terminated. ");
   in->set_inputCloud1("Input Vegetation cloud:",names);
-  in->set_outputCloud1("Output cloud of deleted points:","vegetation-rest");
+  in->set_outputCloud1("Output Cloud of Deleted Points:","vegetation-rest");
   in->set_stretch();
   int dl = in->exec();
 
@@ -2376,20 +2376,20 @@ void MainWindow::manualSelect()
 
     //spustit editacni listu
     addToolBarBreak ();
-    editBar = new QToolBar(tr("edit bar"),this);
+    editBar = new QToolBar(tr("Edit Bar"),this);
     editBar->setIconSize(QSize(24,24));
     this->addToolBar(editBar);
 
-    QAction *stopEd = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop EDIT");
+    QAction *stopEd = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop Edit");
     connect(stopEd,SIGNAL(triggered()),this,SLOT(manualSelectStop()) );
 
-    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"undo");
+    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"Undo");
     connect(undoAct,SIGNAL(triggered()),this,SLOT(undo()) );
 
-    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide editing cloud");
+    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide the edit cloud.");
     connect(displEC,SIGNAL(triggered()),this,SLOT(displayHideEditCloud()) );
 
-    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop edit without saving anything");
+    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop editing without saving.");
     connect(exitEC,SIGNAL(triggered()),this,SLOT(manualSelectExit()) );
 
 
@@ -2415,7 +2415,7 @@ void MainWindow::manualSelectStop()
   bool ok;
   while (name.isEmpty())
   {
-    name = QInputDialog::getText(this, tr("Name of new tree File"),tr("e.g. tree_id"),QLineEdit::Normal,tr("id_"),&ok );
+    name = QInputDialog::getText(this, tr("New File Name of the Tree"),tr("e.g. tree_id"),QLineEdit::Normal,tr("id_"),&ok );
     if(!ok )
     return;
   }
@@ -2425,7 +2425,7 @@ void MainWindow::manualSelectStop()
   bool owrt=false;
   while(treefile.exists() && owrt == false)
   {
-    QMessageBox::StandardButton rewrite = QMessageBox::question(this,tr("Overwrite file?"),tr("File with given name exist. Do you wish to overwrite file?"),QMessageBox::Yes|QMessageBox::No);
+    QMessageBox::StandardButton rewrite = QMessageBox::question(this,tr("Overwrite file?"),tr("A file with the same name already exists. Do you want to overwrite the file?"),QMessageBox::Yes|QMessageBox::No);
     if(rewrite == QMessageBox::Yes)
       owrt=true;
     else
@@ -2445,8 +2445,8 @@ void MainWindow::manualSelectStop()
 
 //ask if continue
   QMessageBox *msgBox =  new QMessageBox(this);
-	msgBox->setText("Continue editting?");
-	msgBox->setInformativeText("Do you want to continue editting the cloud?");
+	msgBox->setText("Continue editing?");
+	msgBox->setInformativeText("Do you want to continue editing the cloud?");
 	msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -2497,24 +2497,24 @@ QStringList method ;
   names2 << get_terrainNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Automatic segmentation");
+  in->set_title("Automatic Segmentation");
   in->set_path(Proj->get_Path());
-  in->set_description("\tAutomatic segmentation method for extraction of individual trees. You have to specify the vegetation cloud containing trees and the terrain cloud for estimating tree base position."
-                      "Input distance refers to a voxel size. All computation are based on points inside voxel and on distance of voxels. so be carefull with it"
-                      "\t Next option is connected with method you want to use. all methods(slope, intensity, PCA) compute range of values from 0 to 100 (100 is the best). You have to choose threshold where it shloud be counted as tree part or not."
-                      "\tMultiplicator refers to input distance and set how far should be searching for another voxel."
-                      " prefix is how the tree will be saved, how the rest of points will be saved and last one reffers to method used for tree description. ");
-  in->set_inputCloud1("Input Vegetation cloud:",names);
-  in->set_inputCloud2("Input terrain cloud:",names2);
-  in->set_inputInt("Input distance:","4");
-  in->set_inputInt2("input range in percent 0-100:","70");
-  in->set_inputInt3("set multiplication value:","2");
-  in->set_inputInt4("set number of elements:","150");
-    in->setSboxDouble("Distance from terrain", 1.6);
+  in->set_description("\tThis tool serves for automatic segmentation of individual trees. There are ten inputs needed to start. "
+                      " The vegetation and terrain clouds of interests as input clouds. The voxel size, descriptor type (slope, intensity, PCA), descriptor threshold value (%), "
+                      " amount of iterations, number of voxels in element, and the distance from terrain, as well as the method itself, are explained in detail on the wiki section on our GitHub https://github.com/janekT/3DForest. "
+                      " The cloud prefix and non-segmented points output name define the output.You have to specify the vegetation cloud containing trees and the terrain cloud for estimating tree base position."
+                      " All computations are based on points inside voxel and on distance of voxels. ");
+  in->set_inputCloud1("Input Vegetation Cloud:",names);
+  in->set_inputCloud2("Input Terrain Cloud:",names2);
+  in->set_inputInt("Voxel Size:","4");
+  in->set_inputInt2("Descriptor Threshold Value in [%] 0-100:","70");
+  in->set_inputInt3("Amount of Iterations:","2");
+  in->set_inputInt4("Number of Voxels in Element:","150");
+    in->setSboxDouble("Distance from Terrain", 1.6);
 
-  in->set_outputCloud1("set prefix of clouds:","ID");
-  in->set_outputCloud2("output of not segmented points:","vegetation-rest");
-    in->set_outputType("select type of descriptor:", method);
+  in->set_outputCloud1("Set Cloud Prefix:","ID");
+  in->set_outputCloud2("Output of Non-segmented Points:","vegetation-rest");
+    in->set_outputType("Descriptor:", method);
   in->set_stretch();
   int dl = in->exec();
 
@@ -2594,7 +2594,7 @@ void MainWindow::eraseSelectedClouds()
   in->set_title("Erase Clouds");
   in->set_path(Proj->get_Path());
   in->set_description("\tVymaze vybrane mracna z projektu i disku bez dalsich dotazu jestli to fakt chces udelat !!!!");
-  in->set_inputList("Input cloud:",get_allNames());
+  in->set_inputList("Input Cloud:",get_allNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -2622,13 +2622,14 @@ void MainWindow::eraseSelectedClouds()
 void MainWindow::treeEdit()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Manual editing of trees");
+  in->set_title("Tree Cloud Edit");
   in->set_path(Proj->get_Path());
-  in->set_description("\tVisual inspection of tree cloud and removal of any points not representing the target tree."
-                      "For editing please press key 'x' and draw a selection box by dragging the mouse with left mouse click. "
-                      "Selected points will be deleted from the tree cloud and saved into a new file; the rest will stay in the tree cloud.");
-  in->set_inputCloud1("Input Tree cloud:",get_treeNames());
-  in->set_outputCloud1("Output cloud of deleted points:","tree-rest");
+  in->set_description("\tThis tool serves for visual inspection of tree cloud and editing. "
+                      " The points that do not belong to the target tree cloud can be deleted manually.\n"
+                      "\t For editing please press the \'x\' key and draw a selection box by dragging a mouse."
+                      " Selected points will be deleted from tree cloud and saved into a new file.");
+  in->set_inputCloud1("Input Tree Cloud:",get_treeNames());
+  in->set_outputCloud1("Output Cloud of Deleted Points:","tree-rest");
   in->set_stretch();
   int dl = in->exec();
 
@@ -2652,17 +2653,17 @@ void MainWindow::treeEdit()
 
     //spustit editacni listu
     addToolBarBreak ();
-    editBar = new QToolBar(tr("edit bar"),this);
+    editBar = new QToolBar(tr("Edit Bar"),this);
     editBar->setIconSize(QSize(24,24));
     this->addToolBar(editBar);
-    QAction *stopTE = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop EDIT");
+    QAction *stopTE = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop Edit");
     connect(stopTE,SIGNAL(triggered()),this,SLOT(treeEditStop()) );
-    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"undo");
+    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"Undo");
     connect(undoAct,SIGNAL(triggered()),this,SLOT(undo()) );
     undopoint.clear();
-    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide editing cloud");
+    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide the edited cloud.");
     connect(displEC,SIGNAL(triggered()),this,SLOT(displayHideEditCloud()) );
-    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop edit without saving anything");
+    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop editing without saving.");
     connect(exitEC,SIGNAL(triggered()),this,SLOT(manualSelectExit()) );
 
     treeWidget->allItemOFF();
@@ -2698,12 +2699,13 @@ void MainWindow::treeEditStop()
 void MainWindow::dbhCloudEdit()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Manual edit of trees");
+  in->set_title("DBH Cloud Edit");
   in->set_path(Proj->get_Path());
-  in->set_description("\tManual editing of the pointcloud used for DBH computation. "
-                      "Exclusion of outliers from the DBH cloud can improve calculation of DBH. "
-                      "For editing please press key 'x' and draw a selection box by dragging the mouse with left mouse click. Selected points will be temporarily excluded from the DBH computation.");
-  in->set_inputCloud1("Input Tree cloud:",get_treeNames());
+  in->set_description("\tThis tool serves for the manual editing of the point cloud used for the DBH computation. "
+                      "Exclusion of outliers from the DBH cloud can improve the resulted DBH value. "
+                      "\t For editing please press the \'x\' key and draw a selection box by dragging a mouse."
+                      " Selected points will be temporarily excluded from the DBH computation.");
+  in->set_inputCloud1("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -2715,7 +2717,7 @@ void MainWindow::dbhCloudEdit()
     //check if tree has dbhcloud
     if(Proj->get_TreeCloud(in->get_inputCloud1()).get_pose().z == -1 && Proj->get_TreeCloud(in->get_inputCloud1()).get_pose().y == -1 && Proj->get_TreeCloud(in->get_inputCloud1()).get_pose().z == -1)
     {
-      QMessageBox::warning(this, ("cannot edit DBH Cloud"), ("There is no position computed for selected tree. Please compute position and then you can compute DBh or change its DBH cloud. "));
+      QMessageBox::warning(this, ("Cannot edit the DBH cloud."), ("There is no base position computed for selected tree. Please compute the base position before the DBH estimation or choose different DBH cloud. "));
       return;
     }
 
@@ -2737,14 +2739,14 @@ void MainWindow::dbhCloudEdit()
     editBar = new QToolBar(tr("edit bar"),this);
     this->addToolBar(editBar);
     editBar->setIconSize(QSize(24,24));
-    QAction *stopTE = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop EDIT");
+    QAction *stopTE = editBar->addAction(QPixmap(":/images/editBar/stopEdit.png"),"Stop Edit");
     connect(stopTE,SIGNAL(triggered()),this,SLOT(treeEditStop()) );
-    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"undo");
+    QAction *undoAct = editBar->addAction(QPixmap(":/images/editBar/undo.png"),"Undo");
     connect(undoAct,SIGNAL(triggered()),this,SLOT(undo()) );
     undopoint.clear();
-    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide editing cloud");
+    QAction *displEC = editBar->addAction(QPixmap(":/images/editBar/displayEditCloud.png"),"Display/hide edited cloud");
     connect(displEC,SIGNAL(triggered()),this,SLOT(displayHideEditCloud()) );
-    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop edit without saving anything");
+    QAction *exitEC = editBar->addAction(QPixmap(":/images/editBar/exitEdit.png"),"Stop editing without saving.");
     connect(exitEC,SIGNAL(triggered()),this,SLOT(manualSelectExit()) );
 
     treeWidget->allItemOFF();
@@ -2771,10 +2773,9 @@ void MainWindow::treeAtributes()
 {
 //TODO: volit ktere parametry budou zapsany
   ExportAttr *exdialog = new ExportAttr (this);
-  exdialog->set_description("\tThe tool for exporting tree parameters into formatted text file. "
-                            "You can select tree(s) for which wants to export the parameters, "
-                            " choose the parameters to export and set the separator of fields in the text file. "
-                            "The tool exports currently computed values.");
+  exdialog->set_description("\tThis tool serves for exporting tree parameters into formatted text files. "
+                              "The trees, the tree parameters, and the separator within the exported .txt file have to be specified. "
+                              "The tool exports currently computed values only.");
   //exdialog->set_trees(names);
   exdialog->set_list(get_treeNames());
 
@@ -2903,9 +2904,9 @@ void MainWindow::convexhull()
   in->set_title("Compute convex planar projection of trees");
   in->set_path(Proj->get_Path());
   in->set_description("\tThe method is based on the convex hull of the tree cloud(s) orthogonally projected to the horizontal plain. "
-                      "This method provides polygon of maximal projected area occupied by the tree. "
-                      "The polygon is displayed at the height of tree base position.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
+                      "This method provides polygon of the maximal projected area occupied by the tree. "
+                      "The polygon is displayed at the height of the tree base position.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
 
   in->set_stretch();
   int dl = in->exec();
@@ -3006,7 +3007,7 @@ void MainWindow::convexhull_HideAll()
 void MainWindow::concavehull()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute concave planar projection of trees");
+  in->set_title("Compute Concave planar projection of trees");
   in->set_path(Proj->get_Path());
   in->set_description("\tThe tool for computing and display of concave planar projection of tree(s) using the concave hull "
                       "of all tree points orthogonally projected to the horizontal plain. "
@@ -3157,14 +3158,14 @@ void MainWindow::dbhCheck()
 void MainWindow::dbhHT()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute tree DBH using Randomized Hough Transform (RHT)");
+  in->set_title("DBH by Randomized Hough Transformation (RHT)");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computation of tree(s) DBH (Diameter at Breast Height). "
-                      "The DBH is calculated as a circle with center and diameter estimated by Randomized Hough Transform (RHT) algorithm from a "
-                      "subset of tree points representing the DBH. It is then displayed as the 10cm high cylinder of corresponding center and diameter. "
-                      "The number of iterations significantly affects the computational time and accuracy. Minimum recommended No. of iterations is 200.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputInt("Number of iterations:", "200");
+  in->set_description("\tThis tool computes the tree(s) DBH (Diameter at Breast Height)."
+                      "The DBH is represented as a circle whose center and diameter are calculated using the Randomized Hough Transform (RHT) algorithm. "
+                      "The number of iterations significantly affects the computational time and accuracy. The recommended minimum of iterations is 200. "
+                      "The resulting DBH is displayed as the 10 cm high cylinder with the corresponding center and diameter.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputInt("Number of Iterations:", "200");
   in->set_stretch();
   int dl = in->exec();
 
@@ -3239,8 +3240,8 @@ void MainWindow::dbhHTDisplay(QString name)
     }
   else
   {
-    QString m = QString("Computed DBH  for tree '%1' is out of range 0 - 50m.\n"
-                        "Please check tree DBH Cloud and if needed edit points using DBHCloud Edit tool.").arg(name);
+    QString m = QString("Computed DBH of the tree '%1' is out of range 0 - 50m.\n"
+                        "Please check the tree DBH cloud. If needed edit points using cloud editing tool.").arg(name);
     //QMessageBox::information(0,("Warning"),m);
   }
   //disconnect and connect different for treebar
@@ -3297,11 +3298,11 @@ void MainWindow::dbhHT_HideAll()
 void MainWindow::dbhLSR()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute tree DBH using Least square regression (LSR)");
+  in->set_title("DBH by Least Square Regression (LSR)");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computation and display of tree(s) DBH (Diameter at Breast Height). "
+  in->set_description("\tThis tool computes the tree(s) DBH (Diameter at Breast Height). "
                       "The DBH is calculated as a circle fitted to the DBH subset of the tree cloud by the Least Squares Regression (LSR). "
-                      "It is then displayed as the 10cm high cylinder of appropriate center and diameter.");
+                      "The resulting DBH is displayed as the 10 cm high cylinder with the corresponding center and diameter.");
   in->set_inputList("Input Tree cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
@@ -3371,8 +3372,8 @@ void MainWindow::dbhLSRDisplay(QString name)
   }
   else
   {
-    QString m = QString("Computed DBH  for tree '%1' is out of range 0 - 50m.\n"
-                        "Please check tree DBH Cloud and if needed edit points using DBHCloud Edit tool.").arg(name);
+    QString m = QString("Computed DBH of the tree '%1' is out of range 0 - 50m.\n"
+                        "Please check the tree DBH cloud. If needed edit points using DBH cloud editing tool.").arg(name);
     QMessageBox::information(0,("Warning"),m);
   }
   //disconnect and connect different for treebar
@@ -3430,11 +3431,11 @@ void MainWindow::dbhLSR_HideAll()
 void MainWindow::height()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute tree height");
+  in->set_title("Tree Height");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computing tree height as a difference of Z coordinates of the highest point of the tree cloud and the tree position. "
-                      "The result is displayed as the vertical line from the tree base position to the height of the highest tree point and the label of calculated tree height value.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
+  in->set_description("\tThis tool computes the tree height as a difference of Z coordinates between the highest point of the tree cloud and the tree base position. "
+                      "The result is displayed as a label on the top of the tree. The vertical line at the tree base position depicts the height itself.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -3538,14 +3539,12 @@ void MainWindow::height_HideAll()
 void MainWindow::length()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute length of the cloud");
+  in->set_title("Cloud Length");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool to compute length of the tree cloud. "
-                      "Since tree height is not always the greatest dimension of the tree we use this method for finding "
-                      "the greatest distance between any two points in the tree cloud. "
-                       "The result is displayed as a line connecting those two points. "
-                      "It may be used instead of Height for highly tilted trees. ");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
+  in->set_description("\tThis tool computes Euclidean distance between the most distant points in the tree cloud and displays their connection. "
+                      "The cloud length is displayed in meters at the bottom of the tree. "
+                      "This tool is suitable for the calculation of the real length of inclined or lying trees.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -3640,18 +3639,17 @@ void MainWindow::position()
   names <<"NO_Terrain";
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute tree position using lowest points of tree cloud");
+  in->set_title("Tree Position by Lowest Point");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for estimating tree base position. "
-                      "The XY position is computed as a median coordinates of all points that lie above the "
-                      "lowest point of the tree cloud up to a user defined height. "
-                      "The Z coordinate is defined as the median Z value of several closest points of terrain at that XY position.  When no terrain is present in project, Z value is used from the lowest point."
-                      "The number of closest terrain points may be also defined by the user. "
-                      "The calculated position is displayed as a sphere with the center at the position and with the radius of 5cm.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputCloud2("Input Terrain cloud:",names);
-  in->set_inputInt("Height above the lowest point in cm:", "60");
-  in->set_inputInt2("Number of points for terrain height estimation:", "5");
+  in->set_description("\tThis tool computes the tree base position. "
+                      "The XY position is computed as a median coordinate of all points that are lying "
+                      "between the lowest point of the tree cloud and the user-defined distance. "
+                      "The Z coordinate is defined as the median Z value of N closest points of the terrain at the XY position. If there is no terrain cloud available, the Z value is defined by the lowest tree point."
+                      "The tree base position is displayed as a sphere with the center at the position and radius of 5 cm. ");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputCloud2("Input Terrain Cloud:",names);
+  in->set_inputInt("Height Above the Lowest Point in [cm]:", "60");
+  in->set_inputInt2("Number of Points Used for Terrain Height Estimation:", "5");
   in->set_stretch();
   int dl = in->exec();
 
@@ -3778,15 +3776,15 @@ void MainWindow::positionHT()
   names <<"NO_Terrain";
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute tree position using two estimated stem centers and terrain");
+  in->set_title("Tree Position by Randomized Hough Transformation (RHT)");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for estimating the tree base position using centers of the two circles fitting the tree stem by RHT in height of 1.3 and 0.65cm above initial position. "
-                      " The point, where the line connecting the two circle centers intersects the terrain plane is the estimated position of the tree. When no terrain is present in project, Z value is used from the lowest point."
-                      "User defines number iterations used for computing of circle.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputCloud2("Input Terrain cloud:",names);
-  in->set_inputInt("Number of RHT iterations:","200");
-  in->set_inputInt2("Number of points for terrain height estimation:","5");
+  in->set_description("\tThis tool computes the tree base position using centers of two circles fitted by RHT to the stem at 1.3 and 0.65 m above the initial or previously computed position. "
+                      "The RHT position is then defined as the intersection of the vector aiming from the upper circle center (at 1.3 m) to the lower circle center (at 0.65 m) and "
+                      "the horizontal plane defined by the median Z value of the N closest points of the terrain cloud.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputCloud2("Input Terrain Cloud:",names);
+  in->set_inputInt("Number of RHT Iterations:","200");
+  in->set_inputInt2("Number of Points for Terrain Height Estimation:","5");
   //in->set_inputCheckBox("Recalculate parameters (DBH cloud, Height) based on tree position?");
 
   in->set_stretch();
@@ -3839,12 +3837,12 @@ if(dl == QDialog::Accepted && in->get_inputList().size() > 0)
 void MainWindow::treeReconstruction()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title("Tree reconstruction");
+    in->set_title("Tree Reconstruction");
     in->set_path(Proj->get_Path());
-    in->set_description("reconstruct tree into stem and branches and save odrer into intenstity field. ");
-    in->set_inputList("Input Tree cloud:",get_treeNames());
-    in->set_inputInt("Size of the minimal coverset:", "4");
-    in->setSboxDouble("Set multiplicator:", 3.0);
+    in->set_description("This tool reconstructs tree into stem and branches. Results are saved as intensity field. ");
+    in->set_inputList("Input Tree Cloud:",get_treeNames());
+    in->set_inputInt("Voxel Size:", "4");
+    in->setSboxDouble("Multiplicator:", 3.0);
     in->set_stretch();
     int dl = in->exec();
 
@@ -3875,11 +3873,11 @@ void MainWindow::sortimenty()
 {
 
     InputDialog *in = new InputDialog(this);
-    in->set_title("Tree sortiments");
+    in->set_title("Tree assortment");
     in->set_path(Proj->get_Path());
-    in->set_description("Create sortiments based on 5 parameters - curvature, branches, diameter size, lenght, fidelity. for each of the parameters you can in user guide what parameters are used.  ");
-    in->set_inputList("Input Tree cloud:",get_treeNames());
-    in->set_inputCheckBox("Display final sortiments?");
+    in->set_description("This tool estimates the tree assortment based on convergence, skewness, diameter, length, and number of connected branches. ");
+    in->set_inputList("Input Tree Cloud:",get_treeNames());
+    in->set_inputCheckBox("Display assortment?");
     in->set_stretch();
     int dl = in->exec();
 
@@ -4023,16 +4021,16 @@ void MainWindow::treeReconstructionHideAll()
 void MainWindow::stemCurvature()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Tree stem curve");
+  in->set_title("Tree Stem Curve");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for calculating stem profile. "
-                      "The stem centers and diameters are estimated by the RHT algorithm in defined sections above the tree base. "
-                      "The sections are 0.65 m, 1.3 m, 2m and then every other meter. The number of RHT iterations may be set by the user. "
-                      "The higher number of iterations significantly increases the computational time but improves the accuracy of estimates. "
+  in->set_description("\tThis tool computes stem profile. "
+                      "The stem centers and diameters are estimated by the randomized Hough transformation algorithm in defined sections above the tree base. "
+                      "The sections are 0.65 m, 1.3 m, 2 m and then every meter. The amount of RHT iterations is defined by the user. "
+                      "The high number of iterations significantly increases the computational time and improves accuracy. "
                       "At least 200 iterations are recommended. The result is displayed as cylinders fitted on stems in corresponding heights.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputInt("Number of RHT iterations:","200");
-  in->set_inputInt2("Section height:","50");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputInt("Number of RHT Iterations:","200");
+  in->set_inputInt2("Section Height:","50");
   in->set_stretch();
   int dl = in->exec();
 
@@ -4144,10 +4142,10 @@ void MainWindow::stemCurvatureExport()
   names << get_treeNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Tree stem curvature Export");
+  in->set_title("Stem Curvature Export");
   in->set_path(Proj->get_Path());
-  in->set_description("Exports previously computed stem curves into a txt file.");
-  in->set_inputCloud1("Input Tree cloud:",names);
+  in->set_description("This tool exports previously computed stem curvature into .txt file.");
+  in->set_inputCloud1("Input Tree Cloud:",names);
   in->set_stretch();
   int dl = in->exec();
 
@@ -4247,13 +4245,13 @@ void MainWindow::exportConvexTxt()
   names << get_treeNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Export Tree convex planar projection into .txt file");
+  in->set_title("Convex Planar Projection Export");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for exporting polygon of the convex planar projection into text file. "
-                      "The .txt file includes coordinates of vertices of convex hull of the tree planar projection.");
+  in->set_description("\tThis tool exports polygon of the convex planar projection into text file. "
+                      "The .txt file includes coordinates of the convex hull vertices of the tree planar projection.");
   //in->set_inputCloud1("Input cloud:",names);
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_outputPath("Name and location of exported file:","c:\\exported_convex_clouds.txt", "Text file (*.txt)");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_outputPath("Name and Location of Exported File:","c:\\exported_convex_clouds.txt", "Text file (*.txt)");
   in->set_stretch();
   int dl = in->exec();
 
@@ -4296,12 +4294,12 @@ void MainWindow::exportConvexTxt()
 void MainWindow::exportConcaveTxt()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Export Tree convex planar projection into .txt file");
+  in->set_title("Concave Planar Projection Export");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for exporting polygon of the concave planar projection into text file. "
-                      "The .txt file includes coordinates of vertices of concave hull of the tree planar projection.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_outputPath("Name and location of exported file:","c:\\exported_concave_clouds.txt", "Text file (*.txt)");
+  in->set_description("\tThis tool exports polygon of the concave planar projection into text file. "
+                      "The .txt file includes coordinates of the concave hull vertices of the tree planar projection.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_outputPath("Name and Location of Exported File:","c:\\exported_concave_clouds.txt", "Text file (*.txt)");
   in->set_stretch();
   int dl = in->exec();
 
@@ -4345,17 +4343,17 @@ void MainWindow::exportConcaveTxt()
 void MainWindow::qsmModel()
 {
     InputDialog *in = new InputDialog(this);
-    in->set_title("Reconstruct tree as cylindrical object and compute volume.");
+    in->set_title("QSM Reconstruction");
     in->set_path(Proj->get_Path());
-    in->set_description("\tReconstruct tree as cylindrical object and compute volume. Stem starts in heigh");
-    in->set_inputList("Input Tree cloud:",get_treeNames());
-    in->set_inputInt("set number of iteration in Hough Transform", "150");
-    in->set_inputInt2("set size of cylinder in cm:", "20");
-    in->setSboxDouble("set minimal diameter [cm] of displayed cylinder",0);
-    in->set_inputInt3 ("set order to compute: ","2");
-    in->set_inputInt4 ("set minimal lenght of branch in cm: ","100");
-    in->set_inputCheckBox("compute also stem profile?");
-  //in->set_outputCloud1("name of output cloud:","Centroids");
+    in->set_description("\tThis tool reconstructs a tree as a cylindrical object and computes its volume. ");
+    in->set_inputList("Input Tree Cloud:",get_treeNames());
+    in->set_inputInt("Set Number of Iteration in Hough Transformation", "150");
+    in->set_inputInt2("Set Size of Cylinder in [cm]:", "20");
+    in->setSboxDouble("Set Minimal Diameter of Displayed Cylinder in [cm]:",0);
+    in->set_inputInt3 ("Set Order to Compute: ","2");
+    in->set_inputInt4 ("Set Minimal Lenght of Branch in [cm]: ","100");
+    in->set_inputCheckBox("Compute stem profile too?");
+  //in->set_outputCloud1("Name of output cloud:","Centroids");
     in->set_stretch();
     int dl = in->exec();
 
@@ -4481,11 +4479,11 @@ void MainWindow::qsmDisplay_HideAll()
 void MainWindow::set_CrownManual()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Manual adjustment of tree crown");
+  in->set_title("Crown Cloud Adjustment");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for editing point cloud representing single tree crown. For editing please press key \'x\' and draw a selection box by dragging a mouse."
-                        " Selected points will be deleted form the cloud representing the tree crown.");
-  in->set_inputCloud1("Input Tree cloud:",get_treeNames());
+  in->set_description("\tThis tool serves for editing point cloud representing a single tree crown. For editing please press the \'x\' key and draw a selection box by dragging a mouse."
+                        " Selected points will be deleted from the cloud representing the tree crown.");
+  in->set_inputCloud1("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -4774,15 +4772,15 @@ void MainWindow::setSectionsVolumeSurfacePosition()
   names << get_treeNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute concave hull of crown using sections.");
+  in->set_title("Crown Volume and Surface by Concave Polyhedron");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computing and visualization of crown volume, surface and space occupation using horizontal sections of the crown"
-                    "The cloud representing the tree crown is divided in horizontal sections, the sections are bounded by concave hulls used for volume calculation and crown surface triangulation. "
-                     "Section height and concaveness (maximal length of edge in the hull) of the section concave hull can be set by user.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  //in->set_inputCloud1("Input Tree cloud:",names);
-  in->set_inputInt("Set section height in cm:","100");
-  in->set_inputInt2("Set initial threshold distance for section concavehull in cm:","100");
+  in->set_description("\tThis tool serves for computing and visualization of crown volume, surface, and space occupation using horizontal sections of the crown"
+                    "The cloud representing the tree crown is divided into horizontal sections. These sections are bounded by concave hulls used for volume calculation and crown surface triangulation. "
+                     "Section height and concaveness (maximal length of the edge in the hull) of the section concave hull can be set by the user.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  //in->set_inputCloud1("Input Tree Cloud:",names);
+  in->set_inputInt("Set Section Height in [cm]:","100");
+  in->set_inputInt2("Set Initial Threshold Distance for Section Concave Hull in [cm]:","100");
 
   in->set_stretch();
   int dl = in->exec();
@@ -4880,13 +4878,13 @@ void MainWindow::crownSurfaceBySectionsDisplayName(QString name)
 void MainWindow::create3DConvexull()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Crown 3D Convexhull.");
+  in->set_title("Volume and Surface by the 3D Convex Hull ");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computing 3D convex hull of the crown. "
-                      "Implicitly only for the two lowest and the two highest 1m high sections all points of the crown cloud are used in calculations. "
-                      "For others sections only border points (computed by 2D hulls) are used. The purpose is to decrease computation time .");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputCheckBox("Use all crown points (larger time consumption)?");
+  in->set_description("\tThis tool serves for computing a 3D convex hull of the crown. "
+                      "Implicitly, all points of the crown cloud of the two lowest and the two highest one meter high sections are used in calculations. "
+                      "Concerning the other sections, the border points only (computed by 2D hulls) are used to accelerate the computations.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputCheckBox("Use all ponts from crown cloud? (high computational time demands)");
 
   in->set_stretch();
   int dl = in->exec();
@@ -5007,9 +5005,9 @@ void MainWindow::computeCrownsIntersections()
 {
 
     QMessageBox *msgBox =  new QMessageBox(this);
-	msgBox->setText("Compute crown intersections.");
-	msgBox->setInformativeText("Intersections are computed as Boolean AND in 3D space for intersecting pairs of crowns."
-                              "The intersections are based on 3D convex hulls of the two crowns.");
+	msgBox->setText("Crown Intersections.");
+	msgBox->setInformativeText("Intersections are computed as Boolean AND in the 3D space for intersecting pairs of crowns."
+                              "The intersections are based on the 3D convex hulls of the two crowns.");
 	msgBox->setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox->setDefaultButton(QMessageBox::Yes);
 
@@ -5103,10 +5101,9 @@ void MainWindow::exportQSM()
     // separator
 
     ExportQSMDialog *d = new ExportQSMDialog(this);
-    d->setDescription("\tThe tool for exporting tree parameters into formatted text files. "
-                              "You can select tree(s) for which wants to export the parameters, "
-                              " choose the parameters to export and set the separator of fields in the text file. "
-                              "The tool exports currently computed values.");
+    d->setDescription("\tThis tool serves for exporting tree parameters into formatted text files. "
+                              "The name, the location, and the separator within the exported .txt file have to be specified. "
+                              "The tool exports currently computed values only.");
     d->setList(get_treeNames());
     d->setPrefix("set prefix of the created file: ", "qsm_");
 
@@ -5119,7 +5116,7 @@ void MainWindow::exportQSM()
         std::cout<< "separator \t\t" << d->getSeparator().toStdString()<<"\n";
         std::cout<< "seznam \t\t" << d->getInputList().at(0).toStdString()<<"\n";
         std::cout<< "trees \t\t" << d->getTrees()<<"\n";
-        std::cout<< "sortiments \t\t" << d->getSortiments()<<"\n";
+        std::cout<< "assortment \t\t" << d->getSortiments()<<"\n";
         std::cout<< "branches \t\t" << d->getBranches()<<"\n";
         std::cout<< "profile \t\t" << d->getProfile()<<"\n";
 
@@ -5310,10 +5307,10 @@ QStandardItemModel* MainWindow::getIntersectionModel()
 void MainWindow::exportIntersections()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Export intersections table");
+  in->set_title("Intersections Parameters Export");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for exporting the table of intersection attributes into .txt file. "
-                      "All currently computed intersection values are exported. ");
+  in->set_description("\tThis tool serves for exporting the table of intersection attributes into .txt file. "
+                      "All currently computed intersection values are exported. The semicolon is used as a separator. ");
   in->set_outputPath("Path to the new file:","c:\\exported_cloud.txt","Text file (*.txt)");
   in->set_stretch();
   int dl = in->exec();
@@ -5347,10 +5344,9 @@ void MainWindow::exportIntersections()
 void MainWindow::exportCrownAttributes()
 {
   ExportCrownAttr *exdialog = new ExportCrownAttr (this);
-  exdialog->set_description("\tThe tool for exporting crown attributes into formatted text file. "
-                            "Select tree(s) for which you want to export attributes, choose the attributes to export and the separator to be used in the text file. "
-                            "Currently computed values are exported. "
-                            "If you want to recompute any attribute (position computed with terrain, etc.) use appropriate tools for computing those.");
+  exdialog->set_description("\tThis tool serves for exporting crown attributes into formatted text file. "
+                            "The tree, the attributes, and the separator within the exported .txt file have to be specified. "
+                            "The tool exports currently computed values only. ");
   exdialog->set_list(get_treeNames());
   int dl = exdialog->exec();
 
@@ -5482,10 +5478,10 @@ void MainWindow::crownVolumeByVoxels()
   InputDialog *in = new InputDialog(this);
   in->set_title("Crown volume by voxels.");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computing crown volume using voxels of given resolution.\n"
-                      " Voxels are not visualized, crown volumes are recorded in project attribute table");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputInt("Set voxel size in cm:","25");
+  in->set_description("\tThis tool serves for computing crown volume using voxels of a given resolution.\n"
+                      " Voxels are not visualized, crown volumes are recorded in the project attribute table");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputInt("Set Voxel Size in [cm]:","25");
   in->set_stretch();
   int dl = in->exec();
 
@@ -5518,15 +5514,15 @@ void MainWindow::mergeClouds()
   types << "Tree" << "Base cloud" << "Terrain cloud" << "Vegetation cloud" << "Other";
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Cloud merge");
+  in->set_title("Cloud Merge");
   in->set_path(Proj->get_Path());
-  in->set_description("\tMerge selected clouds into new one. This tool may be used when one object is to be made of more separated clouds. "
-                      "The result is one cloud with given name and of given type.\n"
+  in->set_description("\tThis tool merges selected clouds into a new one. This tool may be used when one object is to be made of more separated clouds. "
+                      "The result is one cloud with a given name and of a given type.\n"
                       "\t Please select desired clouds in the list and set a name and type of the new cloud.");
-  in->set_inputList("cloud selection:",get_allNames());
-  in->set_outputCloud1("Output cloud name:","cloud");
-  in->set_outputType("Type of the output cloud:", types);
-  in->set_inputCheckBox("remove selected file?");
+  in->set_inputList("cloud Selection:",get_allNames());
+  in->set_outputCloud1("Output Cloud Name:","cloud");
+  in->set_outputType("Type of the Output Cloud:", types);
+  in->set_inputCheckBox("Remove selected file?");
   in->set_stretch();
   int dl = in->exec();
 
@@ -5582,10 +5578,10 @@ void MainWindow::labelClouds()
   types << "Base clouds" << "Terrain clouds" << "Vegetation clouds" <<"Trees" << "Others";
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Cloud label");
+  in->set_title("Cloud Label");
   in->set_path(Proj->get_Path());
-  in->set_description("\tLabel all clouds of given type.");
-  in->set_inputCloud1("set type of clouds for label:",types);
+  in->set_description("\tThis tool labels all clouds of a given type.");
+  in->set_inputCloud1("Set Type of Clouds to Be Labeled:",types);
   in->set_stretch();
   int dl = in->exec();
 
@@ -5637,16 +5633,16 @@ void MainWindow::removePoints(){
     InputDialog *in = new InputDialog(this);
     in->set_title("Remove Points");
     in->set_path(Proj->get_Path());
-    in->set_description("\tSelect point from cloud where intensity value i greater than (input value * -1) and smaller than input value"
-                        "The result is one cloud with given name and of given type.\n"
-                        "\t Please select desired clouds in the list and set a name and type of the new cloud.");
-    //in->set_inputList("cloud selection:",get_allNames());
-    in->set_inputCloud1("cloud:", get_allNames());
-    in->set_outputCloud1("Output cloud name:","cloud");
-    in->set_outputType("Type of the output cloud:", types);
-    in->set_outputType2("Type of field:", fields);
-    in->set_inputInt("input value for point to be greater than", "0");
-    in->set_inputInt2("input value for point values to be smaller than", "5");
+    in->set_description("\tThis tool enables to select point from cloud with specified intensity values."
+                        "The result is one cloud with a given name and of a given type. \n"
+                        "\tClouds of interest has to be selected in the list. A name and type of the new cloud has to be specified.");
+    //in->set_inputList("cloud Selection:",get_allNames());
+    in->set_inputCloud1("Cloud:", get_allNames());
+    in->set_outputCloud1("Output Cloud Name:","cloud");
+    in->set_outputType("Type of the Output Cloud:", types);
+    in->set_outputType2("Type of Field:", fields);
+    in->set_inputInt("Smallest Point Input Value", "0");
+    in->set_inputInt2("Largest Point Input Value", "5");
     in->set_stretch();
     int dl = in->exec();
 
@@ -5743,16 +5739,16 @@ void MainWindow::radiusOutlierRemoval()
     types << "Tree" << "Base cloud" << "Terrain cloud" << "Vegetation cloud" << "Other";
 
     InputDialog *in = new InputDialog(this);
-    in->set_title("Radius outlier point removal");
+    in->set_title("Radius Outlier Removal");
     in->set_path(Proj->get_Path());
-    in->set_description("\tremove points from input cloud, that lies to far away from any another point of the cloud.");
-    in->set_inputList("cloud selection:",get_allNames());
-    //in->set_outputCloud1("New cloud without filtered points:","cloud_Filter");
-    in->set_outputCloud1("set postfix of clouds:","_filterROR");
+    in->set_description("\tThis tool enables to remove isolated points from the input cloud. ");
+    in->set_inputList("Cloud Selection:",get_allNames());
+    //in->set_outputCloud1("New Cloud without Filtered Points:","cloud_Filter");
+    in->set_outputCloud1("Set Postfix of Clouds:","_filterROR");
     in->set_inputInt("Radius [cm]","25");
-    in->set_inputInt2("Minimum neighbors in radius","100");
-    in->set_outputType("Type of the output cloud:", types);
-    in->set_inputCheckBox("remove input file?");
+    in->set_inputInt2("Minimum Neighbors in Radius","100");
+    in->set_outputType("Output Cloud Type:", types);
+    in->set_inputCheckBox("Remove input file?");
     in->set_stretch();
     int dl = in->exec();
 
@@ -5808,16 +5804,16 @@ void MainWindow::minusCloud()
   QStringList types;
   types << "Tree" << "Base cloud" << "Terrain cloud" << "Vegetation cloud" << "Other";
   InputDialog *in = new InputDialog(this);
-  in->set_title("Cloud subtraction");
+  in->set_title("Cloud Subtraction");
   in->set_path(Proj->get_Path());
-  in->set_description("\tCompare two clouds and remove common points from the bigger one. "
+  in->set_description("\tThis tool enables to compare two clouds and remove identical points from the bigger one. "
                       "The result is saved as a new cloud consisting from unique points of the bigger cloud. "
-                      "The tool may be used to reduce duplicate points among pointclouds.");
-  in->set_inputCloud1("1st input cloud:",get_allNames());
-  in->set_inputCloud2("2nd input cloud:",get_allNames());
-  in->set_outputCloud1("Output cloud name:","cloud_subtraction");
- //in->set_outputCloud2("Output cloud name:","truenegative");
-  in->set_outputType("Type of the output cloud:", types);
+                      "The tool may be used to reduce duplicate points within point clouds.");
+  in->set_inputCloud1("1st Input Cloud:",get_allNames());
+  in->set_inputCloud2("2nd Input Cloud:",get_allNames());
+  in->set_outputCloud1("Output Cloud Name:","cloud_subtraction");
+ //in->set_outputCloud2("Output Cloud Name:","truenegative");
+  in->set_outputType("Output Cloud Type:", types);
   in->set_stretch();
   int dl = in->exec();
 
@@ -5900,15 +5896,15 @@ void MainWindow::voxelize()
 {
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Voxelize input cloud");
+  in->set_title("Voxelize Input Cloud");
   in->set_path(Proj->get_Path());
-  in->set_description("\tMake a voxelized cloud in a resolution (voxel size) defined by the user. "
-                      "Resulting pointcloud consists of centroids of original points within individual voxels. "
-                      "The tool may be used for pointcloud generalization and reduction of pointcloud density.");
-  in->set_inputCloud1("Input cloud:",get_allNames());
-  in->set_outputCloud1("Output cloud name:","voxel");
-  in->set_inputInt("Resolution in cm:","10");
-  in->set_inputCheckBox("Do you want to be centroids aligned?");
+  in->set_description("\tThis tool creates a voxelized cloud of a given resolution (voxel size). "
+                      "Resulting point cloud consists of centroids of original points within individual voxels. "
+                      "The tool may be used for the point cloud density reduction.");
+  in->set_inputCloud1("Input Cloud:",get_allNames());
+  in->set_outputCloud1("Output Cloud Name:","voxel");
+  in->set_inputInt("Voxel Size in [cm]:","10");
+  in->set_inputCheckBox("Should centroids be aligned?");
   in->set_stretch();
   int dl = in->exec();
 
@@ -5958,11 +5954,11 @@ void MainWindow::voxelize()
 void MainWindow::duplicatePoints()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Duplicate points removal");
+  in->set_title("Duplicate Points Removal");
   in->set_path(Proj->get_Path());
-  in->set_description("\t Find and erase duplicate points within the cloud.");
-  in->set_inputList("Input clouds:",get_allNames());
-    in->setSboxDouble("Set minimal distance between points in [m]:", 0.002);
+  in->set_description("\tThis tool finds and erases duplicate points within the cloud.");
+  in->set_inputList("Input Clouds:",get_allNames());
+    in->setSboxDouble("Minimal Distance between Points in [m]:", 0.002);
   in->set_stretch();
   int dl = in->exec();
 
@@ -6010,13 +6006,13 @@ void MainWindow::splitCloud()
   field << "x" << "y"<< "z";
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Cloud subtraction");
+  in->set_title("Cloud Subtraction");
   in->set_path(Proj->get_Path());
-  in->set_description("Split cloud into two clouds in the middle of the range of selected coordinate.");
-  in->set_inputCloud1("1. input cloud:",get_allNames());
-  in->set_inputCloud2("Field for split:",field);
-  in->set_outputCloud1("Output cloud:","left");
-  in->set_outputCloud2("Output cloud:","right");
+  in->set_description("This tool splits cloud into two clouds in the middle of the range of selected coordinate.");
+  in->set_inputCloud1("1st Input Cloud:",get_allNames());
+  in->set_inputCloud2("Field for Split:",field);
+  in->set_outputCloud1("Output Cloud:","left");
+  in->set_outputCloud2("Output Cloud:","right");
   in->set_stretch();
   int dl = in->exec();
 
@@ -6088,14 +6084,13 @@ QStringList names;
   names << get_allNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Create 2D concave hull fo given cloud");
+  in->set_title("2D Concave Hull");
   in->set_path(Proj->get_Path());
-  in->set_description("\tTool for computing convex 2D hull of the cloud. "
-                      "Create a new cloud consisting only from points that form the convex 2D hull of planar projection of the input cloud");
-
-  in->set_inputCloud1("Input cloud:",get_allNames());
-  in->set_outputCloud1("Output cloud name:","hull");
-  in->set_inputInt("Initial searching distance in  cm:","100");
+  in->set_description("\tThis tool creates convex 2D hull of the input cloud. "
+                      "It creates a new cloud consisting only from points that form the convex 2D hull of planar projection of the input cloud.");
+  in->set_inputCloud1("Input Cloud:",get_allNames());
+  in->set_outputCloud1("Output Cloud Name:","hull");
+  in->set_inputInt("Initial Search Distance in [cm]:","100");
   in->set_stretch();
 
   int dl = in->exec();
@@ -6126,12 +6121,12 @@ void MainWindow::set_ConvexCloud()
   names << get_allNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Create convex hull ");
+  in->set_title("2D Convex Hull ");
   in->set_path(Proj->get_Path());
-  in->set_description("\tMethod for computing convex 2D hull of given cloud. "
-                      "This tool creates a new cloud consisting only from points that form the convex 2D hull of the input cloud");
-  in->set_inputCloud1("Input cloud:",get_allNames());
-  in->set_outputCloud1("Output cloud name:","hull");
+  in->set_description("\tThis tool creates convex 2D hull of the input cloud. "
+                      "It creates a new cloud consisting only from points that form the convex 2D hull of planar projection of the input cloud.");
+  in->set_inputCloud1("Input Cloud:",get_allNames());
+  in->set_outputCloud1("Output Cloud Name:","hull");
   in->set_stretch();
 
   int dl = in->exec();
@@ -6441,10 +6436,10 @@ void MainWindow::ortho()
 }
 void MainWindow::about()
 {
-  QMessageBox::about(this, tr("about 3D Forest application"),tr(" 3D Forest application is presented in version 0.51.\n"
-                                                             "Application serve for extraction of tree parameters like tree position, dbh,advanced QSM models from TLS data in forest environment."
+  QMessageBox::about(this, tr("About 3D Forest Application"),tr(" The 3D Forest application is presented in version 0.51.\n"
+                                                             "Application serves for extraction of tree parameters like tree position, dbh, or advanced QSM models from TLS data in a forest environment."
                                                              "3D Forest is released under terms of GPL v3.\n"
-                                                             "More information can be found on web site www.3dforest.eu or at wiki on our GitHub https://github.com/janekT/3DForest. \n\n"
+                                                             "More information can be found on web site www.3dforest.eu or on the wiki section on our GitHub https://github.com/janekT/3DForest. \n\n"
                                                              "  AUTHORS:\n "
                                                              "\tJan Trochta j.trochta@gmail.com \n"
                                                              "\tMartin Krucek krucek.martin@gmail.com\n"
@@ -6707,8 +6702,8 @@ void MainWindow::createActions()
     reconstructionAct->setEnabled(false);
     connect(reconstructionAct, SIGNAL(triggered()), this, SLOT(qsmModel()));
 
-    sortimentAct = new QAction(tr("Tree sortiments"), this);
-    sortimentAct->setStatusTip(tr("Based on recostructed tree is compudet cylindrical volume of tree"));
+    sortimentAct = new QAction(tr("Tree assortment"), this);
+    sortimentAct->setStatusTip(tr("Cylindrical volume of recostructed tree"));
     sortimentAct->setEnabled(false);
     connect(sortimentAct, SIGNAL(triggered()), this, SLOT(sortimenty()));
 
@@ -6718,7 +6713,7 @@ void MainWindow::createActions()
     connect(treeReconstructionAct, SIGNAL(triggered()), this, SLOT(treeReconstruction()));
 
     exportQSMAct = new QAction(tr("Export QSM data"), this);
-    exportQSMAct->setStatusTip(tr("Export into text file data about tree parts, QSM and sortiments"));
+    exportQSMAct->setStatusTip(tr("Export into text file data about tree parts, QSM and assortment"));
     exportQSMAct->setEnabled(false);
     connect(exportQSMAct, SIGNAL(triggered()), this, SLOT(exportQSM()));
 
