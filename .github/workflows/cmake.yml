@@ -28,10 +28,6 @@ jobs:
       shell: bash
       run:  |
             brew install vtk@8.2 boost eigen flann qt libgeotiff
-            echo VTK PATH:
-            find /usr/local/opt/vtk@8.2/lib/cmake -name vtkConfig.cmake
-            ls /usr/local/opt/vtk@8.2/lib/cmake/vtk-8.2
-            echo VTK PATH END
             export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
             mkdir ${{runner.workspace}}/deps
             cd ${{runner.workspace}}/deps
@@ -59,7 +55,7 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVTK_DIR="/usr/local/opt/vtk@8.2/lib/cmake" -DQt5Widgets_DIR="/usr/local/opt/qt/lib/cmake/Qt5Widgets" -DQt5Config_DIR="/usr/local/opt/qt/lib/cmake/Qt5Config"
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DVTK_DIR="/usr/local/opt/vtk@8.2/lib/cmake/vtk-8.2" -DQt5Widgets_DIR="/usr/local/opt/qt/lib/cmake/Qt5Widgets" -DQt5Config_DIR="/usr/local/opt/qt/lib/cmake/Qt5Config"
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
