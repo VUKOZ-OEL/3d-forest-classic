@@ -30,7 +30,7 @@ jobs:
             brew install vtk@8.2 boost eigen flann qt libgeotiff
             echo VTK PATH:
             find /usr/local/opt/vtk@8.2/lib/cmake -name vtkConfig.cmake
-            ls /usr/local/opt/vtk@8.2/lib/cmake
+            ls /usr/local/opt/vtk@8.2/lib/cmake/vtk-8.2
             echo VTK PATH END
             export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
             mkdir ${{runner.workspace}}/deps
