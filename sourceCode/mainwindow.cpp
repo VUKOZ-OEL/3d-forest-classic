@@ -1262,10 +1262,10 @@ void MainWindow::exportCloud()
   types << ".txt" << ".ply" << ".pts"<<".wkt" ;
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Export cloud");
+  in->set_title("Cloud Export");
   in->set_path(Proj->get_Path());
-  in->set_description("\tExporting selected clouds into  text file.");
-  in->set_inputList("Input Tree cloud:",get_allNames());
+  in->set_description("\tExports selected clouds into a text file.");
+  in->set_inputList("Input Tree Cloud:",get_allNames());
   //in->set_inputCloud1("Input cloud:",names);
   in->set_outputDir("Path to the destination folder:","c:\\exported_clouds");
   // chtelo by to nastavit separator
@@ -1394,18 +1394,18 @@ void MainWindow::voxelgrid()
   names << get_ostNames();
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Voxelized terrain");
+  in->set_title("Terrain by Voxels");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe automated method segmenting input base cloud into vegetation and terrain points. "
-                      "This method is based on voxelization that converts input cloud into voxels of defined resolution. "
-                      "Centroids of the lowest voxels are selected and saved as Terrain cloud, and the rest is saved as a Vegetation cloud.\n"
-                      "\tThis method is well suited for terrain extraction since the result is a regular grid of points and with combination "
-                      "of octree method can produce precise and accurate terrain representation usable in GIS or other analysis. "
-                      "Yet, voxelization is inappropriate for further vegetation analysis due to considerable reduction of pointcloud density.");
-  in->set_inputCloud1("Input cloud:",names);
-  in->set_outputCloud1("Output cloud of terrain:","voxel-terrain");
-  in->set_outputCloud2("Output cloud of non-ground:","voxel-vegetation");
-  in->set_inputInt("Resolution in cm:","20");
+  in->set_description("\tThis tool serves for automatic terrain segmentation. "
+                      "It is based on voxelization that converts the input cloud into voxels of a defined resolution. "
+                      "Centroids of the lowest voxels are selected and saved as a terrain cloud, and the rest is saved as a vegetation.\n"
+                      "\tThis method is well suited for terrain extraction since the result is a regular grid of points. In combination "
+                      "with the octree method, it can produce precise and accurate terrain representation usable in GIS or other analysis. "
+                      "However, voxelization is not appropriate for further vegetation analysis due to considerable reduction of point-cloud density.");
+  in->set_inputCloud1("Input Cloud:",names);
+  in->set_outputCloud1("Output Terrain Cloud:","voxel-terrain");
+  in->set_outputCloud2("Output Non-ground Cloud:","voxel-vegetation");
+  in->set_inputInt("Resolution in [cm]:","20");
   in->set_stretch();
   int dl = in->exec();
 
@@ -1444,19 +1444,17 @@ void MainWindow::voxelgrid()
 void MainWindow::octreeSlot()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Terrain created with octree ");
+  in->set_title("Terrain by Octree");
   in->set_path(Proj->get_Path());
   //  qWarning<<Proj->get_Path();
-  in->set_description("\tThe automated method segmenting input base cloud into vegetation and terrain points. "
-                      "The method  of octree is based on recursive dividing base cloud into smaller subset of 8 cubes until the size of the cube reach the resolution. For terrain points only the lowest cubes area used."
-                      "\tThe method has two pass system. In the first pass is created rough octree with 10 * resolution. "
-                      "From this cloud is made a fine octree with given resolution in the second pass. "
-                      "The purpose of this it to remove noise points from result. "
-                      "When any noise points are presented in result, it can be modified by manual adjustment.");
-  in->set_inputCloud1("Input cloud:",get_baseNames());
-  in->set_outputCloud1("Output cloud of terrain:","Terrain_octree");
-  in->set_outputCloud2("Output cloud of non-ground:","Vegetation_octree");
-  in->set_inputInt("Resolution in cm:","10");
+  in->set_description("\tThis tool serves for automatic terrain segmentation. "
+                      "The octree method is based on a recursive dividing base cloud into a smaller subset of 8 cubes until the size of the cube resolves. "
+                      "Cubes containing points and having the lowest z-value are considered to be the ground cubes. "
+                      "The terrain is then defined by the points in these ground cubes.");
+  in->set_inputCloud1("Input Cloud:",get_baseNames());
+  in->set_outputCloud1("Output Terrain Cloud:","Terrain_octree");
+  in->set_outputCloud2("Output Non-ground Cloud:","Vegetation_octree");
+  in->set_inputInt("Resolution in [cm]:","10");
   in->set_stretch();
   int dl = in->exec();
 
@@ -1588,7 +1586,7 @@ void MainWindow::IDWslot()
 {
    //inputDialog
   InputDialog *in = new InputDialog(this);
-  in->set_title(tr("Inverse distance weighting (IDW) algorithm for terrain interpolation"));
+  in->set_title(tr("Inverse Distance Weighting (IDW) Algorithm for Terrain Interpolation"));
   in->set_path(Proj->get_Path());
   in->set_description(tr("IDW interpolates a new surface within a given resolution from the terrain cloud input. "
                          "It serves for filling areas with missing data in the original terrain cloud. "
@@ -1639,12 +1637,12 @@ void MainWindow::statisticalOutlierRemovalTerrain()
 {
   InputDialog *in = new InputDialog(this);
   in->set_path(Proj->get_Path());
-  in->set_title("Statistical outlier removal");
-  in->set_description("\t Remove outliers using mean k-nearest neighbor distance. All points with mean distance greater than average are removed from point cloud.");
-  in->set_inputCloud1("Input terrain cloud:",get_terrainNames());
-  in->set_outputCloud1("Output cloud of deleted points:","terrain-rest-sor");
-  in->set_inputInt("Number of neighbors for computing mean distance","3");
-  //in->set_inputInt2("Mean distance multiplier","0");
+  in->set_title("Statistical Outlier Removal");
+  in->set_description("\t This tool removes outliers using mean k-nearest neighbor distance. All points with a mean distance greater than average are removed from the point cloud.");
+  in->set_inputCloud1("Input Terrain Cloud:",get_terrainNames());
+  in->set_outputCloud1("Output Terrain Cloud:","terrain-rest-sor");
+  in->set_inputInt("Number of Neighbors","3");
+  //in->set_inputInt2("Mean Distance Multiplier","0");
   in->set_stretch();
   int dl = in->exec();
 
@@ -1682,12 +1680,12 @@ void MainWindow::radiusOutlierRemovalTerrain()
 {
     InputDialog *in = new InputDialog(this);
   in->set_path(Proj->get_Path());
-  in->set_title("Radius outlier removal");
-  in->set_description("\tAll points without at least minimal amount of neighbors inside the given radius are removed.");
-  in->set_inputCloud1("Input terrain cloud:",get_terrainNames());
-  in->set_outputCloud1("New terrain cloud with filterout points:","terrain-filterROR");
+  in->set_title("Radius Outlier Removal");
+  in->set_description("\tThis tool removes all points with fewer neighbors inside the given radius.");
+  in->set_inputCloud1("Input Terrain Cloud:",get_terrainNames());
+  in->set_outputCloud1("Output Terrain Cloud:","terrain-filterROR");
   in->set_inputInt("Radius [cm]","25");
-  in->set_inputInt2("Minimum neighbors in radius","100");
+  in->set_inputInt2("Minimum Neighbors in Radius","100");
   in->set_stretch();
   int dl = in->exec();
 
@@ -1765,9 +1763,9 @@ void MainWindow::slice()
 {
   InputDialog *in = new InputDialog(this);
   in->set_path(Proj->get_Path());
-  in->set_title("Split terrain cloud into strips");
-  in->set_description("\tMethod for splitting the cloud into slices with given width for easier adjustment.");
-  in->set_inputInt("Width of the slice (m):","5");
+  in->set_title("Terrain cloud Split");
+  in->set_description("\tThis tool creates user-defined strips of terrain for easier point selection.");
+  in->set_inputInt("Width of the Slice in [m]:","5");
   in->set_stretch();
   int dl = in->exec();
   if(dl == QDialog::Accepted )
@@ -2591,9 +2589,9 @@ void MainWindow::mergeCloudsByID()
 void MainWindow::eraseSelectedClouds()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Erase Clouds");
+  in->set_title("Cloud Erase");
   in->set_path(Proj->get_Path());
-  in->set_description("\tVymaze vybrane mracna z projektu i disku bez dalsich dotazu jestli to fakt chces udelat !!!!");
+  in->set_description("\tThis tool permanently erases selected clouds from the project and the disc.");
   in->set_inputList("Input Cloud:",get_allNames());
   in->set_stretch();
   int dl = in->exec();
@@ -2901,10 +2899,10 @@ void MainWindow::treeAtributes()
 void MainWindow::convexhull()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute convex planar projection of trees");
+  in->set_title("Convex Planar Projection");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe method is based on the convex hull of the tree cloud(s) orthogonally projected to the horizontal plain. "
-                      "This method provides polygon of the maximal projected area occupied by the tree. "
+  in->set_description("\tThis tool computes the convex planar projection of trees. The method is based on the convex hull of the tree cloud(s) orthogonally projected to the horizontal plane. "
+                      "It provides polygon of the maximal projected area occupied by the tree. "
                       "The polygon is displayed at the height of the tree base position.");
   in->set_inputList("Input Tree Cloud:",get_treeNames());
 
@@ -3007,15 +3005,15 @@ void MainWindow::convexhull_HideAll()
 void MainWindow::concavehull()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Compute Concave planar projection of trees");
+  in->set_title("Concave Planar Projection");
   in->set_path(Proj->get_Path());
-  in->set_description("\tThe tool for computing and display of concave planar projection of tree(s) using the concave hull "
-                      "of all tree points orthogonally projected to the horizontal plain. "
-                      "The method is based on minimizing the polygon edge based on user specified maximal distance.\n"
-                      "\tThe actual computed area is smaller than that provided by the convex hull, but produce more detailed result. "
-                      "The area can differ according to searching distance used.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
-  in->set_inputInt("Initial searching distance in cm:","100");
+  in->set_description("\tThis tool computes and displays the concave planar projection of tree(s) using the concave hull "
+                      "of all tree points orthogonally projected to the horizontal plane. "
+                      "It is based on minimizing the polygon edge based on user-specified maximal distance.\n"
+                      "\tThe actual computed area is smaller than the one provided by the convex hull, however, it produces a more detailed results. "
+                      "The area can differ according to the used search distance.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
+  in->set_inputInt("Initial Search Distance in [cm]:","100");
 
   in->set_stretch();
   int dl = in->exec();
@@ -3303,7 +3301,7 @@ void MainWindow::dbhLSR()
   in->set_description("\tThis tool computes the tree(s) DBH (Diameter at Breast Height). "
                       "The DBH is calculated as a circle fitted to the DBH subset of the tree cloud by the Least Squares Regression (LSR). "
                       "The resulting DBH is displayed as the 10 cm high cylinder with the corresponding center and diameter.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -3873,9 +3871,9 @@ void MainWindow::sortimenty()
 {
 
     InputDialog *in = new InputDialog(this);
-    in->set_title("Tree assortment");
+    in->set_title("Tree Assortment");
     in->set_path(Proj->get_Path());
-    in->set_description("This tool estimates the tree assortment based on convergence, skewness, diameter, length, and number of connected branches. ");
+    in->set_description("This tool evaluates attributes of the tree based on convergence, skewness, diameter, length, and number of connected branches. ");
     in->set_inputList("Input Tree Cloud:",get_treeNames());
     in->set_inputCheckBox("Display assortment?");
     in->set_stretch();
@@ -4249,7 +4247,7 @@ void MainWindow::exportConvexTxt()
   in->set_path(Proj->get_Path());
   in->set_description("\tThis tool exports polygon of the convex planar projection into text file. "
                       "The .txt file includes coordinates of the convex hull vertices of the tree planar projection.");
-  //in->set_inputCloud1("Input cloud:",names);
+  //in->set_inputCloud1("Input Cloud:",names);
   in->set_inputList("Input Tree Cloud:",get_treeNames());
   in->set_outputPath("Name and Location of Exported File:","c:\\exported_convex_clouds.txt", "Text file (*.txt)");
   in->set_stretch();
@@ -4558,10 +4556,10 @@ void MainWindow::CrownManualStop()
 void MainWindow::set_CrownAutomatic()
 {
   InputDialog *in = new InputDialog(this);
-  in->set_title("Automatical selection of tree crown");
+  in->set_title("Tree Crown Selection");
   in->set_path(Proj->get_Path());
-  in->set_description("The tool for automated selection of tree cloud subset representing the tree crown.");
-  in->set_inputList("Input Tree cloud:",get_treeNames());
+  in->set_description("This tool serves for automatic selection of the tree cloud subset representing the tree crown.");
+  in->set_inputList("Input Tree Cloud:",get_treeNames());
   in->set_stretch();
   int dl = in->exec();
 
@@ -5476,7 +5474,7 @@ void MainWindow::crownVolumeByVoxels()
 {
 
   InputDialog *in = new InputDialog(this);
-  in->set_title("Crown volume by voxels.");
+  in->set_title("Crown Volume by Voxels.");
   in->set_path(Proj->get_Path());
   in->set_description("\tThis tool serves for computing crown volume using voxels of a given resolution.\n"
                       " Voxels are not visualized, crown volumes are recorded in the project attribute table");
@@ -6454,59 +6452,59 @@ void MainWindow::createActions()
 {
 //FILE
   new_projectAct = new QAction(QPixmap(":/images/projectBar/new.png"), tr("New Project"), this);
-  new_projectAct->setStatusTip(tr("Create new project."));
+  new_projectAct->setStatusTip(tr("Creates Project."));
   connect(new_projectAct, SIGNAL(triggered()), this, SLOT(newProject()));
 
   open_projectAct = new QAction(QPixmap(":/images/projectBar/open.png"), tr("Open Project"), this);
-  open_projectAct->setStatusTip(tr("Open existing project."));
+  open_projectAct->setStatusTip(tr("Opens Project."));
   connect(open_projectAct, SIGNAL(triggered()), this, SLOT(openProject()));
 
   close_projectAct = new QAction(QPixmap(":/images/projectBar/close.png"), tr("Close Project"), this);
-  close_projectAct->setStatusTip(tr("Close project."));
+  close_projectAct->setStatusTip(tr("Closes Project."));
   connect(close_projectAct, SIGNAL(triggered()), this, SLOT(closeProject()));
 
-  import_projectAct = new QAction(QPixmap(":/images/projectBar/import.png"), tr("Import project"), this);
-  import_projectAct->setStatusTip(tr("Import of existing project into new folder."));
+  import_projectAct = new QAction(QPixmap(":/images/projectBar/import.png"), tr("Import Project"), this);
+  import_projectAct->setStatusTip(tr("Imports existing project into new folder."));
   connect(import_projectAct, SIGNAL(triggered()), this, SLOT(importProject()));
 
-  importBaseAct = new QAction(tr("Import Base cloud"), this);
-  importBaseAct->setStatusTip(tr("Import new Base cloud into project. Various formats are available."));
+  importBaseAct = new QAction(tr("Base Cloud Import"), this);
+  importBaseAct->setStatusTip(tr("Imports new base cloud into project. Various formats are available."));
   connect(importBaseAct, SIGNAL(triggered()), this, SLOT(importBaseCloud()));
 
-  importTerenAct = new QAction(tr("Import Terrain cloud"), this);
-  importTerenAct->setStatusTip(tr("Import new Terrain cloud into project. Various formats are available."));
+  importTerenAct = new QAction(tr("Terrain Cloud Import"), this);
+  importTerenAct->setStatusTip(tr("Imports new Terrain cloud into project. Various formats are available."));
   connect(importTerenAct, SIGNAL(triggered()), this, SLOT(importTerrainFile()));
 
-  importVegeAct = new QAction(tr("Import Vegetation cloud"), this);
-  importVegeAct->setStatusTip(tr("Import new Vegetation cloud into project. Various formats are available."));
+  importVegeAct = new QAction(tr("Vegetation Cloud Import"), this);
+  importVegeAct->setStatusTip(tr("Imports new vegetation cloud into project. Various formats are available."));
   connect(importVegeAct, SIGNAL(triggered()), this, SLOT(importVegeCloud()));
 
-  importTreeAct = new QAction(tr("Import Tree cloud"), this);
-  importTreeAct->setStatusTip(tr("Import new Tree cloud into project. Various formats are available."));
+  importTreeAct = new QAction(tr("Tree Cloud Import"), this);
+  importTreeAct->setStatusTip(tr("Imports new tree cloud into project. Various formats are available."));
   connect(importTreeAct, SIGNAL(triggered()), this, SLOT(importTreeCloud()));
 
-  exportTXTAct = new QAction(tr("Export clouds"), this);
-  exportTXTAct->setStatusTip(tr("Export selected clouds into TXT file, PLY file or PTS file."));
+  exportTXTAct = new QAction(tr("Cloud Export"), this);
+  exportTXTAct->setStatusTip(tr("Exports selected clouds into TXT file, PLY file or PTS file."));
   connect(exportTXTAct, SIGNAL(triggered()), this, SLOT(exportCloud()));
 
   exitAct = new QAction(QPixmap(":/images/exit.png"),tr("Exit"), this);
   exitAct->setShortcuts(QKeySequence::Quit);
-  exitAct->setStatusTip(tr("Terminate the application."));
+  exitAct->setStatusTip(tr("Terminates the application."));
   connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
 //TERRAIN
-  voxelAct = new QAction(tr("Terrain from voxels"), this);
-  voxelAct->setStatusTip(tr("Automatic Terrain extraction method using voxelized derivate of input cloud. Result is voxelized."));
+  voxelAct = new QAction(tr("Terrain by Voxels"), this);
+  voxelAct->setStatusTip(tr("Automatic terrain extraction method using voxelized derivate of input cloud; result is voxelized."));
  // voxelAct->setEnabled(false);
   connect(voxelAct, SIGNAL(triggered()), this, SLOT(voxelgrid()));
 
-  octreeAct = new QAction(tr("Terrain from octree"), this);
-  octreeAct->setStatusTip(tr("Automatic Terrain extraction method searching for lowest points in octree search."));
+  octreeAct = new QAction(tr("Terrain by Octree"), this);
+  octreeAct->setStatusTip(tr("Automatic terrain extraction method searching for lowest points in octree search."));
   //octreeAct->setEnabled(false);
   connect(octreeAct, SIGNAL(triggered()), this, SLOT(octreeSlot()));
 
-  manualADAct = new QAction(tr("Manual adjustment"), this);
-  manualADAct->setStatusTip(tr("Manual adjustment of selected terrain cloud; serves for deletion of non-ground points from  terrain cloud."));
+  manualADAct = new QAction(tr("Manual Adjustment"), this);
+  manualADAct->setStatusTip(tr("Manual adjustment of selected terrain cloud; serves for deletion of non-ground points from a terrain cloud."));
  // manualADAct->setEnabled(false);
   connect(manualADAct, SIGNAL(triggered()), this, SLOT(manualAdjust()));
 
@@ -6514,115 +6512,115 @@ void MainWindow::createActions()
   IDWAct->setStatusTip(tr("IDW method for interpolating points of terrain. As a boundary minimal and maximal coordinates of input Terrain cloud are used. "));
   connect(IDWAct, SIGNAL(triggered()), this, SLOT(IDWslot()));
 
-  statisticalOutlierRemovalAct = new QAction(tr("Statistical outlier removal"), this);
-  statisticalOutlierRemovalAct->setStatusTip(tr("Remove outliers by mean k-nearest neighbor distance."));
+  statisticalOutlierRemovalAct = new QAction(tr("Statistical Outlier Removal"), this);
+  statisticalOutlierRemovalAct->setStatusTip(tr("Removes outliers by mean k-nearest neighbor distance."));
  // statisticalOutlierRemovalAct->setEnabled(false);
   connect(statisticalOutlierRemovalAct, SIGNAL(triggered()), this, SLOT(statisticalOutlierRemovalTerrain()));
 
-  radiusOutlierRemovalAct = new QAction(tr("Radius outlier removal"), this);
-  radiusOutlierRemovalAct->setStatusTip(tr("Remove outliers by amount of neighbors inside the radius."));
+  radiusOutlierRemovalAct = new QAction(tr("Radius Outlier Removal"), this);
+  radiusOutlierRemovalAct->setStatusTip(tr("Removes outliers by amount of neighbors inside the radius."));
  //radiusOutlierRemovalAct->setEnabled(false);
   connect(radiusOutlierRemovalAct, SIGNAL(triggered()), this, SLOT(radiusOutlierRemovalTerrain()));
 
     slopeAct = new QAction(tr("Slope"), this);
-    slopeAct->setStatusTip(tr("compute slope of terrain"));
+    slopeAct->setStatusTip(tr("Computes slope of terrain."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(slopeAct, SIGNAL(triggered()), this, SLOT(slope()));
     
     aspectAct = new QAction(tr("Aspect"), this);
-    aspectAct->setStatusTip(tr("compute terrain aspect"));
+    aspectAct->setStatusTip(tr("Computes terrain aspect."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(aspectAct, SIGNAL(triggered()), this, SLOT(aspect()));
     
     curvatureAct = new QAction(tr("Curvature"), this);
-    curvatureAct->setStatusTip(tr("compute terrain curvature"));
+    curvatureAct->setStatusTip(tr("Computes terrain curvature."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(curvatureAct, SIGNAL(triggered()), this, SLOT(curvature()));
     
-    hillShadeAct = new QAction(tr("Hill shade"), this);
-    hillShadeAct->setStatusTip(tr("compute hillshade of terrain"));
+    hillShadeAct = new QAction(tr("Hillshade"), this);
+    hillShadeAct->setStatusTip(tr("Computes hillshade of terrain."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(hillShadeAct, SIGNAL(triggered()), this, SLOT(hillShade()));
     
     pointDensityAct = new QAction(tr("Point Density"), this);
-    pointDensityAct->setStatusTip(tr("compute terrain curvature"));
+    pointDensityAct->setStatusTip(tr("Computes point denisty."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(pointDensityAct, SIGNAL(triggered()), this, SLOT(pointDensity()));
     
     terrainDiffAct = new QAction(tr("Terrain Features"), this);
-    terrainDiffAct->setStatusTip(tr("compute features representing similar spots from terrain based on input parameters"));
+    terrainDiffAct->setStatusTip(tr("Computes features representing similar spots from terrain based on input parameters"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(terrainDiffAct, SIGNAL(triggered()), this, SLOT(terrainDiff()));
     
     exportFeaturesAct = new QAction(tr("Export Features"), this);
-    exportFeaturesAct->setStatusTip(tr("Export features into text file with all parameteres and file with convex and concave hulls"));
+    exportFeaturesAct->setStatusTip(tr("Exports features into text file with all parameteres and file with convex and concave hulls"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(exportFeaturesAct, SIGNAL(triggered()), this, SLOT(exportFeaturesAtt()));
 
 //VEGETATION
-  manualSelAct = new QAction(tr("Manual tree selection"), this);
-  manualSelAct->setStatusTip(tr("Manual segmentation of individual trees from vegetation cloud. You can iteratively delete points that do not belong to the tree."));
+  manualSelAct = new QAction(tr("Manual Tree Selection"), this);
+  manualSelAct->setStatusTip(tr("Manual segmentation of individual trees from vegetation cloud. One can iteratively delete points that do not belong to the tree."));
   connect(manualSelAct, SIGNAL(triggered()), this, SLOT(manualSelect()));
 
-  segmentAct = new QAction(tr("Automatic tree segmentation"), this);
+  segmentAct = new QAction(tr("Automatic Tree Segmentation"), this);
   segmentAct->setStatusTip(tr("Automatic segmentation of vegetation cloud into individual trees."));
   connect(segmentAct, SIGNAL(triggered()), this, SLOT(segmentation()));
 
-  mergeCloudsAct = new QAction(tr("Merge clouds by ID"), this);
+  mergeCloudsAct = new QAction(tr("Merge Clouds by ID"), this);
   mergeCloudsAct->setStatusTip(tr("Automatic merging of clouds by ID."));
   connect(mergeCloudsAct, SIGNAL(triggered()), this, SLOT(mergeCloudsByID()));
 
-  eraseSelectedCloudsAct = new QAction(tr("Erase selected clouds"), this);
+  eraseSelectedCloudsAct = new QAction(tr("Erase Selected Clouds"), this);
   eraseSelectedCloudsAct->setStatusTip(tr("Erase all selected clouds from project and disc."));
   connect(eraseSelectedCloudsAct, SIGNAL(triggered()), this, SLOT(eraseSelectedClouds()));
 
 //TREE ATRIBUTES
-  tAAct = new QAction(tr("Export Tree parameters"), this);
-  tAAct->setStatusTip(tr("Export Tree parameters into text file. Select which attributes should be exported and how they should be separated in the text file."));
+  tAAct = new QAction(tr("Export Tree Parameters"), this);
+  tAAct->setStatusTip(tr("Exports Tree parameters into text file. Select which attributes should be exported and how they should be separated in the text file."));
   tAAct->setEnabled(false);
   connect(tAAct, SIGNAL(triggered()), this, SLOT(treeAtributes()));
 
   dbhHTAct = new QAction(QPixmap(":/images/treeBar/dbhHT.png"),tr("DBH RHT"), this);
-  dbhHTAct->setStatusTip(tr("Compute and display DBH using Randomized Hough Transform method; display tree cloud subset used for computing DBH and estimated cylinder with DBH value."));
+  dbhHTAct->setStatusTip(tr("Computes and displays DBH using Randomized Hough Transform method; displays tree cloud subset used for computing DBH and estimated cylinder with DBH value."));
   dbhHTAct->setEnabled(false);
   connect(dbhHTAct, SIGNAL(triggered()), this, SLOT(dbhHT()));
 
   dbhLSRAct = new QAction(QPixmap(":/images/treeBar/dbhLSR.png"), tr("DBH LSR"), this);
-  dbhLSRAct->setStatusTip(tr("Compute and display DBH using Least Squares Regression method; display tree cloud subset used for computing DBH and estimated cylinder with DBH value."));
+  dbhLSRAct->setStatusTip(tr("Computes and displays DBH using Least Squares Regression method; display tree cloud subset used for computing DBH and estimated cylinder with DBH value."));
   dbhLSRAct->setEnabled(false);
   connect(dbhLSRAct, SIGNAL(triggered()), this, SLOT(dbhLSR()));
 
   heightAct = new QAction(QPixmap(":/images/treeBar/height.png"),tr("Height"), this);
-  heightAct->setStatusTip(tr("Compute and display height of the tree as a line starting at tree base position and follows Z axis to the height of highest point of the tree."));
+  heightAct->setStatusTip(tr("Computes and displays height of the tree as a line starting at tree base position and follows Z axis to the height of highest point of the tree."));
   heightAct->setEnabled(false);
   connect(heightAct, SIGNAL(triggered()), this, SLOT(height()));
 
-  posAct = new QAction(QPixmap(":/images/treeBar/position.png"), tr("Position lowest points"), this);
-  posAct->setStatusTip(tr("Compute and display position of the tree as a sphere with diameter 10cm and center at tree position."));
+  posAct = new QAction(QPixmap(":/images/treeBar/position.png"), tr("Position Lowest Points"), this);
+  posAct->setStatusTip(tr("Computes and displays position of the tree as a sphere with diameter 10cm and center at tree position."));
   connect(posAct, SIGNAL(triggered()), this, SLOT(position()));
 
   posHTAct = new QAction(QPixmap(":/images/treeBar/position.png"), tr("Position RHT"), this);
-  posHTAct->setStatusTip(tr("Compute and display position of the tree as a sphere with diameter 10cm and center at tree position. "));
+  posHTAct->setStatusTip(tr("Computes and displays position of the tree as a sphere with diameter 10cm and center at tree position. "));
   connect(posHTAct, SIGNAL(triggered()), this, SLOT(positionHT()));
 
-  treeEditAct = new QAction(tr("Tree cloud edit"), this);
-  treeEditAct->setStatusTip(tr("Edit tree cloud and save deleted parts in a new file."));
+  treeEditAct = new QAction(tr("Tree Cloud Edit"), this);
+  treeEditAct->setStatusTip(tr("Edits tree cloud and saves deleted parts in a new file."));
   connect(treeEditAct, SIGNAL(triggered()), this, SLOT(treeEdit()));
 
-  dbhEditAct = new QAction(tr("DBH cloud edit"), this);
-  dbhEditAct->setStatusTip(tr("Edit tree cloud used for computing DBH."));
+  dbhEditAct = new QAction(tr("DBH Cloud Edit"), this);
+  dbhEditAct->setStatusTip(tr("Edits tree cloud used for computing DBH."));
   dbhEditAct->setEnabled(false);
   connect(dbhEditAct, SIGNAL(triggered()), this, SLOT(dbhCloudEdit()));
 
   lengAct = new QAction(QPixmap(":/images/treeBar/length.png"),tr("Length"), this);
-  lengAct->setStatusTip(tr("Compute and display length of the tree as a line between two points of the tree cloud with the greatest distance."));
+  lengAct->setStatusTip(tr("Computes and displays length of the tree as a line between two points of the tree cloud with the greatest distance."));
   lengAct->setEnabled(false);
   connect(lengAct, SIGNAL(triggered()), this, SLOT(length()));
 
 
 
-  convexAct = new QAction(QPixmap(":/images/treeBar/convex.png"),tr("Convex planar projection"), this);
-  convexAct->setStatusTip(tr("Compute and display convex planar projection of the tree as a polygon in the color of the tree cloud with 50% opacity and with value of the polygon area."));
+  convexAct = new QAction(QPixmap(":/images/treeBar/convex.png"),tr("Convex Planar Projection"), this);
+  convexAct->setStatusTip(tr("Computes and displays convex planar projection of the tree as a polygon in the color of the tree cloud with 50% opacity and with value of the polygon area."));
   convexAct->setEnabled(false);
   connect(convexAct, SIGNAL(triggered()), this, SLOT(convexhull()));
 
@@ -6632,22 +6630,22 @@ void MainWindow::createActions()
   connect(concaveAct, SIGNAL(triggered()), this, SLOT(concavehull()));
 
   stemCurvatureAct = new QAction(QPixmap(":/images/treeBar/stemCurve.png"),tr("Stem Curve"), this);
-  stemCurvatureAct->setStatusTip(tr("Stem curve computation - compute and display cylinders fitting the stem in meter sections."));
+  stemCurvatureAct->setStatusTip(tr("Computes and displays cylinders fitting the stem in meter sections."));
   stemCurvatureAct->setEnabled(false);
   connect(stemCurvatureAct, SIGNAL(triggered()), this, SLOT(stemCurvature()));
 
   exportStemCurvAct = new QAction(tr("Export Stem Curve"), this);
-  exportStemCurvAct->setStatusTip(tr("Export center coordinates and diameters of stem curve rings into text file."));
+  exportStemCurvAct->setStatusTip(tr("Exports center coordinates and diameters of stem curve rings into text file."));
   exportStemCurvAct->setEnabled(false);
   connect(exportStemCurvAct, SIGNAL(triggered()), this, SLOT(stemCurvatureExport()));
 
-  exportCONVEXAct = new QAction(tr("Export Convex planar projection (txt)"), this);
-  exportCONVEXAct->setStatusTip(tr("Export convex planar projection of selected tree(s) into the text file."));
+  exportCONVEXAct = new QAction(tr("Export Convex Planar Projection (txt)"), this);
+  exportCONVEXAct->setStatusTip(tr("Exports convex planar projection of selected tree(s) into the text file."));
   exportCONVEXAct->setEnabled(false);
   connect(exportCONVEXAct, SIGNAL(triggered()), this, SLOT(exportConvexTxt()));
 
-  exportCONCAVEAct = new QAction(tr("Export Concave planar projection (txt)"), this);
-  exportCONCAVEAct->setStatusTip(tr("Export concave planar projection of selected tree(s) into the text file."));
+  exportCONCAVEAct = new QAction(tr("Export Concave Planar Projection (txt)"), this);
+  exportCONCAVEAct->setStatusTip(tr("Exports concave planar projection of selected tree(s) into the text file."));
   exportCONCAVEAct->setEnabled(false);
   connect(exportCONCAVEAct, SIGNAL(triggered()), this, SLOT(exportConcaveTxt()));
 
@@ -6655,99 +6653,99 @@ void MainWindow::createActions()
 
 
 //CROWN             new QAction(QPixmap(":/images/treeBar/length.png"),tr("Length"), this);
-  setCrownManualAct= new QAction(tr("Set manual"), this);
+  setCrownManualAct= new QAction(tr("Set Manual"), this);
   setCrownManualAct->setStatusTip(tr("Set crown by manual selection of points representing the tree crown."));
   connect(setCrownManualAct, SIGNAL(triggered()), this, SLOT(set_CrownManual()));
   setCrownManualAct->setEnabled(false);
 
-  setCrownAutomaticAct= new QAction(tr("Set automatic"), this);
+  setCrownAutomaticAct= new QAction(tr("Set Automatic"), this);
   setCrownAutomaticAct->setStatusTip(tr("Set the points representing the tree crown automatically."));
   connect(setCrownAutomaticAct, SIGNAL(triggered()), this, SLOT(set_CrownAutomatic()));
   setCrownAutomaticAct->setEnabled(false);
 
-  setCrownSectionsAct= new QAction(QPixmap(":/images/crownBar/crownSections.png"),tr("Volume and surface by sections"), this);
-  setCrownSectionsAct->setStatusTip(tr("Calculate and display crown surface and volume using horizontal cross sections."));
+  setCrownSectionsAct= new QAction(QPixmap(":/images/crownBar/crownSections.png"),tr("Volume and Surface by Sections"), this);
+  setCrownSectionsAct->setStatusTip(tr("Computes and displays crown surface and volume using horizontal cross sections."));
   connect(setCrownSectionsAct, SIGNAL(triggered()), this, SLOT(setSectionsVolumeSurfacePosition()));
   setCrownSectionsAct->setEnabled(false);
 
-  setVolumeByVoxAct= new QAction(tr("Volume by voxels"), this);
-  setVolumeByVoxAct->setStatusTip(tr("Compute crown volume by voxels of given resolution."));
+  setVolumeByVoxAct= new QAction(tr("Volume by Voxels"), this);
+  setVolumeByVoxAct->setStatusTip(tr("Computes crown volume by voxels of given resolution."));
   connect(setVolumeByVoxAct, SIGNAL(triggered()), this, SLOT(crownVolumeByVoxels()));
   setVolumeByVoxAct->setEnabled(false);
 
-  exportAttributesAct= new QAction(tr("Export attributes"), this);
-  exportAttributesAct->setStatusTip(tr("Export tree crown attributes into txt file."));
+  exportAttributesAct= new QAction(tr("Export Attributes"), this);
+  exportAttributesAct->setStatusTip(tr("Exports tree crown attributes into txt file."));
   connect(exportAttributesAct, SIGNAL(triggered()), this, SLOT(exportCrownAttributes()));
   exportAttributesAct->setEnabled(false);
 
   convexHull3DAct= new QAction(QPixmap(":/images/crownBar/crownConvex.png"),tr("Compute 3D ConvexHull"), this);
-  convexHull3DAct->setStatusTip(tr("Create and display the 3D convex hull of the crown and its volume and surface area."));
+  convexHull3DAct->setStatusTip(tr("Creates and displays the 3D convex hull of the crown and its volume and surface area."));
   connect(convexHull3DAct, SIGNAL(triggered()), this, SLOT(create3DConvexull()));
   convexHull3DAct->setEnabled(false);
 
   intersectionAct= new QAction(QPixmap(":/images/crownBar/crownIntersection.png"),tr("Intersections"), this);
-  intersectionAct->setStatusTip(tr("Compute and display intersection between two crowns, all possible intersections are verified."));
+  intersectionAct->setStatusTip(tr("Computes and displays intersection between two crowns, all possible intersections are verified."));
   connect(intersectionAct, SIGNAL(triggered()), this, SLOT(computeCrownsIntersections()));
   intersectionAct->setEnabled(false);
 
-  exportIntersectionAct= new QAction(tr("Export intersections attributes"), this);
-  exportIntersectionAct->setStatusTip(tr("Export crown intersection attributes into txt file."));
+  exportIntersectionAct= new QAction(tr("Export Intersections Attributes"), this);
+  exportIntersectionAct->setStatusTip(tr("Exports crown intersection attributes into txt file."));
   connect(exportIntersectionAct, SIGNAL(triggered()), this, SLOT(exportIntersections()));
   exportIntersectionAct->setEnabled(false);
 
     //QSM
 
-    reconstructionAct = new QAction(tr("Tree volume QSM"), this);
-    reconstructionAct->setStatusTip(tr("Based on recostructed tree is compudet cylindrical volume of tree"));
+    reconstructionAct = new QAction(tr("Tree Volume QSM"), this);
+    reconstructionAct->setStatusTip(tr("Computes cylindrical volume of tree based on recostructed tree."));
     reconstructionAct->setEnabled(false);
     connect(reconstructionAct, SIGNAL(triggered()), this, SLOT(qsmModel()));
 
-    sortimentAct = new QAction(tr("Tree assortment"), this);
-    sortimentAct->setStatusTip(tr("Cylindrical volume of recostructed tree"));
+    sortimentAct = new QAction(tr("Tree Assortment"), this);
+    sortimentAct->setStatusTip(tr("Cylindrical volume of recostructed tree."));
     sortimentAct->setEnabled(false);
     connect(sortimentAct, SIGNAL(triggered()), this, SLOT(sortimenty()));
 
-    treeReconstructionAct = new QAction(tr("Tree reconstruction"), this);
-    treeReconstructionAct->setStatusTip(tr("Compute branches  and stem"));
+    treeReconstructionAct = new QAction(tr("Tree Reconstruction"), this);
+    treeReconstructionAct->setStatusTip(tr("Computes branches  and stem."));
     treeReconstructionAct->setEnabled(false);
     connect(treeReconstructionAct, SIGNAL(triggered()), this, SLOT(treeReconstruction()));
 
-    exportQSMAct = new QAction(tr("Export QSM data"), this);
-    exportQSMAct->setStatusTip(tr("Export into text file data about tree parts, QSM and assortment"));
+    exportQSMAct = new QAction(tr("QSM Data Export"), this);
+    exportQSMAct->setStatusTip(tr("Exports into text file data about tree parts, QSM and assortment."));
     exportQSMAct->setEnabled(false);
     connect(exportQSMAct, SIGNAL(triggered()), this, SLOT(exportQSM()));
 
 //MISC
-  multipleMergeAct = new QAction(QPixmap(":/images/merge.png"), tr("Cloud merge"), this);
-  multipleMergeAct->setStatusTip(tr("Merge selected clouds into single cloud and save the result as a new cloud of desired type."));
+  multipleMergeAct = new QAction(QPixmap(":/images/merge.png"), tr("Cloud Merge"), this);
+  multipleMergeAct->setStatusTip(tr("Merges selected clouds into single cloud and save the result as a new cloud of desired type."));
   connect(multipleMergeAct, SIGNAL(triggered()), this, SLOT(mergeClouds()));
 
-  voxAct = new QAction(tr("Voxelize cloud"), this);
-  voxAct->setStatusTip(tr("Create new voxelized cloud of defined resolution from any selected cloud."));
+  voxAct = new QAction(tr("Voxelize Cloud"), this);
+  voxAct->setStatusTip(tr("Creates new voxelized cloud of defined resolution from any selected cloud."));
   connect(voxAct, SIGNAL(triggered()), this, SLOT(voxelize()));
 
   minusAct = new QAction(QPixmap(":/images/substraction.png"), tr("Cloud Subtraction"), this);
-  minusAct->setStatusTip(tr("Remove common points from bigger cloud and save the rest into new cloud."));
+  minusAct->setStatusTip(tr("Removes common points from bigger cloud and save the rest into new cloud."));
   connect(minusAct, SIGNAL(triggered()), this, SLOT(minusCloud()));
 
-  convexCloudAct = new QAction(tr("Create convex hull"), this);
-  convexCloudAct->setStatusTip(tr("Compute and display concave planar projection of selected cloud. Saved as a new point cloud."));
+  convexCloudAct = new QAction(tr("Create Convex Hull"), this);
+  convexCloudAct->setStatusTip(tr("Computes and displays convex planar projection of selected cloud. Saved as a new point cloud."));
   connect(convexCloudAct, SIGNAL(triggered()), this, SLOT(set_ConvexCloud()));
 
-  concaveCloudAct = new QAction(tr("Create concave hull"), this);
-  concaveCloudAct->setStatusTip(tr("Compute and display concave planar projection of selected cloud. Saved as a new point cloud."));
+  concaveCloudAct = new QAction(tr("Create Concave Hull"), this);
+  concaveCloudAct->setStatusTip(tr("Computes and displays concave planar projection of selected cloud. Saved as a new point cloud."));
   connect(concaveCloudAct, SIGNAL(triggered()), this, SLOT(set_ConcaveCloud()));
 
-  tiffAct = new QAction(tr("Save diplay into png"), this);
-  tiffAct->setStatusTip(tr("Save displayed clouds into tiff file."));
+  tiffAct = new QAction(tr("Save Diplay into png"), this);
+  tiffAct->setStatusTip(tr("Saves displayed clouds into tiff file."));
   connect(tiffAct, SIGNAL(triggered()), this, SLOT(save_tiff()));
 
-  bgcolorAct = new QAction(tr("Change background color"), this);
-  bgcolorAct->setStatusTip(tr("Change background color of viewer to user defined color."));
+  bgcolorAct = new QAction(tr("Change Background Color"), this);
+  bgcolorAct->setStatusTip(tr("Changes background color of viewer to user defined color."));
   connect(bgcolorAct, SIGNAL(triggered()), this, SLOT(bgColor()));
 
   spitCloudAct = new QAction(QPixmap(":/images/substraction.png"),tr("Split Cloud"), this);
-  spitCloudAct->setStatusTip(tr("Split input cloud in the middle of selected coordinate and save into two separate clouds."));
+  spitCloudAct->setStatusTip(tr("Splits input cloud in the middle of selected coordinate and save into two separate clouds."));
   connect(spitCloudAct, SIGNAL(triggered()), this, SLOT(splitCloud()));
 
   labelONAct= new QAction(tr("Labels ON"), this);
@@ -6756,25 +6754,25 @@ void MainWindow::createActions()
   labelOFFAct= new QAction(tr("Labels OFF"), this);
   connect(labelOFFAct, SIGNAL(triggered()), this, SLOT(labelCloudsOFF()));
 
-  acuracyAct = new QAction(tr("accuracy"), this);
+  acuracyAct = new QAction(tr("Accuracy"), this);
   connect(acuracyAct, SIGNAL(triggered()), this, SLOT(accuracy()));
 
-    filterRadiusAct = new QAction(tr("Filter - Radius removal Filter."), this);
+    filterRadiusAct = new QAction(tr("Filter - Radius Removal Filter."), this);
     connect(filterRadiusAct, SIGNAL(triggered()), this, SLOT(radiusOutlierRemoval()));
 
-  duplicateAct = new QAction(tr("Remove duplicate points from cloud."), this);
+  duplicateAct = new QAction(tr("Remove Duplicate Points from Cloud."), this);
   connect(duplicateAct, SIGNAL(triggered()), this, SLOT(duplicatePoints()));
     
-    removePointsAct= new QAction(tr("Remove points from cloud."), this);
+    removePointsAct= new QAction(tr("Remove Selected Points from Cloud."), this);
     connect(removePointsAct, SIGNAL(triggered()), this, SLOT(removePoints()));
 
 //ABOUT
   aboutAct = new QAction(QPixmap(":/images/icon.png"),tr("&About"), this);
-  aboutAct->setStatusTip(tr("Show information about 3D Forest application."));
+  aboutAct->setStatusTip(tr("Shows information about 3D Forest application."));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
     
     featureTableAct = new QAction(QPixmap(":/images/icon.png"),tr("&Feature table"), this);
-     featureTableAct->setStatusTip(tr("Show information about 3D Forest application."));
+     featureTableAct->setStatusTip(tr("Shows information about 3D Forest application."));
      connect(featureTableAct, SIGNAL(triggered()), this, SLOT(showFeatureTable()));
     
 
@@ -6899,7 +6897,7 @@ void MainWindow::createMenus()
 void MainWindow::createToolbars()
 {
 //Project toolbar
-  QToolBar *Projectbar = addToolBar("Project toolbar");
+  QToolBar *Projectbar = addToolBar("Project Toolbar");
   //Projectbar->setMaximumHeight(24);
   Projectbar->resize(24,80);
   Projectbar->setIconSize(QSize(24,24));
@@ -6917,7 +6915,7 @@ void MainWindow::createToolbars()
   showAttributTableT->setEnabled(false);
 
 //ViewBar
-  QToolBar *viewBar = addToolBar("View toolbar");          /**< Toolbar with setting for display*/
+  QToolBar *viewBar = addToolBar("View Toolbar");          /**< Toolbar with setting for display*/
   viewBar->resize(24,80);
   viewBar->setIconSize(QSize(24,24));
   frontViewAct = viewBar->addAction(QPixmap(":/images/viewBar/front.png"),"Front view");
@@ -6939,7 +6937,7 @@ void MainWindow::createToolbars()
 
 
 // Tree toolbar
-  treeBar = addToolBar("Tree toolbar");
+  treeBar = addToolBar("Tree Toolbar");
   //treeBar->setMaximumHeight(24);
   treeBar->setIconSize(QSize(24,24));
 
@@ -6994,7 +6992,7 @@ void MainWindow::createToolbars()
     connect(sortimentT,SIGNAL(triggered()),this,SLOT(sortimentDisplay_DisplayAll()));
 
 //CROWN BAR
-  crownBar = addToolBar("Crown toolbar");
+  crownBar = addToolBar("Crown Toolbar");
   Projectbar->resize(24,144);
   crownBar->setIconSize(QSize(24,24));
 
