@@ -63,7 +63,7 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: |
             make
-            make install
+            make 3DForest
             
 
     - name: Konec
