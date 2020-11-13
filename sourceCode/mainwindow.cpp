@@ -885,7 +885,7 @@ void MainWindow::importPTX(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
 }
 void MainWindow::importLAS(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr output)
 {
-  qWarning()<<"start import las";
+  qWarning()<<"importing las file";
   std::ifstream ifs;
   ifs.open(file.toUtf8().constData(), std::ios::in | std::ios::binary);
   liblas::ReaderFactory f;
@@ -907,6 +907,7 @@ void MainWindow::importLAS(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr ou
   output->width = output->points.size ();
   output->is_dense=true;
   output->height=1;
+  qWarning()<<"importing las file finished";
 }
 void MainWindow::importPCD(QString file, pcl::PointCloud<pcl::PointXYZI>::Ptr output)
 {
@@ -1269,7 +1270,7 @@ void MainWindow::exportCloud()
   //in->set_inputCloud1("Input cloud:",names);
   in->set_outputDir("Path to the destination folder:","c:\\exported_clouds");
   // chtelo by to nastavit separator
-  //chce to rozdělit typ souboru
+  //chce to rozdÄlit typ souboru
 
   in->set_outputType("Type of the output file:", types);
   in->set_stretch();
@@ -1772,7 +1773,7 @@ void MainWindow::slice()
   {
     // vytvorit vektor mracen na zaklade zadaneho parametru
     float dist = in->get_intValue();
-    // kolik bude celkem pásu?
+    // kolik bude celkem pÃ¡su?
     std::vector< std::vector<int> > indices;
     pcl::PointXYZI minp, maxp; // body ohranicujici vegetaci
     pcl::getMinMax3D(*m_cloud->get_Cloud(),minp, maxp);
@@ -2348,7 +2349,7 @@ void MainWindow::manualSelect()
                       "The points that do not belong to the target tree can be deleted manually.\n"
                       "\t For editing please press the \'x\' key and draw a selection box by dragging a mouse."
                       " Selected points will be deleted from the view.\n"
-                      "\tThe points representing a target tree will be saved as a separate tree cloud by �Stop EDIT� icon that ends editing mode. "
+                      "\tThe points representing a target tree will be saved as a separate tree cloud by Stop EDIT icon that ends editing mode. "
                       "The filename of the new tree cloud has to be set. Once the segmented tree is saved, another segmentation process can be started (all the removed but unsegmented points will reappear) or terminated. ");
   in->set_inputCloud1("Input Vegetation cloud:",names);
   in->set_outputCloud1("Output Cloud of Deleted Points:","vegetation-rest");
@@ -5119,7 +5120,7 @@ void MainWindow::exportQSM()
         std::cout<< "profile \t\t" << d->getProfile()<<"\n";
 
 
-        //složení souboru stromy: strom jmeno, DBH, vyška, vyška pařezu, celkovy objem, objem hroubi,
+        //sloÅ¾enÃ­ souboru stromy: strom jmeno, DBH, vyÅ¡ka, vyÅ¡ka paÅezu, celkovy objem, objem hroubi,
         if(d->getTrees() == true) // create tree file
         {
             //open file
@@ -5146,7 +5147,7 @@ void MainWindow::exportQSM()
             }
             file.close();
         }
-        // slozeni souboru kmeny:  pro kazdy strom: jmeno, poradove čislo, vypsat rad vetve, objem
+        // slozeni souboru kmeny:  pro kazdy strom: jmeno, poradove Äislo, vypsat rad vetve, objem
         if(d->getBranches() == true)
         {
             //open file
@@ -5180,7 +5181,7 @@ void MainWindow::exportQSM()
             }
             file.close();
         }
-        // složení souboru sekce: pro kazdy strom: jmeno, poradove cislo sekce, vyška sekce, DBH [mm]
+        // sloÅ¾enÃ­ souboru sekce: pro kazdy strom: jmeno, poradove cislo sekce, vyÅ¡ka sekce, DBH [mm]
         if(d->getProfile() == true)
         {
             //open file
@@ -5228,7 +5229,7 @@ void MainWindow::exportQSM()
             }
             file.close();
         }
-        // složení souboru vyrezy: pro kazdy strom: jmeno, cislo vyrezu, celkova delka, celo, cep, objem,
+        // sloÅ¾enÃ­ souboru vyrezy: pro kazdy strom: jmeno, cislo vyrezu, celkova delka, celo, cep, objem,
         if(d->getSortiments() == true)
         {
             //open file
@@ -6232,13 +6233,13 @@ void MainWindow::accuracy()
             nn=10;
           if(n == 100)
             nn=100;
-          // vypočet uhlu kde umisti body - radiany
+          // vypoÄet uhlu kde umisti body - radiany
           float uhel = ((float)u * M_PI/180)/(float)n;
 
-          //vypocet počtu noise bodů
+          //vypocet poÄtu noise bodÅ¯
           float noiseNum = ((float)n /(1-((float)i/100))) - (float)n;
           // mracno do ktereho se ulozi vsechny body
-          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);// mracno s centroidy vsech clusterů
+          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ (new pcl::PointCloud<pcl::PointXYZI>);// mracno s centroidy vsech clusterÅ¯
           // pozice
           pcl::PointXYZI pose;
           pose.x=stredx;
@@ -6326,7 +6327,7 @@ QString namePCD =QString("%1.pcd").arg(name);
 //      mean.z=(maxp.z+minp.z)/2;
 //      // najdi nejblizsi podle pozice?
 //      // pro kazdy strom pokud neni stejne jmeno
-//     // zjistit překryv boundingboxu a ten s nejvetsim prekryvem pouzit
+//     // zjistit pÅekryv boundingboxu a ten s nejvetsim prekryvem pouzit
 //      for(int a=0; a < Proj->get_sizeTreeCV();a++)
 //      {
 //        if(Proj->get_TreeCloud(a).get_name() == clouds.at(q) || Proj->get_TreeCloud(a).get_name().startsWith("AUT") !=true)
