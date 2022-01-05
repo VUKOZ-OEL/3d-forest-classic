@@ -6435,8 +6435,9 @@ void MainWindow::ortho()
 }
 void MainWindow::about()
 {
-  QMessageBox::about(this, tr("About 3D Forest Application"),tr(" The 3D Forest application is presented in version 0.51.\n"
+  QMessageBox::about(this, tr("About 3D Forest Application"),tr(" The 3D Forest application is presented in version 0.52.\n"
                                                              "Application serves for extraction of tree parameters like tree position, dbh, or advanced QSM models from TLS data in a forest environment."
+								"Individual part like QSM or Charcoal are supproted by research grants."
                                                              "3D Forest is released under terms of GPL v3.\n"
                                                              "More information can be found on web site www.3dforest.eu or on the wiki section on our GitHub https://github.com/janekT/3DForest. \n\n"
                                                              "  AUTHORS:\n "
