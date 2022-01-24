@@ -693,7 +693,7 @@ void Slope::execute()
     {
         int local_count = 0;
     
-#pragma omp parallel for
+#pragma omp for 
         for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
         {
             std::vector<int> pointIDv;
@@ -831,7 +831,7 @@ void Aspect::execute()
     {
         int local_count = 0;
     
-#pragma omp parallel for
+#pragma omp for
         for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
         {
             std::vector<int> pointIDv;
@@ -1056,7 +1056,7 @@ void Curvature::execute()
     {
         int local_count = 0;
     
-#pragma omp parallel for
+#pragma omp for
         for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
         {
             std::vector<int> pointIDv;
@@ -1189,7 +1189,7 @@ void HillShade::execute(){
     {
         int local_count = 0;
         
-#pragma omp parallel for
+#pragma omp for
         for(int i=0 ; i < m_TerrainCloud->get_Cloud()->points.size(); i++)
         {
             std::vector<int> pointIDv;
@@ -1797,51 +1797,62 @@ bool TerrainFeatures::filterClustersBySize(std::vector<Features>& input ,float l
 }
 bool TerrainFeatures::filterClustersByPCA(std::vector<Features>& input, float ratio, float lowerSideLimit, float upperSideLimit, bool ratioLess, std::vector<Features>& output)
 {
-    for(int i =0; i < input.size(); i++)
+#pragma omp parallel
     {
-        float xlen=0, ylen=0;
-        float ratioF =  computeCurvature( input.at(i),xlen, ylen);
-        input.at(i).setXlenght(xlen);
-        input.at(i).setYlengtht(ylen);
-        //std::cout<<"ratio: " << ratio << " xlen: " << input.at(i).getXlenght() << " ylen: " << input.at(i).getYlenght() << "\n";
-        if(ratioLess ==true)
+#pragma omp for
+        for (int i = 0; i < input.size(); i++)
         {
-            if(xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF < ratio)
+            //std::cout << "feaute:" << i << "\n";
+            float xlen = 0, ylen = 0;
+            float ratioF = computeCurvature(input.at(i), xlen, ylen);
+            //std::cout << "feaute:" << i << " ratio: "<< ratioF <<"\n";
+            input.at(i).setXlenght(xlen);
+            input.at(i).setYlengtht(ylen);
+            //std::cout<<"ratio: " << ratio << " xlen: " << input.at(i).getXlenght() << " ylen: " << input.at(i).getYlenght() << "\n";
+            if (ratioLess == true)
             {
-                output.push_back(input.at(i));
+                if (xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF < ratio)
+                {
+#pragma omp critical
+                    output.push_back(input.at(i));
+                }
             }
-        }
-        else
-        {
-           if(xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF > ratio)
+            else
             {
-                output.push_back(input.at(i));
+                if (xlen > lowerSideLimit && xlen < upperSideLimit && ylen > lowerSideLimit && ylen < upperSideLimit && ratioF > ratio)
+                {
+#pragma omp critical
+                    output.push_back(input.at(i));
+                }
             }
-        }
-    
-        
+        } 
     }
     return true;
 }
 bool TerrainFeatures::filterClustersByHull( std::vector<Features>& input,float ratio, float lowerAreaLimit, float upperAreaLimit,bool ratioLess, std::vector<Features>& output)
 {
-    for(int i=0; i< input.size(); i++)
+//#pragma omp parallel
     {
-        input.at(i).setConvexHull();
-        input.at(i).setconcaveHull();
-        input.at(i).setConvexArea(0);
-        input.at(i).setConcaveArea(0);
-        float computedRatio = input.at(i).getConcaveArea()/input.at(i).getConvexArea();
-        //std::cout<<"ratio: " << ratio << " convex: " << input.at(i).getConvexArea() << " concave: " << input.at(i).getConcaveArea()<< "\n";
-        if(ratioLess ==false && computedRatio < ratio)
-            continue;
-        
-        if(ratioLess ==true && computedRatio > ratio)
-            continue;
-             
-        if((input.at(i).getConvexArea() > lowerAreaLimit && input.at(i).getConvexArea() < upperAreaLimit) || (input.at(i).getConcaveArea() > lowerAreaLimit && input.at(i).getConcaveArea() < upperAreaLimit ))
-            output.push_back(input.at(i));
-        
+//#pragma omp for
+        for (int i = 0; i < input.size(); i++)
+        {
+            input.at(i).setConvexHull();
+            input.at(i).setconcaveHull();
+            input.at(i).setConvexArea(0);
+            input.at(i).setConcaveArea(0);
+            float computedRatio = input.at(i).getConcaveArea() / input.at(i).getConvexArea();
+            //std::cout<<"ratio: " << ratio << " convex: " << input.at(i).getConvexArea() << " concave: " << input.at(i).getConcaveArea()<< "\n";
+            if (ratioLess == false && computedRatio < ratio)
+                continue;
+
+            if (ratioLess == true && computedRatio > ratio)
+                continue;
+
+            if ((input.at(i).getConvexArea() > lowerAreaLimit && input.at(i).getConvexArea() < upperAreaLimit) || (input.at(i).getConcaveArea() > lowerAreaLimit && input.at(i).getConcaveArea() < upperAreaLimit))
+//#pragma omp critical
+                output.push_back(input.at(i));
+
+        }
     }
     return true;
 }
@@ -1914,7 +1925,9 @@ bool TerrainFeatures::computePCA (pcl::PointCloud<pcl::PointXYZI>::Ptr input, fl
     
 }
 void TerrainFeatures::sendData(){
-
+    if (m_stems.size() == 0) {
+        hotovo();
+    }
     for(int i=0; i < m_stems.size(); i++)
     {
        // m_stems.at(i).get
@@ -2075,13 +2088,16 @@ float TerrainFeatures::computeSlope(std::vector<int> vec){
 }
 float TerrainFeatures::computeCurvature(Features vec,float& xleng, float& yleng)
 {
-    
-    
+    //std::cout << "PCA\n";
     pcl::PointCloud<pcl::PointXYZI> cloud_ ;
     pcl::PCA<pcl::PointXYZI> pca;
-    pca.setInputCloud(vec.getPointCloud()->get_Cloud());
+    //std::cout << "PCA setInputCloud\n";
+   
+    //std::cout << "pocet bodu feautre: "<< vec.getPointNumber() <<"\n";
+    pca.setInputCloud(vec.get_Cloud());
+    //std::cout << "PCA project\n";
     pca.project(*vec.get_Cloud(), cloud_);
-
+    //std::cout << "PCA hotovo\n";
     pcl::PointXYZI proj_min,proj_max;
     pcl::getMinMax3D (cloud_, proj_min, proj_max);
 

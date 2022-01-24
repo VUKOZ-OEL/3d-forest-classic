@@ -2120,11 +2120,11 @@ void MainWindow::terrainDiff()
 {
     // okno
     InputDialog *in = new InputDialog(this);
-    in->set_title(tr("Terrain Features"));
+    in->set_title(tr("Charcoal sites"));
     in->set_path(Proj->get_Path());
     in->set_description(tr("This tool computes the terrain features (similar places) based on its area concave or convex characteristic, their ratio, number of points with a similar value of intensity, and axis length."));
     in->set_inputCloud1(tr("Input Curvature Cloud:"), get_terrainNames());
-    in->set_inputInt(tr("MInimal Intensity Value Limit") ,"-4");
+    in->set_inputInt(tr("MInimal Intensity Value Limit") ,"-2");
     in->set_inputInt7(tr("Maximal Intenstity Value Limit:"),"4");
     in->set_inputInt2(tr("Minimal Point Size of Feature:"),"35");
     in->set_inputInt10(tr("Maximal Point Size of Feature:"),"350");
@@ -6436,8 +6436,8 @@ void MainWindow::ortho()
 void MainWindow::about()
 {
   QMessageBox::about(this, tr("About 3D Forest Application"),tr(" The 3D Forest application is presented in version 0.52.\n"
+      "SOme parts like QSM or CharCoal are implemented into 3D Forest thanks to various grants. Thanks you for such help. "
                                                              "Application serves for extraction of tree parameters like tree position, dbh, or advanced QSM models from TLS data in a forest environment."
-								"Individual part like QSM or Charcoal are supproted by research grants."
                                                              "3D Forest is released under terms of GPL v3.\n"
                                                              "More information can be found on web site www.3dforest.eu or on the wiki section on our GitHub https://github.com/janekT/3DForest. \n\n"
                                                              "  AUTHORS:\n "
@@ -6548,13 +6548,17 @@ void MainWindow::createActions()
     pointDensityAct->setStatusTip(tr("Computes point denisty."));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(pointDensityAct, SIGNAL(triggered()), this, SLOT(pointDensity()));
-    
-    terrainDiffAct = new QAction(tr("Terrain Features"), this);
+    //MILIRE
+    terrainDiffAct = new QAction(tr("Charcoal sites"), this);
     terrainDiffAct->setStatusTip(tr("Computes features representing similar spots from terrain based on input parameters"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(terrainDiffAct, SIGNAL(triggered()), this, SLOT(terrainDiff()));
     
-    exportFeaturesAct = new QAction(tr("Export Features"), this);
+    featureTableAct = new QAction(QPixmap(":/images/icon.png"),tr("&Feature table"), this);
+     featureTableAct->setStatusTip(tr("Shows information about 3D Forest application."));
+     connect(featureTableAct, SIGNAL(triggered()), this, SLOT(showFeatureTable()));
+    
+    exportFeaturesAct = new QAction(tr("Export charcoal sites"), this);
     exportFeaturesAct->setStatusTip(tr("Exports features into text file with all parameteres and file with convex and concave hulls"));
     //radiusOutlierRemovalAct->setEnabled(false);
     connect(exportFeaturesAct, SIGNAL(triggered()), this, SLOT(exportFeaturesAtt()));
@@ -6773,9 +6777,7 @@ void MainWindow::createActions()
   aboutAct->setStatusTip(tr("Shows information about 3D Forest application."));
   connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
     
-    featureTableAct = new QAction(QPixmap(":/images/icon.png"),tr("&Feature table"), this);
-     featureTableAct->setStatusTip(tr("Shows information about 3D Forest application."));
-     connect(featureTableAct, SIGNAL(triggered()), this, SLOT(showFeatureTable()));
+    
     
 
 //EVENTS treewidget
@@ -6820,9 +6822,7 @@ void MainWindow::createMenus()
     terenMenu->addAction(curvatureAct);
     terenMenu->addAction(hillShadeAct);
     terenMenu->addAction(pointDensityAct);
-    terenMenu->addAction(terrainDiffAct);
-    terenMenu->addAction(featureTableAct);
-    terenMenu->addAction(exportFeaturesAct);
+    
 
 //VEGETATION
   vegeMenu = menuBar()->addMenu(tr("&Vegetation"));
@@ -6872,7 +6872,12 @@ void MainWindow::createMenus()
     qsmMenu->addAction(reconstructionAct);
     qsmMenu->addAction(sortimentAct);
     qsmMenu->addAction(exportQSMAct);
-
+//MILIRE
+    milireMenu = menuBar()->addMenu(tr("CharCoal"));
+    milireMenu->addAction(terrainDiffAct);
+    milireMenu->addAction(featureTableAct);
+    milireMenu->addAction(exportFeaturesAct);
+    
 //MISC
   miscMenu = menuBar()->addMenu(tr("Other features"));
   miscMenu->addAction(multipleMergeAct);
