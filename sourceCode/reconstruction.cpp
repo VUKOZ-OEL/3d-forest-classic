@@ -3,6 +3,8 @@
 
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/pca.h>
+#include <pcl/octree/octree_search.h>
+#include <pcl/search/octree.h>
 
 //BOOOST
 #include <boost/graph/adjacency_list.hpp>

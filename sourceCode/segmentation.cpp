@@ -601,7 +601,7 @@ void Segmentation::reconstructVegetationRest()
             indices.insert(indices.end(), m_clusters.at(element.at(a)).begin(),m_clusters.at(element.at(a)).end());
     }
     
-    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
+    std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
     pcl::ExtractIndices<pcl::PointXYZI> extract;
     extract.setInputCloud (m_vegetation->get_Cloud());
     extract.setIndices (indicesptr);
@@ -631,7 +631,7 @@ void Segmentation::reconstructElement(std::vector<int> element)
     if(m_vegetation->get_Cloud()->points.size() < indices.size()  || indices.size() ==0)
         return;
     
-    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
+    std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
     pcl::ExtractIndices<pcl::PointXYZI> extract;
     extract.setInputCloud (m_vegetation->get_Cloud());
     extract.setIndices (indicesptr);

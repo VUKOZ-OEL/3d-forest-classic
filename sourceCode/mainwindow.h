@@ -16,8 +16,7 @@
 #ifndef MAINWINDOW_H_INCLUDED
 #define MAINWINDOW_H_INCLUDED
 
-#include <QVTKOpenGLWidget.h>
-#include <QVTKWidget.h>
+#include <QVTKOpenGLNativeWidget.h>
 #include <QtWidgets/QMainWindow>
 #include "gui.h"
 #include "project.h"
@@ -492,7 +491,7 @@ private:
 
 //QVTKWIDGET - display and hide clouds
   //QVTKWidget *qvtkwidget;
-    QVTKOpenGLWidget *qvtkwidget;
+    QVTKOpenGLNativeWidget *qvtkwidget;
     /**< Define QVTKWidget */
   //Visualizer *m_vis;
     pcl::visualization::PCLVisualizer *m_vis; /**< Visualizer */
@@ -611,7 +610,8 @@ private:
   QMenu *crownMenu;           /**< Crown menu */
   QMenu *helpMenu;            /**< About menu */
   QMenu *miscMenu;            /**< Other features menu */
-    QMenu *qsmMenu;
+  QMenu *milireMenu;
+  QMenu *qsmMenu;
 
 //PROJECT ACTIONS
   QAction *new_projectAct;    /**< New project Act */

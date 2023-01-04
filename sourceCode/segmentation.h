@@ -4,6 +4,7 @@
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
 #include <pcl/common/common_headers.h>
+#include <pcl/octree/octree_search.h>
 #include "cloud.h"
 #include <QtCore/QObject>
 
