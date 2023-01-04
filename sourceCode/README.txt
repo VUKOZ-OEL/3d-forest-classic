@@ -5,9 +5,9 @@ created by: Jan trochta j.trochta@gmail.com
 
 INSTALLATION
 	For successful compilation from source are needed those libraries:
-	Qt 5.x, Eigen, Boost, Flann, libLAS, VTK 9.x, PCL > 1.11.
+	Qt 5.x, Eigen, Boost, Flann, libLAS, VTK 9.x, PCL >= 1.11.
 	
-	For Linux OSs, you can download compiled libraries from official Linux repositories (e.g. using apt, dnf...). 
+	For Linux OSs, you can download compiled libraries from official Linux repositories (e.g. using apt, dnf, etc.). 
 	
 	For Windows OSs, you can use already compiled libraries which are attached in compiled application.
 	Application was build with mingw-w64.	
