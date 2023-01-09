@@ -573,7 +573,7 @@ void Skeleton::mergeTreeSets(std::vector<std::vector<int>>& sets, pcl::PointClou
         std::chrono::system_clock::to_time_t(now);
        // start = std::time(nullptr);
         // set octree search
-        boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (sets.at(bigSegmentID)));
+        std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (sets.at(bigSegmentID)));
        // std::cout<< "veliksot indices: "<< sets.at(bigSegmentID).size()<<"\n";
         search.setInputCloud (cloud, indicesptr);
         search.addPointsFromInputCloud ();

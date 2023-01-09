@@ -32,6 +32,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/math/special_functions/round.hpp>
@@ -70,7 +71,7 @@
 #include <vtkOrientationMarkerWidget.h>
 #include <vtkRenderer.h>
 #include <vtkPNGWriter.h>
-#include <QVTKOpenGLWidget.h>
+#include <QVTKOpenGLNativeWidget.h>
 #include <vtkInteractorStyle.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
@@ -104,16 +105,18 @@ BOOST_FUSION_ADAPT_STRUCT(double3, (double, x)(double, y)(double, z))
     setWindowTitle ( tr("3D Forest - Forest Lidar Data Processing Tool") );
 
 //QVTKwidget - visualizer
-    qvtkwidget = new QVTKOpenGLWidget(this);
+    qvtkwidget = new QVTKOpenGLNativeWidget(this);
 
     auto renderer = vtkSmartPointer<vtkRenderer >::New();
     auto renderWindow = vtkSmartPointer<vtkGenericOpenGLRenderWindow >::New();
-
+    auto style = vtkSmartPointer<pcl::visualization::PCLVisualizerInteractorStyle>::New();
+    
     renderWindow->AddRenderer(renderer);
     
-    m_vis = new pcl::visualization::PCLVisualizer(renderer, renderWindow, "data viewer", true);
+    m_vis = new pcl::visualization::PCLVisualizer(renderer, renderWindow, "data viewer", false);
     m_vis->setShowFPS(false);
-    qvtkwidget->SetRenderWindow(m_vis->getRenderWindow());
+    qvtkwidget->setRenderWindow(m_vis->getRenderWindow());
+    m_vis->setupInteractor(qvtkwidget->interactor()->GetInteractorStyle()->GetInteractor(), qvtkwidget->renderWindow());
     coordianteAxes();
     setCentralWidget(qvtkwidget);
     qvtkwidget->show();
@@ -7142,7 +7145,7 @@ void MainWindow::AreaEvent(const pcl::visualization::AreaPickingEvent& event, vo
     auto name = (m_cloud->get_name().toStdString());
     auto indices = event.getPointsIndices(name);
 
-    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
+    std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (indices));
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud2 (new pcl::PointCloud<pcl::PointXYZI>);
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud1 (new pcl::PointCloud<pcl::PointXYZI>);
     undopoint.push_back(indices.size());

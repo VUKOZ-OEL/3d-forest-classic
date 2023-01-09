@@ -24,7 +24,7 @@
 #include <pcl/io/vtk_io.h>
 #include <iostream>
 //#include <string>
-#include <QtCore/QString.h>
+#include <QtCore/qstring.h>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QRadioButton>

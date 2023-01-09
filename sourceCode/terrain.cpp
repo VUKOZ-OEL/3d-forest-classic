@@ -8,6 +8,8 @@
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/common/centroid.h>
 #include <pcl/common/pca.h>
+#include <pcl/octree/octree_search.h>
+
  OctreeTerrain::OctreeTerrain()
 {
   m_baseCloud = new Cloud();
@@ -112,7 +114,7 @@ void OctreeTerrain::octree(float res, pcl::PointCloud<pcl::PointXYZI>::Ptr input
   ocsearch.deleteTree();
  // ocs.voxelSearch(voxels.at(q),low_voxels_indices);
 
-    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (low_voxels_indices));
+    std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (low_voxels_indices));
     pcl::ExtractIndices<pcl::PointXYZI> extract;
      // Extract the inliers
     extract.setInputCloud (input);
@@ -170,7 +172,7 @@ std::vector<int> pointID_ground;
       }
     }
 emit percentage( 60);
-    boost::shared_ptr<std::vector<int> > indices_ground (new std::vector<int> (pointID_ground));
+    std::shared_ptr<std::vector<int> > indices_ground (new std::vector<int> (pointID_ground));
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_ground(new pcl::PointCloud<pcl::PointXYZI>);
     pcl::ExtractIndices<pcl::PointXYZI> extract;
        // Extract the inliers
@@ -213,7 +215,7 @@ emit percentage( 70);
     }
 emit percentage( 80);
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_vege(new pcl::PointCloud<pcl::PointXYZI>);
-    boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (pointIDS));
+    std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (pointIDS));
     pcl::ExtractIndices<pcl::PointXYZI> e;
        // Extract the inliers
     e.setInputCloud (m_baseCloud->get_Cloud());
@@ -368,7 +370,7 @@ emit percentage( 40);
 
   // jeste by to chtelo trochu prefiltrovat aby byl opravdu jen voxely terenu
 
-  boost::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (low_voxels));
+  std::shared_ptr<std::vector<int> > indicesptr (new std::vector<int> (low_voxels));
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_vege (new pcl::PointCloud<pcl::PointXYZI>);
   pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_terrain (new pcl::PointCloud<pcl::PointXYZI>);
   pcl::ExtractIndices<pcl::PointXYZI> extract;

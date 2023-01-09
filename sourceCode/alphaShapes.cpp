@@ -1,5 +1,4 @@
 #include "alphaShapes.h"
-#include <QVTKWidget.h>
 #include <vtkInteractorStyle.h>
 #include <vtkPolyDataAlgorithm.h>
 #include <vtkPoints.h>
