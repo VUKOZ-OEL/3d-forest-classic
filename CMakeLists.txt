@@ -20,10 +20,10 @@ file(GLOB SOURCES "sourceCode/*.cpp")
 ADD_EXECUTABLE(3DForest ${SOURCES} sourceCode/3dforest.qrc)
 
 #dependencies - Qt
-find_package(QtWidgets REQUIRED)
-include_directories(${QtWidgets_INCLUDE_DIRS})
-add_definitions(${QtWidgets_DEFINITIONS})
-target_link_libraries(3DForest Qt::Widgets)
+find_package(Qt6Widgets REQUIRED)
+include_directories(${Qt6Widgets_INCLUDE_DIRS})
+add_definitions(${Qt6Widgets_DEFINITIONS})
+target_link_libraries(3DForest Qt6::Widgets)
 
 #dependencies -libLAS
 find_package(libLAS REQUIRED)
