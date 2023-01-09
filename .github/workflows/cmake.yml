@@ -27,7 +27,7 @@ jobs:
       # We'll use this as our working directory for all subsequent commands
       shell: bash
       run:  |
-            brew install vtk boost eigen flann qt libgeotiff
+            brew install vtk boost eigen flann qt libgeotiff pcl
             export PKG_CONFIG_PATH="/usr/local/opt/qt/lib/pkgconfig"
             mkdir ${{runner.workspace}}/deps
             cd ${{runner.workspace}}/deps
@@ -35,13 +35,6 @@ jobs:
             mkdir liblas_build
             cd liblas_build
             cmake -S../liblas
-            make
-            make install
-            cd ..
-            git clone -b pointpicking https://github.com/janekT/pcl.git pcl
-            mkdir pcl_build
-            cd pcl_build
-            cmake -S../pcl -DVTK_DIR="/usr/local/opt/vtk/lib/cmake/vtk-8.2" -DCMAKE_OSX_SYSROOT="/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk"
             make
             make install
             cd .. 
